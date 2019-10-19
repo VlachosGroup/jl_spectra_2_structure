@@ -1,0 +1,21 @@
+jl_spectra_2_structure
+=============
+
+The ``get_defaults`` function
+*****************************
+.. autofunction:: jl_spectra_2_structure.jl_spectra_2_structure.get_defaults
+
+The ``IR_DECONV`` class
+***********************
+.. autoclass:: jl_spectra_2_structure.jl_spectra_2_structure.IR_DECONV
+   :members:
+   :undoc-members:
+   :private-members:
+
+The ``IR_Results`` class
+************************
+.. autoclass:: jl_spectra_2_structure.jl_spectra_2_structure.IR_Results
+   :members:
+   :undoc-members:
+   :private-members:
+
