@@ -731,8 +731,8 @@ class COVERAGE_SCALING:
             return np.exp(a*X)
         def reg_m(y, x):
             # with statsmodels
-            X = sm.add_constant(x) # adding a constant
-            model = sm.OLS(y, X).fit()
+            #X = sm.add_constant(x) # adding a constant
+            model = sm.OLS(y-1, x).fit()
             return model
         CO_Filter = (ES_joined['COVERAGE']>0.0278) & (ES_joined['MODE_ID']=='CO_C12O16') & (ES_joined['INTENSITY_SCALE']>0) \
         & (ES_joined['MODE_ID'].str.startswith('CO_C')) & (ES_joined['NUM_C12O32']==0) & (ES_joined['NUM_C24O16']==0)
@@ -771,7 +771,9 @@ class COVERAGE_SCALING:
         with open(coverage_scaling_path, 'w') as outfile:
             json.dump(COVERAGE_SCALING_DICT, outfile, sort_keys=True, indent=1)
             
-    def save_coverage_figures(self, figure_directory, adsorbate='CO',metal='Pt'):
+    def save_coverage_figures(self, figure_directory, adsorbate='CO',metal='Pt'\
+                              ,frequency_scale_axis1=[0.98,1.10], frequency_scale_axis2=[0.995,1.138]\
+                              ,y_2_ticks=[1,1.02,1.04,1.06,1.08,1.10,1.12]):
         PRIMARY_DATA_PATH = self.PRIMARY_DATA_PATH
         with open(PRIMARY_DATA_PATH, 'r') as infile:
             ES_compressed = pd.io.json.read_json(infile)
@@ -844,8 +846,8 @@ class COVERAGE_SCALING:
             return np.exp(a*X)
         def reg_m(y, x):
             # with statsmodels
-            X = sm.add_constant(x) # adding a constant
-            model = sm.OLS(y, X).fit()
+            #X = sm.add_constant(x) # adding a constant
+            model = sm.OLS(y-1, x).fit()
             return model
         markers = ['o','^','s','D']
         CO_Filter = (ES_joined['COVERAGE']>0.0278) & (ES_joined['MODE_ID']=='CO_C12O16') & (ES_joined['INTENSITY_SCALE']>0) \
@@ -887,11 +889,11 @@ class COVERAGE_SCALING:
         axes[0,1].set_xticks([])
         axes[0,1].set_yticks([])
         axes[1,1].set_yticks([])
-        axes[0,0].set_ylim([0.98,1.10])
-        axes[0,1].set_ylim([0.98,1.10])
-        axes[1,0].set_ylim([0.995,1.138])
-        axes[1,1].set_ylim([0.995,1.138])
-        axes[1,0].set_yticks([1,1.02,1.04,1.06,1.08,1.10,1.12])
+        axes[0,0].set_ylim(frequency_scale_axis1)
+        axes[0,1].set_ylim(frequency_scale_axis1)
+        axes[1,0].set_ylim(frequency_scale_axis2)
+        axes[1,1].set_ylim(frequency_scale_axis2)
+        axes[1,0].set_yticks(y_2_ticks)
         axis_list = [axes[0, 0],axes[0, 1], axes[1, 0], axes[1, 1]]
         abcd = ['(a)','(b)','(c)','(d)']
         for count, (freq_CO, X_CO, marker) in enumerate(zip(FreqCO_CNCO, XCO_CNCO, markers)):
