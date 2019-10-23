@@ -10,13 +10,15 @@ import numpy as np
 import pandas as pd
 
 class VASP_PARSER:
-    def __init__(self, directory):
+    def __init__(self, directory, create_files=False):
         freq_dirs = [os.path.join(r,subdirectory) for r,d,f in os.walk(directory) for subdirectory in d\
                       if ('charge2.extxyz' in os.listdir(os.path.join(r,subdirectory))\
                           and 'vasprun2.xml' in os.listdir(os.path.join(r,subdirectory)))]
         self.freq_dirs = freq_dirs
+        self.create_files = create_files
     
     def get_freq_files(self, directory=None):
+        create_files = self.create_files
         if directory is None:
             directory = self.freq_dirs
         num_files = len(directory)
@@ -25,13 +27,15 @@ class VASP_PARSER:
         for count, freq_file in enumerate(freq_files):
             num_lines = sum(1 for line in open(freq_file)) - 10
             freq_files_clean[count] = freq_file + 'stripped.xml'
-            with open(freq_files_clean[count],'w') as outfile, open(freq_file,'r') as infile:
-                for num, line in enumerate(infile):
-                    if (('xml' not in line and 'modeling' not in line) or num <10 or num > num_lines):
-                        outfile.write(line)
+            if create_files == True:
+                with open(freq_files_clean[count],'w') as outfile, open(freq_file,'r') as infile:
+                    for num, line in enumerate(infile):
+                        if (('xml' not in line and 'modeling' not in line) or num <10 or num > num_lines):
+                            outfile.write(line)
         return freq_files_clean
     
     def get_charge_files(self,directory=None):
+        create_files = self.create_files
         if directory is None:
             directory = self.freq_dirs
         num_files = len(directory)
@@ -39,23 +43,24 @@ class VASP_PARSER:
         charge_files_clean = [None]*num_files
         for count, charge_file in enumerate(charge_files):
             charge_files_clean[count] = charge_file + 'stripped.extxyz'
-            containsdipole = False
-            linenum = 0
-            with open(charge_files_clean[count],'w') as outfile, open(charge_file,'r') as infile:
-                for num, line in enumerate(infile):
-                    if num==0:
-                        atoms = float(line)
-                    elif 'atom number' in line and 'net_charge' in line and 'dipole_x' in line:
-                        linenum = num
-                        if containsdipole is False:
-                            outfile.write(line.replace(" ", ""))
-                        containsdipole = True
-                    elif num <= (linenum + atoms) and containsdipole is True:
-                        outfile.write(re.sub(' +',',',line.strip(' ')))
+            if create_files == True:
+                containsdipole = False
+                linenum = 0
+                with open(charge_files_clean[count],'w') as outfile, open(charge_file,'r') as infile:
+                    for num, line in enumerate(infile):
+                        if num==0:
+                            atoms = float(line)
+                        elif 'atom number' in line and 'net_charge' in line and 'dipole_x' in line:
+                            linenum = num
+                            if containsdipole is False:
+                                outfile.write(line.replace(" ", ""))
+                            containsdipole = True
+                        elif num <= (linenum + atoms) and containsdipole is True:
+                            outfile.write(re.sub(' +',',',line.strip(' ')))
         return charge_files_clean
     
-def explode(df, lst_cols, fill_value='', preserve_index=False):
-# make sure `lst_cols` is list-alike
+def explode(df, lst_cols, fill_value='', preserve_index=True):
+    # make sure `lst_cols` is list-alike
     if (lst_cols is not None
         and len(lst_cols) > 0
         and not isinstance(lst_cols, (list, tuple, np.ndarray, pd.Series))):
@@ -66,7 +71,7 @@ def explode(df, lst_cols, fill_value='', preserve_index=False):
     lens = df[lst_cols[0]].str.len()
     # preserve original index values    
     idx = np.repeat(df.index.values, lens)
-    # create "exploded" DF
+    # create "exploded" DF the values in each list have their own rows
     res = (pd.DataFrame({
                 col:np.repeat(df[col].values, lens)
                 for col in idx_cols},

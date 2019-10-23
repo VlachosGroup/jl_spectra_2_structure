@@ -39,11 +39,11 @@ def get_defaults(adsorbate):
     
     """
     nanoparticle_path = os.path.join(data_path, 'dft_nanoparticle/single_'+adsorbate+'.json')
-    surface_path = os.path.join(data_path, 'dft_surface/surfaces_'+adsorbate+'.json')
+    isotope_path = os.path.join(data_path, 'dft_surface/isotope_'+adsorbate+'.json')
     high_coverage_path = os.path.join(data_path, 'dft_surface/high_coverage_'+adsorbate+'.json')
     cross_validation_path = os.path.join(data_path, 'cross_validation')
     coverage_scaling_path = os.path.join(data_path,'coverage_scaling_params_'+adsorbate+'.json')
-    return nanoparticle_path, surface_path, high_coverage_path\
+    return nanoparticle_path, isotope_path, high_coverage_path\
            , cross_validation_path, coverage_scaling_path
 
 class CROSS_VALIDATION:

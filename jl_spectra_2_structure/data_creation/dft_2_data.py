@@ -5,33 +5,37 @@ Created on Fri Mar 17 16:14:47 2017
 @author: lansford
 """
 
-from __future__ import division
-import os #,sys,inspect
-from pandas import read_csv
-from ase.io import read
+from __future__ import absolute_import, division, print_function
+import os
+from copy import deepcopy
+import itertools
 import json
 import numpy as np
-import itertools
-from copy import deepcopy
-#import pkg_resources
-
-#currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-#parentdir = os.path.dirname(currentdir)
-#sys.path.insert(0,parentdir) 
-
+import pandas as pd
+from pandas import read_csv
+from ase.io import read
+import statsmodels.api as sm
+from scipy.optimize import curve_fit
+from matplotlib import rcParams
+from matplotlib import pyplot as plt
 from ..vibrations import Infrared
-from .file_parser import VASP_PARSER
 from ..coordination import Coordination
+from ..error_metrics import get_r2
+from .file_parser import VASP_PARSER
+from .file_parser import explode
+
 
 class Primary_DATA:
     """
     """
-    def __init__(self,metal_atoms=['Pt'], adsorbate_atoms=['C','O'], delta=0.025):
+    def __init__(self,metal_atoms=['Pt'], adsorbate_atoms=['C','O']\
+                 , create_new_vasp_files=False, delta=0.025):
         """
         """
         self.METAL_ATOMS = metal_atoms
         self.ADSORBATE_ATOMS = adsorbate_atoms
         self.DELTA = delta
+        self.CREATE_NEW_VASP_FILES = create_new_vasp_files
     def generate_primary_data(self, vasp_directory, output_path\
                                 ,data_type='nanoparticle'\
                                 , num_adsorbates='single', poc=1):
@@ -40,9 +44,10 @@ class Primary_DATA:
         metal_atoms = self.METAL_ATOMS
         adsorbate_atoms = self.ADSORBATE_ATOMS
         delta = self.DELTA
+        create_new_vasp_files = self.CREATE_NEW_VASP_FILES
         assert data_type in ['nanoparticle','surface'], "data type not 'nanoparticle' or 'slab'"
         assert num_adsorbates in ['single','multiple'], "data type not 'nanoparticle' or 'slab'"
-        VASP_FILES = VASP_PARSER(vasp_directory)
+        VASP_FILES = VASP_PARSER(vasp_directory, create_new_vasp_files)
         #Get files that store forces (freq_files) and charges (charge_files)
         freq_files = VASP_FILES.get_freq_files()
         charge_files = VASP_FILES.get_charge_files()
@@ -102,20 +107,21 @@ class Primary_DATA:
             atom_positions = np.array(np.floor(moved_positions/3),dtype='int')
             #ensure that the atoms moved where those desired
             atom_symbols = np.array([molecule_images[i+1][atom_positions[i]].symbol in adsorbate_atoms for i in range(num_disp)])
-            if num_adsorbates == 'single':
-                adsorbates_match = len(molecule_images) == len(adsorbate_atoms)*6+1
-            else:
-                adsorbates_match=True
             #Get indices of carbon atoms
             Catoms = [atom.index for atom in molecule_images[0] if atom.symbol == adsorbate_atoms[0]]
+            num_adsorbate_atoms = len([atom.index for atom in molecule_images[0] if atom.symbol in adsorbate_atoms])
             #Get indices of oxygen atoms
-            Oatoms = [atom.index for atom in molecule_images[0] if atom.symbol == adsorbate_atoms[1]]
+            #Oatoms = [atom.index for atom in molecule_images[0] if atom.symbol == adsorbate_atoms[1]]
+            if num_adsorbates == 'single':
+                adsorbates_match = len(molecule_images) == num_adsorbate_atoms*6+1
+            else:
+                adsorbates_match=True
             #Get all forces on the carbon and oxygen atoms and ensure they are less than 0.05 eV/A
-            Cforce = np.max(np.sum((molecule_images[0].get_forces()[Catoms])**2,axis=-1)**0.5)
-            Oforce = np.max(np.sum((molecule_images[0].get_forces()[Oatoms])**2,axis=-1)**0.5)
-            COforce_small = np.max((Cforce,Oforce)) <0.05
+            #Cforce = np.max(np.sum((molecule_images[0].get_forces()[Catoms])**2,axis=-1)**0.5)
+            #Oforce = np.max(np.sum((molecule_images[0].get_forces()[Oatoms])**2,axis=-1)**0.5)
+            #COforce_small = np.max((Cforce,Oforce)) <0.05
             #Ensure a valid frequency calculation was done before moving on
-            if np.all([moved_25.all(),moved_unique,adsorbates_match,atom_symbols.all(),COforce_small]) == True:
+            if np.all([moved_25.all(),moved_unique,adsorbates_match,atom_symbols.all()]) == True:
                 #read in chargemole file to get patial charges and atomic dipoles as a dataframe
                 chargemol = read_csv(charge_file,header=0,sep=',',index_col=False,usecols=range(0,15))
                 #Get number of atoms in the chargemol file
@@ -151,8 +157,18 @@ class Primary_DATA:
                             molecule_images[i].dipole = np.array(np.sum(dipolemoments,axis=0))
                             #set charges of the atoms
                             molecule_images[i].charges = np.array(chargelist[i]['net_charge'])
+                        
+                        if data_type == 'surface':
+                            Pt_indices = np.isin(molecule_images[0].get_chemical_symbols(), metal_atoms)
+                            Z_distances = np.array([molecule.z for molecule in molecule_images[0]])
+                            is_Surface = np.all((Z_distances>=np.max(Z_distances[Pt_indices])-1,Pt_indices),axis=0)
+                            surface_atoms = len(Pt_indices[is_Surface])
+                        #If the dataset does not have enouhgh surface atoms expand it
+                        if data_type == 'surface' and surface_atoms <16:
+                            repeated_images = molecule_images[0].repeat((2,2,1))
+                        else:
+                            repeated_images = molecule_images[0]
                         #remove adsorbate atoms from including in generalized coordination number calculations
-                        repeated_images = molecule_images[0].repeat((3,3,1))
                         exclude=[atom.index for atom in repeated_images if atom.symbol not in metal_atoms]
                         #Initialize Coordination object. Repeat is necessary so it doesn't count itself
                         CN = Coordination(repeated_images,exclude=exclude,cutoff=1.25)
@@ -176,13 +192,8 @@ class Primary_DATA:
                                 NumPt += 1
                         
                         #Get Pt atoms on the surface
-                        if data_type == 'surface':
-                            Pt_indices = np.array(molecule_images[0].get_chemical_symbols()) in metal_atoms
-                            Z_distances = np.array([molecule.z for molecule in molecule_images[0]])
-                            is_Surface = np.all((Z_distances>=np.max(Z_distances[Pt_indices])-1,Pt_indices),axis=0)
-                            surface_atoms = len(Pt_indices[is_Surface])
-                        else:
-                            surface_atoms = (len([i for i in CN.cn if i <12]) - len(Catoms)-len(Oatoms))/2
+                        if data_type == 'nanoparticle':
+                            surface_atoms = len([i for i in CN.cn if i <12]) - num_adsorbate_atoms
                         NUM_CO = len(Catoms)
                         #set values of dictionary
                         #Generate an infrared object
@@ -204,8 +215,6 @@ class Primary_DATA:
                         VIB_DICT['COVERAGE'].append(NUM_CO/surface_atoms)
                         if num_adsorbates == 'single' and poc==1:
                             VIB_DICT['GCN'].append(GCN[0])
-                            if CN_CO[0] ==5 or CN_CO[0]==0:
-                                CN_CO[0]=4
                             VIB_DICT['CN_ADSORBATE'].append(CN_CO[0])
                             VIB_DICT['CN_METAL'].append(TotalNN[0])
                         else:
@@ -213,40 +222,19 @@ class Primary_DATA:
                             VIB_DICT['CN_ADSORBATE'].append(CN_CO)
                             VIB_DICT['CN_METAL'].append(TotalNN)
                         if poc > 1:
-                            VIB_DICT['CN_ADOSRBATE'][-1] = np.unique([CN.bonded[C] for C in Catoms]).size
-                            if VIB_DICT['CN_ADOSRBATE'][-1] == 5:
-                                VIB_DICT['CN_ADOSRBATE'][-1]=4
+                            VIB_DICT['CN_ADSORBATE'][-1] = np.unique([CN.bonded[C] for C in Catoms]).size
+                            VIB_DICT['GCN'][-1] = np.mean(GCN)
+                            VIB_DICT['CN_METAL'][-1] = np.mean(TotalNN)
                         count_list.append(count)
         
         with open(output_path, 'w') as outfile:
             json.dump(VIB_DICT, outfile, sort_keys=True, indent=1)
         self.OUTPUT_DICTIONARY = VIB_DICT
+        self.FREQ_FILES = freq_files
+        self.CHARGE_FILES = charge_files
             
     def generate_isotope_data(self, vasp_directory, output_file\
                                        ,masses1=[12,16], masses2=[24,32]):
-        metal_atoms = self.METAL_ATOMS
-        adsorbate_atoms = self.ADSORBATE_ATOMS
-        delta = self.DELTA
-        #convert these strings to numbers
-        C12 = masses1[0]
-        C24 = masses2[0]
-        O16 = masses1[1]
-        O32 = masses2[1]
-        
-        #Directories where low coverage (single species) and high coverage (Multiple CO) DFT results are stored
-        directory= os.path.expanduser('~/Documents/Data/IR_Materials_Gap/VASP_FILES/single_species_LDIPOL')
-        #Get all directories that contain results of VASP vibrational calculations
-        VASP_FILES = VASP_PARSER(directory)
-        #Get files that store forces (freq_files) and charges (charge_files)
-        freq_files = VASP_FILES.get_freq_files()
-        charge_files = VASP_FILES.get_charge_files()
-        #Initialize dictionary that will be saved as json
-        VIB_DICT = {'FREQUENCIES':[],'INTENSITIES':[],'CO_CN_CO':[],'MIN_SEPARATION':[]\
-                ,'CN_CO':[],'GCN':[],'CN_PT':[],'NUM_PT':[],'SURFACE_AREA':[],'CO_PER_A2':[]\
-                ,'NUM_CO':[],'SURFACE_PT':[], 'NUM_C12O16':[],'COVERAGE':[],'SELF_COVERAGE':[]\
-                ,'NUM_C12O32':[],'NUM_C24O16':[],'NUM_C24O32':[],'SELF_CO_PER_A2':[]\
-                ,'MODE_ID':[],'REDUCED_MASS':[],'REDUCED_MASS_NORMED':[],'MIXED_FACTOR':[]\
-                   }
         """
         FREQUENCIES: frequencies of normal modes
         INTENSITIES: intensities of normal modes
@@ -272,6 +260,28 @@ class Primary_DATA:
         REDUCED_MASS_NORMED: normalized reduced mass of each normal mode
         MIXED_FACTOR: contribution to each normal from secondary contributing CO isotopes
         """
+        metal_atoms = self.METAL_ATOMS
+        adsorbate_atoms = self.ADSORBATE_ATOMS
+        delta = self.DELTA
+        create_new_vasp_files = self.CREATE_NEW_VASP_FILES
+        #convert these strings to numbers
+        C12 = masses1[0]
+        C24 = masses2[0]
+        O16 = masses1[1]
+        O32 = masses2[1]
+        
+        #Get all directories that contain results of VASP vibrational calculations
+        VASP_FILES = VASP_PARSER(vasp_directory, create_new_vasp_files)
+        #Get files that store forces (freq_files) and charges (charge_files)
+        freq_files = VASP_FILES.get_freq_files()
+        charge_files = VASP_FILES.get_charge_files()
+        #Initialize dictionary that will be saved as json
+        VIB_DICT = {'FREQUENCIES':[],'INTENSITIES':[],'CO_CN_CO':[],'MIN_SEPARATION':[]\
+                ,'CN_CO':[],'GCN':[],'CN_PT':[],'NUM_PT':[],'SURFACE_AREA':[],'CO_PER_A2':[]\
+                ,'NUM_CO':[],'SURFACE_PT':[], 'NUM_C12O16':[],'COVERAGE':[],'SELF_COVERAGE':[]\
+                ,'NUM_C12O32':[],'NUM_C24O16':[],'NUM_C24O32':[],'SELF_CO_PER_A2':[]\
+                ,'MODE_ID':[],'REDUCED_MASS':[],'REDUCED_MASS_NORMED':[],'MIXED_FACTOR':[]\
+                   }
         #countlist is used only for testing purposes
         count_list = []
         #iterate over each force file and charge file simultaneously
@@ -363,8 +373,20 @@ class Primary_DATA:
                             molecule_images[i].dipole = np.array(np.sum(dipolemoments,axis=0))
                             #set charges of the atoms
                             molecule_images[i].charges = np.array(chargelist[i]['net_charge'])
+                        
+                        #Get Pt atoms on the surface
+                        Pt_indices = np.isin(molecule_images[0].get_chemical_symbols(), metal_atoms)
+                        Z_distances = np.array([molecule.z for molecule in molecule_images[0]])
+                        is_Surface = np.all((Z_distances>=np.max(Z_distances[Pt_indices])-1,Pt_indices),axis=0)
+                        surface_atoms = len(Pt_indices[is_Surface])
+                        NUM_CO = len(Catoms)
+                        #If the dataset does not have enouhgh surface atoms expand it
+                        if surface_atoms <16:
+                            repeated_images = molecule_images[0].repeat((2,2,1))
+                        else:
+                            #This must be repeated so we can get the minimum separation distance for the case of one adsorbate
+                            repeated_images = molecule_images[0].repeat((2,1,1))
                         #remove adsorbate atoms from including in generalized coordination number calculations
-                        repeated_images = molecule_images[0].repeat((3,3,1))
                         exclude=[atom.index for atom in repeated_images if atom.symbol not in metal_atoms]
                         #Initialize Coordination object. Repeat is necessary so it doesn't count itself
                         CN = Coordination(repeated_images,exclude=exclude,cutoff=1.25)
@@ -377,9 +399,9 @@ class Primary_DATA:
                         #filter out data where more than one binding-type is occupied
                         if len(set(GCN)) == 1 and len(set(CN_CO)) == 1:
                             #exlude all non-carbon atoms
-                            exclude_notC=[atom.index for atom in repeated_images if atom.symbol not in ['C']]
+                            exclude_notC=[atom.index for atom in repeated_images if atom.symbol not in adsorbate_atoms[0]]
                             #Get Distances
-                            Catoms2 = [atom.index for atom in repeated_images if atom.symbol in ['C']]
+                            Catoms2 = [atom.index for atom in repeated_images if atom.symbol in adsorbate_atoms[0]]
                             C_Distances = []
                             for C in Catoms:
                                 distance_list = [atom for atom in Catoms2 if atom != C]
@@ -406,12 +428,6 @@ class Primary_DATA:
                                     if atom.symbol in metal_atoms:
                                         NumPt += 1
                                 
-                                #Get Pt atoms on the surface
-                                Pt_indices = np.array(molecule_images[0].get_chemical_symbols()) in metal_atoms
-                                Z_distances = np.array([molecule.z for molecule in molecule_images[0]])
-                                is_Surface = np.all((Z_distances>=np.max(Z_distances[Pt_indices])-1,Pt_indices),axis=0)
-                                surface_atoms = len(Pt_indices[is_Surface])
-                                NUM_CO = len(Catoms)
                                 
                                 #CList and Olist are a list of Carbon and Oxygen atoms to have their isotopes changed
                                 #empty list allows original masses to be kept
@@ -457,8 +473,8 @@ class Primary_DATA:
                                         #create new array of masses
                                         new_masses = molecule_images[0].get_masses()
                                         #set masses of to C12 or O16
-                                        new_masses[molecule_images[0].get_atomic_numbers() == 6] = C12
-                                        new_masses[molecule_images[0].get_atomic_numbers() == 8] = O16
+                                        new_masses[np.array(molecule_images[0].get_chemical_symbols()) == adsorbate_atoms[0]] = C12
+                                        new_masses[np.array(molecule_images[0].get_chemical_symbols()) == adsorbate_atoms[1]] = O16
                                         #set masses in join list to C24 and O32
                                         new_masses[CO_combo[0]] = C24
                                         new_masses[CO_combo[1]] = O32
@@ -528,10 +544,10 @@ class Primary_DATA:
                                             #partner atom is the nearest neighbor
                                             partner = Allatoms[np.argsort(maxm_distances)[0]]
                                             #identify if atom that moved the most is carbon or oxygen
-                                            if molecule_images[0][max_moved].symbol=='C':
+                                            if molecule_images[0][max_moved].symbol==adsorbate_atoms[0]:
                                                 C_idx = max_moved
                                                 O_idx = partner
-                                            elif molecule_images[0][max_moved].symbol=='O':
+                                            elif molecule_images[0][max_moved].symbol==adsorbate_atoms[1]:
                                                 C_idx = partner
                                                 O_idx = max_moved
                                             else:
@@ -613,6 +629,8 @@ class Primary_DATA:
                                                         MODE_ID.append('pPtCO_C24O32')
                                             else:
                                                 MODE_ID.append('OTHER')
+                                                SELF_COVERAGE.append(COVERAGE)
+                                                SELF_CO_PER_A2.append(CO_PER_A2)
                                             REDUCED_MASS.append(new_masses[C_idx]*new_masses[O_idx]/(new_masses[C_idx]+new_masses[O_idx]))
                                             lk = mode_cartesion**2
                                             REDUCED_MASS_NORMED.append(lk.sum()*np.sum(lk/(new_masses.reshape((-1,1))))**-1)
@@ -632,3 +650,323 @@ class Primary_DATA:
         with open(output_file, 'w') as outfile:
             json.dump(VIB_DICT, outfile, sort_keys=True, indent=1)
         self.OUTPUT_DICTIONARY = VIB_DICT
+        self.FREQ_FILES = freq_files
+        self.CHARGE_FILES = charge_files
+        
+class COVERAGE_SCALING:
+    def __init__(self,primary_data_path):
+        self.PRIMARY_DATA_PATH = primary_data_path
+    
+    def get_coverage_parameters(self, coverage_scaling_path):
+        COVERAGE_SCALING_DICT = {'CO_INT_EXP':[],'CO_FREQ':[], 'PTCO_INT_EXP':[], 'PTCO_FREQ': []}
+        PRIMARY_DATA_PATH = self.PRIMARY_DATA_PATH
+        with open(PRIMARY_DATA_PATH, 'r') as infile:
+            ES_compressed = pd.io.json.read_json(infile)
+        ES_compressed['GCN']= ES_compressed['GCN'].round(decimals=4)
+        ES_exploded = explode(ES_compressed,['FREQUENCIES','INTENSITIES','MODE_ID','REDUCED_MASS','REDUCED_MASS_NORMED'\
+                                             ,'MIXED_FACTOR','SELF_COVERAGE','SELF_CO_PER_A2'], fill_value='', preserve_index=True)
+        def remove_char(string):
+            if 'PtCO' in string:
+                new_string = string[1:]
+            else:
+                new_string = string
+            return new_string
+        
+        ES_exploded['MODE_ID'] = ES_exploded['MODE_ID'].apply(remove_char)
+        
+        ES_first = ES_exploded.drop(columns=['INTENSITIES','FREQUENCIES','REDUCED_MASS_NORMED','MIXED_FACTOR']\
+                                    ).groupby([ES_exploded.index,'MODE_ID']\
+                                              ).first()
+        ES_sum = ES_exploded[['MODE_ID','INTENSITIES','REDUCED_MASS_NORMED']\
+                             ].assign(**{'FREQxINT':ES_exploded['INTENSITIES']*ES_exploded['FREQUENCIES']\
+                                       ,'NUMBER_OF_MODES':np.ones(len(ES_exploded['REDUCED_MASS_NORMED']),dtype='int')\
+                                       ,'MIXEDxINT':ES_exploded['INTENSITIES']*ES_exploded['MIXED_FACTOR']}\
+                                      ).groupby([ES_exploded.index,'MODE_ID']\
+                                                ).sum().rename(columns={'INTENSITIES':'TOTAL_INTENSITY'})
+        ES_sum = ES_sum.assign(**{'WEIGHTED_FREQUENCY':ES_sum['FREQxINT']/ES_sum['TOTAL_INTENSITY']\
+                                  ,'AVG_REDUCED_MASS_NORMED':ES_sum['REDUCED_MASS_NORMED']/ES_sum['NUMBER_OF_MODES']\
+                                  ,'WEIGHTED_MIXED':ES_sum['MIXEDxINT']/ES_sum['TOTAL_INTENSITY']}\
+                               ).drop(columns=['FREQxINT','MIXEDxINT','REDUCED_MASS_NORMED'],inplace=False)
+        ES_joined = ES_sum.join(ES_first\
+                                ).reset_index(level='MODE_ID')
+        ES_Low_Cov = ES_joined[['GCN','CN_CO','CN_PT','MODE_ID','WEIGHTED_FREQUENCY','TOTAL_INTENSITY']][(ES_joined['NUM_CO']==1) & (ES_joined['SURFACE_PT']==36)]
+        ES_Low_Cov.rename(columns={'WEIGHTED_FREQUENCY':'LOW_COV_FREQUENCY','TOTAL_INTENSITY':'LOW_COV_INTENSITY'},inplace=True)
+        #losing some values due to certain modes not existing on some of the low coverage surfaces for certain isotopes
+        ES_joined = ES_joined.reset_index().merge(ES_Low_Cov, how='inner', on=['CN_CO','CN_PT','MODE_ID','GCN']\
+                                                  ).set_index('index')  
+        INTENSITY_SCALE = np.zeros(ES_joined.shape[0])
+        INTENSITY_SHIFT = np.zeros(ES_joined.shape[0])
+        SELF_CO = np.zeros(ES_joined.shape[0])
+        vectors = zip(ES_joined['MODE_ID'],ES_joined['TOTAL_INTENSITY'],ES_joined['NUM_C12O16'], ES_joined['NUM_C12O32']\
+                      ,ES_joined['NUM_C24O16'],ES_joined['NUM_C24O32'],ES_joined['LOW_COV_INTENSITY'])
+        for count, parameters in enumerate(vectors):
+            if parameters[6] > 0:
+                if 'C12O16' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[2]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[2] - parameters[6]
+                    SELF_CO[count] = parameters[2]
+                elif 'C12O32' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[3]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[3] - parameters[6]
+                    SELF_CO[count] = parameters[3]
+                elif 'C24O16' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[4]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[4] - parameters[6]
+                    SELF_CO[count] = parameters[4]
+                elif 'C24O32' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[5]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[5] - parameters[6]
+                    SELF_CO[count] = parameters[5]
+        ES_joined = ES_joined.assign(**{'SELF_CO':SELF_CO\
+                                        ,'INTENSITY_SCALE':INTENSITY_SCALE\
+                                        ,'FREQUENCY_SCALE':ES_joined['WEIGHTED_FREQUENCY']/ES_joined['LOW_COV_FREQUENCY']\
+                                        ,'INTENSITY_SHIFT':INTENSITY_SHIFT\
+                                        ,'FREQUENCY_SHIFT':ES_joined['WEIGHTED_FREQUENCY']-ES_joined['LOW_COV_FREQUENCY']\
+                                        ,'OTHER_COVERAGE':ES_joined['COVERAGE']-ES_joined['SELF_COVERAGE']\
+                                        ,'OTHER_CO_PER_A2':ES_joined['CO_PER_A2']-ES_joined['SELF_CO_PER_A2']})
+        
+        
+        
+        def INT_func(X,a):
+            return np.exp(a*X)
+        def reg_m(y, x):
+            # with statsmodels
+            X = sm.add_constant(x) # adding a constant
+            model = sm.OLS(y, X).fit()
+            return model
+        CO_Filter = (ES_joined['COVERAGE']>0.0278) & (ES_joined['MODE_ID']=='CO_C12O16') & (ES_joined['INTENSITY_SCALE']>0) \
+        & (ES_joined['MODE_ID'].str.startswith('CO_C')) & (ES_joined['NUM_C12O32']==0) & (ES_joined['NUM_C24O16']==0)
+        popt_n, pcov = curve_fit(INT_func, ES_joined['CO_PER_A2'][CO_Filter], ES_joined['INTENSITY_SCALE'][CO_Filter])
+        COVERAGE_SCALING_DICT.update({'CO_INT_EXP':popt_n[0]})
+        FreqCO_CNCO = [ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==1)]\
+                     ,ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==2)]
+                     ,ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==3)]
+                     ,ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==4)]]
+        XCO_CNCO = [ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==1)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==2)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==3)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==4)]]
+        for count, (freq_CO, X_CO) in enumerate(zip(FreqCO_CNCO, XCO_CNCO)):
+            modelCO = reg_m(freq_CO, X_CO)
+            COVERAGE_SCALING_DICT['CO_FREQ'].append(modelCO.params.to_dict())
+        
+          
+        PtCO_Filter = (ES_joined['COVERAGE']>0.0278) & (ES_joined['MODE_ID']=='PtCO_C12O16') & (ES_joined['INTENSITY_SCALE']>0) \
+        & (ES_joined['NUM_C12O32']==0) & (ES_joined['NUM_C24O16']==0)
+        popt_n, pcov = curve_fit(INT_func, ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1)], ES_joined['INTENSITY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==1)])
+        COVERAGE_SCALING_DICT.update({'PTCO_INT_EXP':popt_n[0]})
+        
+        FreqPtCO_CNCO = [ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==1)]\
+                     ,ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==2)]
+                     ,ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==3)]
+                     ,ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==4)]]
+        XPtCO_CNCO = [ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==1)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==2)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==3)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==4)]]
+                       
+        modelCO = reg_m(FreqPtCO_CNCO[0], XPtCO_CNCO[0])
+        COVERAGE_SCALING_DICT.update({'PTCO_FREQ':modelCO.params.to_dict()})
+        
+        with open(coverage_scaling_path, 'w') as outfile:
+            json.dump(COVERAGE_SCALING_DICT, outfile, sort_keys=True, indent=1)
+            
+    def save_coverage_figures(self, figure_directory, adsorbate='CO',metal='Pt'):
+        PRIMARY_DATA_PATH = self.PRIMARY_DATA_PATH
+        with open(PRIMARY_DATA_PATH, 'r') as infile:
+            ES_compressed = pd.io.json.read_json(infile)
+        ES_compressed['GCN']= ES_compressed['GCN'].round(decimals=4)
+        ES_exploded = explode(ES_compressed,['FREQUENCIES','INTENSITIES','MODE_ID','REDUCED_MASS','REDUCED_MASS_NORMED'\
+                                             ,'MIXED_FACTOR','SELF_COVERAGE','SELF_CO_PER_A2'], fill_value='', preserve_index=True)
+        def remove_char(string):
+            if 'PtCO' in string:
+                new_string = string[1:]
+            else:
+                new_string = string
+            return new_string
+        
+        ES_exploded['MODE_ID'] = ES_exploded['MODE_ID'].apply(remove_char)
+        
+        ES_first = ES_exploded.drop(columns=['INTENSITIES','FREQUENCIES','REDUCED_MASS_NORMED','MIXED_FACTOR']\
+                                    ).groupby([ES_exploded.index,'MODE_ID']\
+                                              ).first()
+        ES_sum = ES_exploded[['MODE_ID','INTENSITIES','REDUCED_MASS_NORMED']\
+                             ].assign(**{'FREQxINT':ES_exploded['INTENSITIES']*ES_exploded['FREQUENCIES']\
+                                       ,'NUMBER_OF_MODES':np.ones(len(ES_exploded['REDUCED_MASS_NORMED']),dtype='int')\
+                                       ,'MIXEDxINT':ES_exploded['INTENSITIES']*ES_exploded['MIXED_FACTOR']}\
+                                      ).groupby([ES_exploded.index,'MODE_ID']\
+                                                ).sum().rename(columns={'INTENSITIES':'TOTAL_INTENSITY'})
+        ES_sum = ES_sum.assign(**{'WEIGHTED_FREQUENCY':ES_sum['FREQxINT']/ES_sum['TOTAL_INTENSITY']\
+                                  ,'AVG_REDUCED_MASS_NORMED':ES_sum['REDUCED_MASS_NORMED']/ES_sum['NUMBER_OF_MODES']\
+                                  ,'WEIGHTED_MIXED':ES_sum['MIXEDxINT']/ES_sum['TOTAL_INTENSITY']}\
+                               ).drop(columns=['FREQxINT','MIXEDxINT','REDUCED_MASS_NORMED'],inplace=False)
+        ES_joined = ES_sum.join(ES_first\
+                                ).reset_index(level='MODE_ID')
+        ES_Low_Cov = ES_joined[['GCN','CN_CO','CN_PT','MODE_ID','WEIGHTED_FREQUENCY','TOTAL_INTENSITY']][(ES_joined['NUM_CO']==1) & (ES_joined['SURFACE_PT']==36)]
+        ES_Low_Cov.rename(columns={'WEIGHTED_FREQUENCY':'LOW_COV_FREQUENCY','TOTAL_INTENSITY':'LOW_COV_INTENSITY'},inplace=True)
+        #losing some values due to certain modes not existing on some of the low coverage surfaces for certain isotopes
+        ES_joined = ES_joined.reset_index().merge(ES_Low_Cov, how='inner', on=['CN_CO','CN_PT','MODE_ID','GCN']\
+                                                  ).set_index('index')  
+        INTENSITY_SCALE = np.zeros(ES_joined.shape[0])
+        INTENSITY_SHIFT = np.zeros(ES_joined.shape[0])
+        SELF_CO = np.zeros(ES_joined.shape[0])
+        vectors = zip(ES_joined['MODE_ID'],ES_joined['TOTAL_INTENSITY'],ES_joined['NUM_C12O16'], ES_joined['NUM_C12O32']\
+                      ,ES_joined['NUM_C24O16'],ES_joined['NUM_C24O32'],ES_joined['LOW_COV_INTENSITY'])
+        for count, parameters in enumerate(vectors):
+            if parameters[6] > 0:
+                if 'C12O16' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[2]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[2] - parameters[6]
+                    SELF_CO[count] = parameters[2]
+                elif 'C12O32' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[3]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[3] - parameters[6]
+                    SELF_CO[count] = parameters[3]
+                elif 'C24O16' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[4]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[4] - parameters[6]
+                    SELF_CO[count] = parameters[4]
+                elif 'C24O32' in parameters[0]:
+                    INTENSITY_SCALE[count] = parameters[1]/(parameters[5]*parameters[6])
+                    INTENSITY_SHIFT[count] = parameters[1]/parameters[5] - parameters[6]
+                    SELF_CO[count] = parameters[5]
+        ES_joined = ES_joined.assign(**{'SELF_CO':SELF_CO\
+                                        ,'INTENSITY_SCALE':INTENSITY_SCALE\
+                                        ,'FREQUENCY_SCALE':ES_joined['WEIGHTED_FREQUENCY']/ES_joined['LOW_COV_FREQUENCY']\
+                                        ,'INTENSITY_SHIFT':INTENSITY_SHIFT\
+                                        ,'FREQUENCY_SHIFT':ES_joined['WEIGHTED_FREQUENCY']-ES_joined['LOW_COV_FREQUENCY']\
+                                        ,'OTHER_COVERAGE':ES_joined['COVERAGE']-ES_joined['SELF_COVERAGE']\
+                                        ,'OTHER_CO_PER_A2':ES_joined['CO_PER_A2']-ES_joined['SELF_CO_PER_A2']})
+        
+        
+        
+        def INT_func(X,a):
+            return np.exp(a*X)
+        def reg_m(y, x):
+            # with statsmodels
+            X = sm.add_constant(x) # adding a constant
+            model = sm.OLS(y, X).fit()
+            return model
+        markers = ['o','^','s','D']
+        CO_Filter = (ES_joined['COVERAGE']>0.0278) & (ES_joined['MODE_ID']=='CO_C12O16') & (ES_joined['INTENSITY_SCALE']>0) \
+        & (ES_joined['MODE_ID'].str.startswith('CO_C')) & (ES_joined['NUM_C12O32']==0) & (ES_joined['NUM_C24O16']==0)
+        popt_n, pcov = curve_fit(INT_func, ES_joined['CO_PER_A2'][CO_Filter], ES_joined['INTENSITY_SCALE'][CO_Filter])
+        print('Intensity coverage scaling factors')
+        print(popt_n[0])
+        #Plot C-O intensity scaling vs total spatial coverage 
+        plt.figure(0,figsize=(3.5,2),dpi=400)
+        plt.plot(np.sort(ES_joined['CO_PER_A2'][CO_Filter]),INT_func(np.sort(ES_joined['CO_PER_A2'][CO_Filter]),popt_n[0]),'k-')
+        for i in range(4):
+            plt.plot(ES_joined['CO_PER_A2'][CO_Filter & (ES_joined['CN_CO']==i+1)],ES_joined['INTENSITY_SCALE'][CO_Filter & (ES_joined['CN_CO']==i+1)],'o',marker=markers[i])
+        plt.ylabel(r'$\mathrm{\frac{Intensity\ @\ \theta}{Intensity\ @\ 1/36\ ML}}$',size=10) 
+        plt.xlabel('Total spatial coverage ['+adsorbate+' per $\mathrm{\AA}^{2}$]')
+        #plt.legend(['Exponential fit','Atop','Bridge','3-fold','4-fold'])
+        plt.savefig(os.path.join(figure_directory,adsorbate+'_intensity_scale.jpg'), format='jpg')
+        plt.close()
+        
+        R2 = get_r2(ES_joined['INTENSITY_SCALE'][CO_Filter],INT_func(ES_joined['CO_PER_A2'][CO_Filter],popt_n[0]))
+        print(R2)
+        
+        FreqCO_CNCO = [ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==1)]\
+                     ,ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==2)]
+                     ,ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==3)]
+                     ,ES_joined['FREQUENCY_SCALE'][CO_Filter & (ES_joined['CN_CO']==4)]]
+        XCO_CNCO = [ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==1)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==2)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==3)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][CO_Filter & (ES_joined['CN_CO']==4)]]
+        
+        
+        #Plot C-O Frequency scaling vs total spatial coverage 
+        params = {'figure.autolayout': False,
+                  'axes.labelpad':2}
+        rcParams.update(params)
+        fig = plt.figure(1,figsize=(7.2,4),dpi=400)
+        axes = fig.subplots(nrows=2, ncols=2)
+        axes[0,0].set_xticks([])
+        axes[0,1].set_xticks([])
+        axes[0,1].set_yticks([])
+        axes[1,1].set_yticks([])
+        axes[0,0].set_ylim([0.98,1.10])
+        axes[0,1].set_ylim([0.98,1.10])
+        axes[1,0].set_ylim([0.995,1.138])
+        axes[1,1].set_ylim([0.995,1.138])
+        axes[1,0].set_yticks([1,1.02,1.04,1.06,1.08,1.10,1.12])
+        axis_list = [axes[0, 0],axes[0, 1], axes[1, 0], axes[1, 1]]
+        abcd = ['(a)','(b)','(c)','(d)']
+        for count, (freq_CO, X_CO, marker) in enumerate(zip(FreqCO_CNCO, XCO_CNCO, markers)):
+            modelCO = reg_m(freq_CO, X_CO)
+            print_model = modelCO.summary()
+            print(print_model)
+            im=axis_list[count].scatter(X_CO.values[:,0], freq_CO, c=X_CO.values[:,1], marker=marker)
+            axis_list[count].text(0.01,0.93,abcd[count],size=8,name ='Calibri',transform=axis_list[count].transAxes)
+            axis_list[count].set_xlim([0,0.152])
+        plt.gcf().subplots_adjust(bottom=0.09,top=0.98,left=0.09,right=0.97,wspace=0.05,hspace=0.05)
+        cbar = fig.colorbar(im, ax=axes.ravel().tolist(),fraction=0.07,pad=0.01)
+        cbar.set_label('Total spatial coverage ['+adsorbate+' per $\mathrm{\AA}^{2}$]')
+        fig.text(0.5, 0.01, 'Spatial coverage of identical sites ['+adsorbate+' per $\mathrm{\AA}^{2}$]', ha='center',size=8)
+        fig.text(0.01, 0.5, r'$\mathrm{\frac{Frequency\ @\ \theta}{Frequency\ @\ 1/36\ ML}}$', va='center', rotation='vertical',size=10)
+        fig.savefig(os.path.join(figure_directory,adsorbate+'_frequency_scale.jpg'), format='jpg')
+        plt.close()
+        params = {
+                  'figure.autolayout': True}
+        rcParams.update(params)
+        
+          
+        PtCO_Filter = (ES_joined['COVERAGE']>0.0278) & (ES_joined['MODE_ID']=='PtCO_C12O16') & (ES_joined['INTENSITY_SCALE']>0) \
+        & (ES_joined['NUM_C12O32']==0) & (ES_joined['NUM_C24O16']==0)
+        popt_n, pcov = curve_fit(INT_func, ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1)], ES_joined['INTENSITY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==1)])
+        print('Intensity coverage scaling factors')
+        print(popt_n[0])
+        R2 = get_r2(ES_joined['INTENSITY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==1)],INT_func(ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1)],popt_n[0]))
+        print(R2)
+        
+        FreqPtCO_CNCO = [ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==1)]\
+                     ,ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==2)]
+                     ,ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==3)]
+                     ,ES_joined['FREQUENCY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==4)]]
+        XPtCO_CNCO = [ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==1)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==2)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==3)]\
+                    ,ES_joined[['SELF_CO_PER_A2','CO_PER_A2']][PtCO_Filter & (ES_joined['CN_CO']==4)]]
+        
+        #Plot atop Pt-CO frequency scaling vs self coverage and intensity scaling vs total coverage
+        fig, axes = plt.subplots(2,1, figsize=(3.5,3.8),dpi=400)
+        im = axes[0].scatter(XPtCO_CNCO[0].values[:,0], FreqPtCO_CNCO[0], c=XPtCO_CNCO[0].values[:,1])
+        axes[0].text(0.01,0.93,'(a)',size=8,name ='Calibri',transform=axes[0].transAxes)
+        cbar = fig.colorbar(im, ax=axes[0])
+        cbar.set_label('Total spatial coverage ['+adsorbate+' per $\mathrm{\AA}^{2}$]')
+        axes[0].set_xlabel('Spatial coverage of identical sites ['+adsorbate+' per $\mathrm{\AA}^{2}$]')
+        axes[0].set_ylabel(r'$\mathrm{\frac{Frequency\ @\ \theta}{Frequency\ @\ 1/36\ ML}}$',size=10)
+        axes[1].plot(np.sort(ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1)]),INT_func(np.sort(ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1)]),popt_n[0]),'k-')
+        axes[1].plot(ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1)],ES_joined['INTENSITY_SCALE'][PtCO_Filter & (ES_joined['CN_CO']==1)],'o')
+        axes[1].text(0.01,0.93,'(b)',size=8,name ='Calibri',transform=axes[1].transAxes)
+        axes[1].set_xlabel('Total spatial coverage ['+adsorbate+' per $\mathrm{\AA}^{2}$]')
+        axes[1].set_ylabel(r'$\mathrm{\frac{Intensity\ @\ \theta}{Intensity\ @\ 1/36\ ML}}$',size=10)
+        fig.savefig(os.path.join(figure_directory,metal+adsorbate+'_scale_scale.jpg'), format='jpg')
+        plt.close()
+            
+        modelCO = reg_m(FreqPtCO_CNCO[0], XPtCO_CNCO[0])
+        print_model = modelCO.summary()
+        print(print_model)
+        
+        #plot intensity shift of all Pt-CO bindying-types
+        plt.figure(3, figsize=(3.5,2),dpi=400)
+        for count, (freq_CO, X, marker) in enumerate(zip(FreqPtCO_CNCO, XPtCO_CNCO, markers)):
+            X_CO = X.values
+            plt.plot(ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1+count)],ES_joined['INTENSITY_SHIFT'][PtCO_Filter & (ES_joined['CN_CO']==1+count)],marker)
+        plt.legend(['Atop','Bridge','3-fold','4-fold'])
+        plt.xlabel('Total spatial coverage ['+adsorbate+' per $\mathrm{\AA}^{2}$]' )
+        plt.ylabel('Intensity Shift (AU)',size=8)
+        plt.savefig(os.path.join(figure_directory,metal+adsorbate+'_all_shift.jpg'), format='jpg')
+        plt.close()
+        
+        plt.figure(3, figsize=(3.5,2),dpi=400)
+        for count, (freq_CO, X, marker) in enumerate(zip(FreqPtCO_CNCO, XPtCO_CNCO, markers)):
+            X_CO = X.values
+            plt.plot(ES_joined['CO_PER_A2'][PtCO_Filter & (ES_joined['CN_CO']==1+count)],ES_joined['TOTAL_INTENSITY'][PtCO_Filter & (ES_joined['CN_CO']==1+count)]/ES_joined['SELF_CO'][PtCO_Filter & (ES_joined['CN_CO']==1+count)],marker)
+        plt.legend(['Atop','Bridge','3-fold','4-fold'])
+        plt.xlabel('Total spatial coverage ['+adsorbate+' per $\mathrm{\AA}^{2}$]' )
+        plt.ylabel('Intensity (AU)',size=8)
+        plt.savefig(os.path.join(figure_directory,metal+adsorbate+'_all_shift_INT.jpg'), format='jpg')
+        plt.close()

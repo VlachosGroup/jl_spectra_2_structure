@@ -1,12 +1,12 @@
 """Multi-layer Perceptron
 """
 
-# Authors: Issam H. Laradji <issam.laradji@gmail.com>
+# Original Authors: Issam H. Laradji <issam.laradji@gmail.com>
 #          Andreas Mueller
 #          Jiyuan Qian
 #Wasserstein  and KL-divergence loss added by Joshua Lansford
 #Derivative of Wasserstein loss squared with respect to softmax activation added by Joshua Lansford
-#Softmax output activation with multinomial regression added by Joshua Lansford
+#Softmax output activation with multinomial regression added by Joshua Lansford <lansford.jl@gmail.com>
 # License: BSD 3 clause
 
 import numpy as np
@@ -19,7 +19,8 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from ._base import ACTIVATIONS, DERIVATIVES, LOSS_FUNCTIONS
 from ._stochastic_optimizers import SGDOptimizer, AdamOptimizer
 from sklearn.model_selection import train_test_split
-from sklearn.externals import six
+#from sklearn.externals import six
+import six
 from sklearn.utils import gen_batches, check_random_state
 from sklearn.utils import shuffle
 from sklearn.utils import check_array, check_X_y, column_or_1d
