@@ -11,8 +11,8 @@ Created on Sun Oct 20 20:41:16 2019
 from __future__ import absolute_import, division, print_function
 import os
 from jl_spectra_2_structure import get_defaults
-from jl_spectra_2_structure.data_creation.dft_2_data import Primary_DATA
-from jl_spectra_2_structure.data_creation.dft_2_data import COVERAGE_SCALING
+from jl_spectra_2_structure.primary_data_creation.dft_2_data import Primary_DATA
+from jl_spectra_2_structure.primary_data_creation.dft_2_data import COVERAGE_SCALING
 from jl_spectra_2_structure.plotting_tools import set_figure_settings
 set_figure_settings('paper')
 
@@ -32,6 +32,7 @@ vasp_CO_high_coverage = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\VASP_FI
 
 #Only change this code below if you wish to use a different set of adsorbates
 #and metal atoms
+
 nanoparticle_path, isotope_path, high_coverage_path\
 , cross_validation_path, coverage_scaling_path = get_defaults('CO')
 
@@ -54,6 +55,7 @@ nanoparticle_path, isotope_path, high_coverage_path\
 
 
 #Generate Primary Set of Data from DFT for NO
+
 NO_DATA = Primary_DATA(metal_atoms=['Pt'], adsorbate_atoms=['N','O']\
                        , create_new_vasp_files=False, delta=0.015)
 
@@ -68,6 +70,7 @@ NO_coverage.get_coverage_parameters(coverage_scaling_path)
 NO_coverage.save_coverage_figures(Downloads_folder,adsorbate='NO',metal='Pt'\
                                   ,frequency_scale_axis1=[0.92,1.085], frequency_scale_axis2=[0.99,1.16]\
                               ,y_2_ticks=[.98,1.01,1.04,1.07,1.10,1.13,1.16])
+
 
 #Generate Primary Set of Data from DFT for C2H4
 nanoparticle_path, isotope_path, high_coverage_path\

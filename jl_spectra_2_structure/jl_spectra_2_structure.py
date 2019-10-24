@@ -10,12 +10,8 @@ import numpy as np
 import json
 import json_tricks
 import pkg_resources
-from timeit import default_timer as timer
-from sklearn.model_selection import StratifiedKFold
-from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.cluster import KMeans
 from imblearn.over_sampling import RandomOverSampler
-from copy import deepcopy
 from .neural_network import MLPRegressor
 
 #default values
@@ -46,314 +42,61 @@ def get_defaults(adsorbate):
     return nanoparticle_path, isotope_path, high_coverage_path\
            , cross_validation_path, coverage_scaling_path
 
-class CROSS_VALIDATION:
-    """
-    """
-    def __init__(self, cross_validation_path, CV_SPLITS=10, GCN_LABELS=11):
-        """
-        """
-        self.CV_SPLITS = CV_SPLITS
-        self.GCN_LABELS=GCN_LABELS
-        self.INDICES_FILE = os.path.join(cross_validation_path +'/cross_validation_indices_'+str(CV_SPLITS)+'fold.json')
-        self.CV_PATH = cross_validation_path
-        
-    def generate_TEST_CV_indices(self,TEST_FRACTION=0.2,RANDOM_STATE=0, write_file=False):
-        """
-        """
-        CV_SPLITS = self.CV_SPLITS
-        GCN_LABELS = self.GCN_LABELS
-        indices_file = self.INDICES_FILE
-        train_test_all = {'CNCO':{'train_indices':[], 'val_indices':[]\
-                         ,'CV_indices':[],'TEST_indices':[]}\
-                        ,'GCN':{'train_indices':[], 'val_indices':[]\
-                         ,'CV_indices':[],'TEST_indices':[]}\
-                        ,'CNCO4GCN':{'train_indices':[], 'val_indices':[]\
-                         ,'CV_indices':[],'TEST_indices':[]}}
-        #Remove points that do not represent local minima on the PES
-        GCNconv = IR_GEN(TARGET='GCN', NUM_TARGETS=GCN_LABELS)
-        GCNconv.get_GCNlabels(Minimum=0,showfigures=False)
-        #Get List of indices so we can split the data later
-        #combined class to stratify data based on binding-type and GCN simultaneously
-        combined_class = 100*GCNconv.CNCOList+GCNconv.GCNLabel
-        #split data into cross validation and test set
-        sss = StratifiedShuffleSplit(n_splits=1, test_size=TEST_FRACTION, random_state=RANDOM_STATE)
-        for CV_index, test_index in sss.split(combined_class,combined_class):
-            CV_indices = CV_index
-            TEST_indices = test_index
-        train_test_all['CNCO'].update({'CV_indices':CV_indices.astype('int').tolist()})
-        train_test_all['CNCO'].update({'TEST_indices':TEST_indices.astype('int').tolist()})
-        train_test_all['GCN'].update({'CV_indices':CV_indices[GCNconv.CNCOList[CV_indices] == 1].astype('int').tolist()})
-        train_test_all['GCN'].update({'TEST_indices':TEST_indices[GCNconv.CNCOList[TEST_indices] == 1].astype('int').tolist()})
-        train_test_all['CNCO4GCN'].update({'CV_indices':CV_indices[GCNconv.CNCOList[CV_indices] > 1].astype('int').tolist()})
-        train_test_all['CNCO4GCN'].update({'TEST_indices':TEST_indices[GCNconv.CNCOList[TEST_indices] > 1].astype('int').tolist()})
-        #split data into training and validation sets
-        skf = StratifiedKFold(n_splits=CV_SPLITS, shuffle = True, random_state=RANDOM_STATE)
-        for train_index, val_index in skf.split(combined_class[CV_indices], combined_class[CV_indices]):
-            train_test_all['CNCO']['train_indices'].append(CV_indices[train_index].astype('int').tolist())
-            train_test_all['CNCO']['val_indices'].append(CV_indices[val_index].astype('int').tolist())
-            train_test_all['GCN']['train_indices'].append(CV_indices[train_index[GCNconv.CNCOList[CV_indices[train_index]] == 1]].astype('int').tolist())
-            train_test_all['GCN']['val_indices'].append(CV_indices[val_index[GCNconv.CNCOList[CV_indices[val_index]] == 1]].astype('int').tolist())
-            train_test_all['CNCO4GCN']['train_indices'].append(CV_indices[train_index[GCNconv.CNCOList[CV_indices[train_index]] > 1]].astype('int').tolist())
-            train_test_all['CNCO4GCN']['val_indices'].append(CV_indices[val_index[GCNconv.CNCOList[CV_indices[val_index]] > 1]].astype('int').tolist())
-        
-        if write_file==True:
-            with open(indices_file, 'w') as outfile:
-                json.dump(train_test_all, outfile, sort_keys=True, indent=4)
-                print('Generated CV indices and saved dictionary to file ' + indices_file)
-        self.INDICES_DICTIONARY = train_test_all
-    
-    def run_CV(self, TARGET, COVERAGE, PROPERTIES\
-               ,num_train, num_val, num_test, read_file=True, write_file=False
-               ,MinGCNperLabel=0):
-        self.TARGET = TARGET
-        self.COVERAGE = COVERAGE
-        GCN_LABELS = self.GCN_LABELS
-        CV_SPLITS = self.CV_SPLITS
-        self.CV_RESULTS_FILE = os.path.join(self.CV_PATH,'/CV_results_'+TARGET+'_'+str(COVERAGE)\
-        +'_'+str(CV_SPLITS)+'fold'+'_reg'+'{:.2E}'.format(PROPERTIES['alpha'])+'_'+PROPERTIES['loss']+'.json')
-        results_file = self.CV_RESULTS_FILE
-        if TARGET == 'CNCO1HOLLOW': 
-            MAINconv = IR_GEN(TARGET='CNCO1HOLLOW', NUM_TARGETS=3)
-        elif TARGET == 'CNCO':
-            MAINconv = IR_GEN(TARGET='CNCO', NUM_TARGETS=4)
-        elif TARGET == 'GCN':
-            MAINconv = IR_GEN(TARGET='GCN', NUM_TARGETS=GCN_LABELS)
-            MAINconv.get_GCNlabels(Minimum=MinGCNperLabel, showfigures=False)
-            SECONDARYconv = IR_GEN(TARGET='CNCO',NUM_TARGETS=3)
-            self.SECONDARYconv = SECONDARYconv
-        self.MAINconv = MAINconv
-        
-        if read_file == True:
-            with open(self.INDICES_FILE, 'r') as outfile:
-                indices_dictionary = json.load(outfile)
-        else:
-            indices_dictionary = self.INDICES_DICTIONARY
-        
-        if TARGET in ['CNCO','CNCO1HOLLOW']:
-            indices_val = indices_dictionary['CNCO']['val_indices']
-            indices_train = indices_dictionary['CNCO']['train_indices']
-            indices_test = indices_dictionary['CNCO']['TEST_indices']
-            indices_CV_all = indices_dictionary['CNCO']['CV_indices']
-        elif TARGET == 'GCN':
-            indices_val = [(indices_dictionary['GCN']['val_indices'][CV_VAL]\
-                           , indices_dictionary['CNCO4GCN']['val_indices'][CV_VAL])\
-                           for CV_VAL in range(CV_SPLITS)]
-            indices_train = [(indices_dictionary['GCN']['train_indices'][CV_VAL]\
-                             , indices_dictionary['CNCO4GCN']['train_indices'][CV_VAL])\
-                             for CV_VAL in range(CV_SPLITS)]
-            indices_test = [indices_dictionary['GCN']['TEST_indices']\
-                            , indices_dictionary['CNCO4GCN']['TEST_indices']]
-            indices_CV_all = [indices_dictionary['GCN']['CV_indices']\
-                              , indices_dictionary['CNCO4GCN']['CV_indices']]
-            
-        DictList = []
-        #Cross Validation
-        for CV_INDEX in range(CV_SPLITS):
-            print('The CV number is '+str(CV_INDEX))
-            #Get validation spectra
-            self._get_VAL_TEST(SAMPLES=num_val, INDICES=indices_val[CV_INDEX])
-            Dict =  self._get_results(num_train, indices_train[CV_INDEX]\
-                                     , PROPERTIES, IS_TEST=False) 
-            DictList.append(Dict)
-            
-        #Train model on all CV Data and Test agains Test Set
-        #Get Test Spectra
-        self._get_VAL_TEST(num_test, indices_test)
-        
-        Dict =self._get_results(num_train, indices_CV_all, PROPERTIES, IS_TEST=True)
-        DictList.append(Dict)
-        
-        if write_file == True:
-            with open(results_file, 'w') as outfile:
-                json_tricks.dump(DictList, outfile, sort_keys=True, indent=4)
-        
-        return DictList
-    
-    def _get_VAL_TEST(self,SAMPLES, INDICES):
-        COVERAGE = self.COVERAGE
-        TARGET = self.TARGET
-        MAINconv = self.MAINconv
-        if TARGET == 'GCN':
-            SECONDARYconv = self.SECONDARYconv
-        start = timer()
-        if TARGET in ['CNCO','CNCO1HOLLOW']:
-            X, y = MAINconv.get_synthetic_spectra(SAMPLES, INDICES, COVERAGE=COVERAGE)
-        elif TARGET == 'GCN':
-            X1, y = MAINconv.get_synthetic_spectra(SAMPLES, INDICES[0], COVERAGE=COVERAGE)
-            X2, y2 = SECONDARYconv.get_synthetic_spectra(int(SAMPLES/5), INDICES[1], COVERAGE='low')
-            X = MAINconv.add_noise(X1,X2)
-            del X1; del X2; del y2
-        stop = timer()
-        print('Time to generate one batch of secondary data: ' + str(stop-start))
-        #Add to the validation and test sets to get more coverage options (each iteration has 10 different coverages)
-        for _ in range(9):
-            if TARGET in ['CNCO','CNCO1HOLLOW']:
-                X_2, y_2 = MAINconv.get_more_spectra(SAMPLES, INDICES)
-            elif TARGET == 'GCN':
-                X1_2, y_2 = MAINconv.get_more_spectra(SAMPLES, INDICES[0])
-                X2_2, y2_2 = SECONDARYconv.get_more_spectra(int(SAMPLES/5), INDICES[1])
-                X_2 = MAINconv.add_noise(X1_2, X2_2)
-                del X1_2; del X2_2; del y2_2
-            X = np.append(X,X_2,axis=0)
-            y = np.append(y,y_2,axis=0)
-            del X_2; del y_2
-        stop = timer()
-        print('Time to generate val/test set: ' + str(stop-start))
-        self.X_compare = X
-        self.y_compare = y
-
-    def _get_results(self, SAMPLES, INDICES, PROPERTIES, IS_TEST):
-        X_compare = self.X_compare
-        y_compare = self.y_compare
-        COVERAGE = self.COVERAGE
-        TARGET = self.TARGET
-        MAINconv = self.MAINconv
-        if TARGET == 'GCN':
-            SECONDARYconv = self.SECONDARYconv
-        if IS_TEST == False:
-            Dict = {'Wl2_Train':[], 'Score_Train':[]\
-                ,'Wl2_Val':[], 'Score_Val':[]}
-            Score_compare = Dict['Score_Val']
-            Wl2_compare = Dict['Wl2_Val']
-        else:
-            Dict = {'properties':[]
-            ,'Wl2_Train':[], 'Score_Train':[]
-            ,'Wl2_Test':[], 'Score_Test': []
-            ,'parameters': [],'__getstate__':[]
-            ,'intercepts_': []}
-            Score_compare = Dict['Score_Test']
-            Wl2_compare = Dict['Wl2_Test']
-        
-        NN = MLPRegressor(hidden_layer_sizes=PROPERTIES['hidden_layer_sizes'], activation='relu', solver='adam'
-                              , tol=10**-9, alpha=PROPERTIES['alpha'], verbose=False, batch_size=PROPERTIES['batch_size']
-                              , max_iter=PROPERTIES['initial_epochs'], epsilon= PROPERTIES['epsilon'], early_stopping=False
-                              ,warm_start=True,loss=PROPERTIES['loss']
-                              ,learning_rate_init=PROPERTIES['learning_rate_init'],out_activation='softmax')
-        
-        #Using Fit (w/ coverages)
-        if TARGET in ['CNCO','CNCO1HOLLOW']:
-            X, y = MAINconv.get_synthetic_spectra(SAMPLES, INDICES, COVERAGE=COVERAGE)
-        elif TARGET == 'GCN':
-            X1, y = MAINconv.get_synthetic_spectra(SAMPLES, INDICES[0], COVERAGE=COVERAGE)
-            X2, y2 = SECONDARYconv.get_synthetic_spectra(int(SAMPLES/5), INDICES[1], COVERAGE='low')
-            X = MAINconv.add_noise(X1,X2)
-            del X1; del X2; del y2
-        NN.fit(X, y)
-        y_predict = NN.predict(X)
-        del X
-        ycompare_predict = NN.predict(X_compare)
-        Dict['Score_Train'].append(r2(y,y_predict))
-        Dict['Wl2_Train'].append(wasserstein_loss(y,y_predict))
-        Score_compare.append(r2(y_compare,ycompare_predict))
-        Wl2_compare.append(wasserstein_loss(y_compare,ycompare_predict))
-        
-        for _ in range(PROPERTIES['iterations']):
-            print(_)  
-            if TARGET in ['CNCO','CNCO1HOLLOW']:
-                X, y = MAINconv.get_synthetic_spectra(SAMPLES, INDICES, COVERAGE=COVERAGE)
-            elif TARGET == 'GCN':
-                X1, y = MAINconv.get_synthetic_spectra(SAMPLES, INDICES[0], COVERAGE=COVERAGE)
-                X2, y2 = SECONDARYconv.get_synthetic_spectra(int(SAMPLES/5), INDICES[1], COVERAGE='low')
-                X = MAINconv.add_noise(X1,X2)
-                del X1; del X2; del y2
-            indices = np.arange(y.shape[0])    
-            for __ in range(PROPERTIES['epochs']):
-                np.random.shuffle(indices)
-                X = X[indices]
-                y = y[indices]    
-                NN.partial_fit(X,y)
-                y_predict = NN.predict(X)
-                ycompare_predict = NN.predict(X_compare)
-                Dict['Score_Train'].append(r2(y,y_predict))
-                Dict['Wl2_Train'].append(wasserstein_loss(y,y_predict))
-                Score_compare.append(r2(y_compare,ycompare_predict))
-                Wl2_compare.append(wasserstein_loss(y_compare,ycompare_predict))
-                print('Score val/test: ' + str(Score_compare[-1]))
-            del X; del y
-            print('Wl2_val/test: ' + str(Wl2_compare[-1]))
-            print('Wl2_Train: ' + str(Dict['Wl2_Train'][-1]))
-            print('Score val/test: ' + str(Score_compare[-1]))
-            print('Score_Train: ' + str(Dict['Score_Train'][-1]))
-            if IS_TEST==True:
-                state = deepcopy(NN.__getstate__())
-                NoneType = type(None)
-                array_type = type(np.array(0))
-                for key in list(state.keys()):
-                    if type(state[key]) not in [str, float, int, tuple, bool, complex, NoneType, list, array_type]:
-                        del  state[key]
-                    elif type(state[key]) in [list, tuple, array_type]:
-                        if type(state[key][0]) not in [str, float, int, tuple, bool, complex, NoneType, list, array_type]:
-                            del state[key]
-                Dict.update({'properties':PROPERTIES, 'parameters':NN.get_params()
-                ,'__getstate__': state})
-        return Dict
-
-    def get_Test(self, TARGET, COVERAGE, num_test, read_file=True, MinGCNperLabel=0):
-            self.TARGET = TARGET
-            self.COVERAGE = COVERAGE
-            GCN_LABELS = self.GCN_LABELS
-            if TARGET == 'CNCO1HOLLOW': 
-                MAINconv = IR_GEN(TARGET='CNCO1HOLLOW', NUM_TARGETS=3)
-            elif TARGET == 'CNCO':
-                MAINconv = IR_GEN(TARGET='CNCO', NUM_TARGETS=4)
-            elif TARGET == 'GCN':
-                MAINconv = IR_GEN(TARGET='GCN', NUM_TARGETS=GCN_LABELS)
-                MAINconv.get_GCNlabels(Minimum=MinGCNperLabel, showfigures=False)
-                SECONDARYconv = IR_GEN(TARGET='CNCO',NUM_TARGETS=3)
-                self.SECONDARYconv = SECONDARYconv
-            self.MAINconv = MAINconv
-            
-            if read_file == True:
-                with open(self.INDICES_FILE, 'r') as outfile:
-                    indices_dictionary = json.load(outfile)
-            else:
-                indices_dictionary = self.INDICES_DICTIONARY
-            
-            if TARGET in ['CNCO','CNCO1HOLLOW']:
-                indices_test = indices_dictionary['CNCO']['TEST_indices']
-            elif TARGET == 'GCN':
-                indices_test = [indices_dictionary['GCN']['TEST_indices']\
-                                , indices_dictionary['CNCO4GCN']['TEST_indices']]
-                
-            #Train model on all CV Data and Test agains Test Set
-            #Get Test Spectra
-            self._get_VAL_TEST(num_test, indices_test)
-
 class IR_GEN:
-    def __init__(self, nanoparticle_path, TARGET='CNCO', NUM_TARGETS=4):
-        #number of target variablesa.
-        coverage_scaling_path
-        self.TARGET = TARGET
-        self.NUM_TARGETS = NUM_TARGETS
-        self.GCNLabel = None
+    def __init__(self, ADSORBATE='CO', poc=1, TARGET='binding_type', NUM_TARGETS=4\
+                 ,nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None):
+        assert TARGET in ['binding_type','GCN','combine_hollow_sites'], "incorrect TARGET given"
+        assert poc in [1,2], "The adsorbate must have 1 or 2 atoms in contact with the surface."
+        #number of target variables.
+        nano_path, isotope_path, high_cov_path\
+           , cross_validation_path, cov_scale_path = get_defaults(ADSORBATE)
+        
+        if nanoparticle_path is None:
+            nanoparticle_path = nano_path
+            if poc == 1:
+                coverage_scaling_path = cov_scale_path
+                if ADSORBATE == 'CO':
+                    high_coverage_path = high_cov_path
+            
+        
         with open(nanoparticle_path, 'r') as infile:
             nanoparticle_data = json.load(infile)
         Xfreq_ALL = np.array(nanoparticle_data['FREQUENCIES'], dtype='float')
         is_local_minima = np.min(Xfreq_ALL, axis=1) > 0
-        #CNCOs = np.array([i.CNCO for i in nanoparticle_data])
-        #is_outlierBridge = np.all((np.max(Xfreq_ALL,axis=1)<1700,CNCOs==2),axis=0)
-        #del CNCOs
-        #select_files = np.all((is_local_minima,is_outlierBridge==False),axis=0)
+        BINDING_TYPES_unfiltered = np.array(nanoparticle_data['CN_ADSORBATE'])
+        is_adsorbed = BINDING_TYPES_unfiltered >0
+        if poc==1:
+            max_coordination=4
+        elif poc==2:
+            max_coordination=2
+        correct_coordination = BINDING_TYPES_unfiltered<=max_coordination
+        select_files = np.all((is_local_minima,is_adsorbed,correct_coordination),axis=0)
         for key in nanoparticle_data.keys():
-            nanoparticle_data[key] = np.array(nanoparticle_data[key])[is_local_minima]
-        nanoparticle_data['CN_CO'][nanoparticle_data['CN_CO'] == 5] = 4
-        nanoparticle_data['CN_CO'][nanoparticle_data['CN_CO'] == 0] = 4
-        self.CNCOList_original = nanoparticle_data['CN_CO']
+            nanoparticle_data[key] = np.array(nanoparticle_data[key])[select_files]
         nanoparticle_data['INTENSITIES'][nanoparticle_data['FREQUENCIES'] == 0] = 0
-        if TARGET == 'CNCO1HOLLOW':
-            nanoparticle_data['CN_CO'][nanoparticle_data['CN_CO'] == 4] = 3
+        BINDING_TYPES_with_4fold = nanoparticle_data['CN_ADSORBATE']
+        if TARGET == 'combine_hollow_sites':
+            nanoparticle_data['CN_ADSORBATE'][nanoparticle_data['CN_ADSORBATE'] == 4] = 3
             print('grouping hollow sites')
+        self.BINDING_TYPES_with_4fold = BINDING_TYPES_with_4fold
+        self.TARGET = TARGET
+        self.NUM_TARGETS = NUM_TARGETS
+        self.GCNLabel = None
         self.X0cov = np.array([(nanoparticle_data['FREQUENCIES'][i], nanoparticle_data['INTENSITIES'][i])
                                for i in range(len(nanoparticle_data['FREQUENCIES']))])
-        self.CNCOList = nanoparticle_data['CN_CO']
+        self.BINDING_TYPES = nanoparticle_data['CN_ADSORBATE']
         self.GCNList = nanoparticle_data['GCN']
+        self.NANO_PATH = nanoparticle_path
+        self.HIGH_COV_PATH = high_coverage_path
+        self.COV_SCALE_PATH = coverage_scaling_path
+        
 
     def get_GCNlabels(self, Minimum=7, showfigures=False):
         print('Initial number of targets: '+str(self.NUM_TARGETS))
         NUM_TARGETS = self.NUM_TARGETS
         GCNList = self.GCNList
-        CNCOList = self.CNCOList
-        GCNListAtop = GCNList[CNCOList == 1]
+        BINDING_TYPES = self.BINDING_TYPES
+        GCNListAtop = GCNList[BINDING_TYPES == 1]
         KC = KMeans(n_clusters=NUM_TARGETS, random_state=0).fit(GCNListAtop.reshape(-1, 1))
         KC_new = np.zeros(NUM_TARGETS, dtype='int')
         KC_new[0] = KC.labels_[np.argmin(GCNListAtop)]
@@ -384,7 +127,7 @@ class IR_GEN:
         NUM_TARGETS = len(set(KCclass))
 
         GCNlabel = np.zeros(len(GCNList), dtype='int')
-        GCNlabel[(CNCOList == 1)] = KCclass
+        GCNlabel[(BINDING_TYPES == 1)] = KCclass
         BreakPoints = np.linspace(0, 8.5, num=810)
         BreakLabels = KC.predict(BreakPoints.reshape(-1, 1))
         BreakLabels = [KC2class[i] for i in BreakLabels]
@@ -407,7 +150,7 @@ class IR_GEN:
                            for count, i in enumerate(BreakString)]
             plt.figure(1)
             #ax = plt.subplot()
-            plt.hist(GCNlabel[(CNCOList == 1)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
+            plt.hist(GCNlabel[(BINDING_TYPES == 1)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
             plt.xticks(range(1, NUM_TARGETS+1))
             #ax.set_xticklabels(greater_than)
             plt.xlabel('GCN Group')
@@ -421,7 +164,7 @@ class IR_GEN:
             rcParams.update(params)
             plt.figure(2, figsize=(3.5, 3), dpi=300)
             #ax = plt.subplot()
-            plt.hist(GCNlabel[(CNCOList == 1)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
+            plt.hist(GCNlabel[(BINDING_TYPES == 1)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
             plt.xticks(range(1, NUM_TARGETS+1))
             #ax.set_xticklabels(greater_than)
             plt.xticks(fontsize=8)
@@ -449,16 +192,16 @@ class IR_GEN:
         [np.random.shuffle(i) for i in probabilities]
         return probabilities
 
-    def _perturb_spectra(self, perturbations, X, y, a=0.999, b=1.001, CNCO=None):
+    def _perturb_spectra(self, perturbations, X, y, a=0.999, b=1.001, BINDING_TYPES=None):
         X = X.copy(); y = y.copy()
         perturbed_values = (b-a)*np.random.random_sample((X.shape[0]*perturbations
                                                           , X.shape[1], X.shape[2]))+a
         Xperturbed = X.repeat(perturbations, axis=0)*perturbed_values
         yperturbed = y.repeat(perturbations, axis=0)
-        if CNCO is not None:
-            CNCO = CNCO.copy()
-            CNCO_perturbed = CNCO.repeat(perturbations,axis=0)
-            return(Xperturbed, yperturbed, CNCO_perturbed)
+        if BINDING_TYPES is not None:
+            BINDING_TYPES = BINDING_TYPES.copy()
+            BINDING_TYPES_perturbed = BINDING_TYPES.repeat(perturbations,axis=0)
+            return(Xperturbed, yperturbed, BINDING_TYPES_perturbed)
         else:
             return(Xperturbed, yperturbed)
    
@@ -474,11 +217,12 @@ class IR_GEN:
         transform = fL*specL+(1-fL)*specG
         return transform
 
-    def _coverage_shift(self, X, CNCO, SELF_COVERAGE, TOTAL_COVERAGE):
+    def _coverage_shift(self, X, BINDING_TYPES, SELF_COVERAGE, TOTAL_COVERAGE):
         """
         COVERAGE: Relative spatial coverage of each binding-type
         TOTAL_COVERAGE: relative combined coverages of non-island
         """
+        coverage_scaling_path = self.COV_SCALE_PATH
         ones = np.ones(X.shape[0])
         Xfrequencies = X[:, 0].copy()
         Xintensities = X[:, 1].copy()
@@ -497,21 +241,19 @@ class IR_GEN:
         CO_frequencies = Xfrequencies.copy()[np.arange(len(Xfrequencies)), CO_STRETCH_IDX]
         CO_intensities = Xintensities.copy()[np.arange(len(Xintensities)), CO_STRETCH_IDX]
         for i in range(4):
-            CO_frequencies[CNCO == i+1] = (CO_frequencies[CNCO == i+1]\
-                                           *(Coverage_Scaling['CO_FREQ'][i]['SELF_CO_PER_A2']*ABS_COVERAGE[CNCO == i+1]\
-                                             +Coverage_Scaling['CO_FREQ'][i]['CO_PER_A2']*TOTAL_COVERAGE_ABS[CNCO == i+1]\
-                                             +Coverage_Scaling['CO_FREQ'][i]['const'])\
-                                             /Coverage_Scaling['CO_FREQ'][i]['const'])
-            CO_intensities[CNCO == i+1] = (CO_intensities[CNCO == i+1]\
-                                         *np.exp(Coverage_Scaling['CO_INT_EXP']*TOTAL_COVERAGE_ABS[CNCO == i+1]))
+            CO_frequencies[BINDING_TYPES == i+1] = (CO_frequencies[BINDING_TYPES == i+1]\
+                                           *(Coverage_Scaling['CO_FREQ'][i]['SELF_CO_PER_A2']*ABS_COVERAGE[BINDING_TYPES == i+1]\
+                                             +Coverage_Scaling['CO_FREQ'][i]['CO_PER_A2']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]\
+                                             +1))
+            CO_intensities[BINDING_TYPES == i+1] = (CO_intensities[BINDING_TYPES == i+1]\
+                                         *np.exp(Coverage_Scaling['CO_INT_EXP']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]))
             
-            Xfrequencies[CNCO == i+1] = (Xfrequencies[CNCO == i+1]\
-                                           *(Coverage_Scaling['PTCO_FREQ']['SELF_CO_PER_A2']*ABS_COVERAGE[CNCO == i+1]\
-                                             +Coverage_Scaling['PTCO_FREQ']['CO_PER_A2']*TOTAL_COVERAGE_ABS[CNCO == i+1]\
-                                             +Coverage_Scaling['PTCO_FREQ']['const']).reshape((-1, 1))\
-                                             /Coverage_Scaling['PTCO_FREQ']['const'])
-            Xintensities[CNCO == i+1] = (Xintensities[CNCO == i+1]\
-                                         *np.exp(Coverage_Scaling['PTCO_INT_EXP']*TOTAL_COVERAGE_ABS[CNCO == i+1]).reshape((-1,1)))                          
+            Xfrequencies[BINDING_TYPES == i+1] = (Xfrequencies[BINDING_TYPES == i+1]\
+                                           *(Coverage_Scaling['PTCO_FREQ']['SELF_CO_PER_A2']*ABS_COVERAGE[BINDING_TYPES == i+1]\
+                                             +Coverage_Scaling['PTCO_FREQ']['CO_PER_A2']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]\
+                                             +1))
+            Xintensities[BINDING_TYPES == i+1] = (Xintensities[BINDING_TYPES == i+1]\
+                                         *np.exp(Coverage_Scaling['PTCO_INT_EXP']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]).reshape((-1,1)))                          
         Xfrequencies[np.arange(X.shape[0]), CO_STRETCH_IDX] = CO_frequencies
         Xintensities[np.arange(X.shape[0]), CO_STRETCH_IDX] = CO_intensities
         Xcov = np.array([np.array((Xfrequencies[i], Xintensities[i]))
@@ -544,10 +286,9 @@ class IR_GEN:
             int2D = np.tile(Xintensities[i], (ENERGY_POINTS, 1))
             temp = int2D*prefactor*np.exp(-(freq2D-energies2D)**2/(2.0*sigma**2))
             int_mesh[i] = np.sum(temp, axis=1)
-        int_mesh[abs(int_mesh[...])<2**-500] = 0
         return int_mesh
     
-    def _xyconv(self, X_sample, Y_sample, probabilities, CNCO_sample):
+    def _xyconv(self, X_sample, Y_sample, probabilities, BINDING_TYPES_sample):
         get_probabilities = self._get_probabilities
         mixed_lineshape = self._mixed_lineshape
         coverage_shift = self._coverage_shift
@@ -582,7 +323,7 @@ class IR_GEN:
         parray = np.zeros(Y_sample.size)
         coverage_parray = get_probabilities(num_samples, 11)
         coverage_totals = np.random.random_sample(size=[num_samples,10])
-        if COVERAGE == 'low' or TARGET not in ['CNCO', 'CNCO1HOLLOW']:
+        if COVERAGE == 'low' or TARGET not in ['binding_type', 'combine_hollow_sites']:
             int_mesh = generate_spectra(Xfrequencies, Xintensities\
                                         ,energies2D, prefactor, sigma)
         for i in range(num_samples):
@@ -590,7 +331,7 @@ class IR_GEN:
                 parray[Y_sample == ii+MIN_Y] = probabilities[i, ii]
             parray /= np.sum(parray)
             indices_primary = np.random.choice(sample_indices, size=Nanos[i], replace=True, p=parray)
-            if COVERAGE == 'low' or TARGET not in ['CNCO', 'CNCO1HOLLOW']:
+            if COVERAGE == 'low' or TARGET not in ['binding_type', 'combine_hollow_sites']:
                 combined_mesh = np.sum(int_mesh[indices_primary], axis=0)
             else:
                 #initialize coverages
@@ -604,44 +345,42 @@ class IR_GEN:
                     SELF_COVERAGE[COVERAGE_INDICES == ii ] = coverage_totals[i][ii-1]/TOTAL_COVERAGE[COVERAGE_INDICES == ii].size
                     #update self coverage of indentical binding types to be the same (their sum)
                     for iii in [1,2,3,4]:
-                        SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,CNCO_sample[indices_primary]==iii),axis=0)] \
-                        = np.sum(SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,CNCO_sample[indices_primary]==iii),axis=0)])
+                        SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,BINDING_TYPES_sample[indices_primary]==iii),axis=0)] \
+                        = np.sum(SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,BINDING_TYPES_sample[indices_primary]==iii),axis=0)])
                 #decrease maximum coverage at less favorable sites to improve prediction score
-                SELF_COVERAGE[CNCO_sample[indices_primary] == 2] *= 0.7
-                SELF_COVERAGE[np.any((CNCO_sample[indices_primary] == 3,CNCO_sample[indices_primary] == 4), axis=0)] *= 0.2
+                SELF_COVERAGE[BINDING_TYPES_sample[indices_primary] == 2] *= 0.7
+                SELF_COVERAGE[np.any((BINDING_TYPES_sample[indices_primary] == 3,BINDING_TYPES_sample[indices_primary] == 4), axis=0)] *= 0.2
                 for ii in sorted(set(COVERAGE_INDICES.tolist()+[0]))[1:]:
                     TOTAL_COVERAGE[COVERAGE_INDICES == ii] *= ( \
-                            SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,CNCO_sample[indices_primary] == 1), axis=0)].size\
-                          + 0.7 * SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,CNCO_sample[indices_primary] == 2),axis=0)].size \
-                          + 0.2 * SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,CNCO_sample[indices_primary] == 3),axis=0)].size \
-                          + 0.2 * SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,CNCO_sample[indices_primary] == 4),axis=0)].size \
+                            SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,BINDING_TYPES_sample[indices_primary] == 1), axis=0)].size\
+                          + 0.7 * SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,BINDING_TYPES_sample[indices_primary] == 2),axis=0)].size \
+                          + 0.2 * SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,BINDING_TYPES_sample[indices_primary] == 3),axis=0)].size \
+                          + 0.2 * SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,BINDING_TYPES_sample[indices_primary] == 4),axis=0)].size \
                           )/TOTAL_COVERAGE[COVERAGE_INDICES == ii].size        
                 TOTAL_COVERAGE[COVERAGE_INDICES==0] = SELF_COVERAGE[COVERAGE_INDICES==0]
-                Xcov = coverage_shift(X_sample[indices_primary], CNCO_sample[indices_primary], SELF_COVERAGE, TOTAL_COVERAGE)
+                Xcov = coverage_shift(X_sample[indices_primary], BINDING_TYPES_sample[indices_primary], SELF_COVERAGE, TOTAL_COVERAGE)
                 Xcovfrequencies = Xcov[:, 0].copy()
                 Xcovintensities = Xcov[:, 1].copy()
                 int_mesh = generate_spectra(Xcovfrequencies,Xcovintensities\
                                                   ,energies2D, prefactor, sigma)
-                int_mesh[CNCO_sample[indices_primary] == 2] *= 0.7
-                int_mesh[CNCO_sample[indices_primary] == 3] *= 0.2
-                int_mesh[CNCO_sample[indices_primary] == 4] *= 0.2
+                int_mesh[BINDING_TYPES_sample[indices_primary] == 2] *= 0.7
+                int_mesh[BINDING_TYPES_sample[indices_primary] == 3] *= 0.2
+                int_mesh[BINDING_TYPES_sample[indices_primary] == 4] *= 0.2
                 combined_mesh = np.sum(int_mesh, axis=0)
             yconv[i] = np.sum(y_mesh[indices_primary], axis=0, dtype='int')
             transform = mixed_lineshape(FWHMs[i], fLs[i], ENERGY_POINTS, energy_spacing)
             Xconv[i] = np.convolve(combined_mesh, transform, mode='valid')
         #This part is to adjust the tabulated contribution to match that of the adjusted spectra for max coverage of bridge, 3-fold and 4-fold
-        if COVERAGE == 'high' and TARGET in ['CNCO', 'CNCO1HOLLOW']:
+        if COVERAGE == 'high' and TARGET in ['binding_type', 'combine_hollow_sites']:
             yconv[:,1] *= 0.7
             yconv[:,2] *= 0.2
-            if TARGET == 'CNCO':
+            if TARGET == 'binding_type':
                 yconv[:,3] *= 0.2
+        #10**-3 accounts for noise
         Xconv += 10**-3*np.max(Xconv, axis=1).reshape((-1, 1))*np.random.random_sample(Xconv.shape)
-        Xconv[abs(Xconv[...])<2**-500] = 0
-        yconv[abs(yconv[...])<2**-500] = 0
+        #normalize so max X is 1 and make y a set of fractions that sum to 1
         Xconv /= np.max(Xconv, axis=1).reshape((-1, 1))
         yconv /= np.sum(yconv, axis=1).reshape((-1, 1))
-        Xconv[abs(Xconv[...])<2**-500] = 0
-        yconv[abs(yconv[...])<2**-500] = 0
         return Xconv, yconv
 
     def add_noise(self, Xconv_main, Xconv_noise, noise2signalmax=2.0/3.0):
@@ -651,20 +390,17 @@ class IR_GEN:
         noise_sample = np.random.choice(noise_indices, size=len(Xconv_main), replace=True)
         for i in range(len(Xconv_main)):
             X_noisey[i] = Xconv_main[i] + Xconv_noise[noise_sample[i]]*noise_value[i]
-        X_noisey[abs(X_noisey[...])<2**-500] = 0
         X_noisey = X_noisey/np.max(X_noisey, axis=1).reshape(-1, 1)
-        X_noisey[abs(X_noisey[...])<2**-500] = 0
         return X_noisey
 
     def get_synthetic_spectra(self, NUM_SAMPLES, indices, COVERAGE=None
                               , LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
+        assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
+        in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
+        high_coverage_path = self.HIGH_COV_PATH
         TARGET = self.TARGET
-        CNCO = self.CNCOList
-        CNCO_original = self.CNCOList_original
-        self.COVERAGE = COVERAGE
-        self.LOW_FREQUENCY = LOW_FREQUENCY
-        self.HIGH_FREQUENCY = HIGH_FREQUENCY
-        self.ENERGY_POINTS = ENERGY_POINTS
+        BINDING_TYPES = self.BINDING_TYPES
+        BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
         #Assign the target variable Y to either GCN group or binding site
         if TARGET == 'GCN':
             if self.GCNLabel is None:
@@ -672,7 +408,7 @@ class IR_GEN:
                 self.get_GCNlabels(Minimum=0, showfigures=False)
             Y = self.GCNLabel
         else:
-            Y = CNCO
+            Y = BINDING_TYPES
         #correct self.NUM_TARGETS in case this method is run multiple times
         self.NUM_TARGETS = len(set(Y[indices]))
         print('NUM_TARGETS: '+str(self.NUM_TARGETS))
@@ -682,18 +418,18 @@ class IR_GEN:
             print('Adding high-coverage low index planes')
             with open(high_coverage_path, 'r') as infile:
                 HC_Ext = json.load(infile)
-            HC_CNPt = np.sort(np.array(list(set([np.min(i) for i in HC_Ext['CN_PT']]))))
+            HC_CNPt = np.sort(np.array(list(set([np.min(i) for i in HC_Ext['CN_METAL']]))))
             self.NUM_TARGETS += len(HC_CNPt)
             HC_frequencies = []
             HC_intensities = []
             HC_classes = []
             max_freqs = np.max([len(i) for i in HC_Ext['FREQUENCIES']])
             for counter, i in enumerate(HC_CNPt):
-                for ii in range(len(HC_Ext['CN_PT'])):
-                    if np.min(HC_Ext['CN_PT'][ii]) == i:
+                for ii in range(len(HC_Ext['CN_METAL'])):
+                    if np.min(HC_Ext['CN_METAL'][ii]) == i:
                         HC_classes.append(np.max(Y)+counter+1)
-                        num_atop = len(np.array(HC_Ext['CN_CO'][ii]
-                                               )[np.array(HC_Ext['CN_CO'][ii]) == 1])
+                        num_atop = len(np.array(HC_Ext['CN_ADSORBATE'][ii]
+                                               )[np.array(HC_Ext['CN_ADSORBATE'][ii]) == 1])
                         offset = max_freqs-len(HC_Ext['FREQUENCIES'][ii])
                         HC_frequencies.append(np.pad(HC_Ext['FREQUENCIES'][ii], (0, offset)
                                                      , 'constant', constant_values=0))
@@ -712,12 +448,12 @@ class IR_GEN:
             HC_X = self._scaling_factor_shift(HC_X)
             offset = max_freqs-len(X0cov[0][0])
             X = np.pad(X0cov, ((0, 0), (0, 0), (0, offset)), 'constant', constant_values=0)
-        elif (COVERAGE == 'high' and (TARGET == 'CNCO' or TARGET == 'CNCO1HOLLOW')):
+        elif (COVERAGE == 'high' and (TARGET == 'binding_type' or TARGET == 'combine_hollow_sites')):
             print('testing all coverages')
             X = X0cov
         elif type(COVERAGE) == int or type(COVERAGE) == float:
             print('Relative coverage is ' + str(COVERAGE))
-            X = self._coverage_shift(X0cov, CNCO, COVERAGE,COVERAGE)
+            X = self._coverage_shift(X0cov, BINDING_TYPES, COVERAGE,COVERAGE)
         elif COVERAGE == 'low':
             print('Low Coverage')
             X = X0cov
@@ -730,7 +466,7 @@ class IR_GEN:
             self.HC_X = HC_X
             self.HC_classes = HC_classes
             num_single = Y.size
-            #b = 2105/2095 #a = 1854/1865
+            #b = 2105/2095 #a = 1854/1865 - difference between experiments and DFT
             HC_X_expanded, HC_classes_expanded = self._perturb_spectra(5, HC_X, HC_classes
                                                                        , a=0.995, b=1.01)
             X = np.concatenate((X, HC_X_expanded), axis=0)
@@ -740,33 +476,33 @@ class IR_GEN:
         indices_balanced, Y_balanced = RandomOverSampler().fit_sample(np.array(indices).reshape(-1,1),Y[indices].copy())
         X_balanced = X[indices_balanced.flatten()]
         
-        
-        CNCO_sample = None
-        #adding perturbations for improved fitting
-        if COVERAGE == 'high' and (TARGET == 'CNCO' or TARGET == 'CNCO1HOLLOW'):
-            CNCO_balanced = CNCO_original[indices_balanced.flatten()]
-            X_sample, Y_sample, CNCO_sample = self._perturb_spectra(5, X_balanced, Y_balanced
-                                                                    , a=0.995, b=1.005,CNCO=CNCO_balanced)
-        elif COVERAGE == 'high' and TARGET == 'GCN':
-            X_sample, Y_sample = self._perturb_spectra(5, X_balanced, Y_balanced
-                                                       , a=0.9975, b=1.0025)
-        else:
-            X_sample, Y_sample = self._perturb_spectra(5, X_balanced, Y_balanced, a=0.999, b=1.001)
+        #only use BINDING_TYPES_balanced if COVERAGE == 'high' and (TARGET == 'binding_type' or TARGET == 'combine_hollow_sites')
+        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
+        #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
+        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
+        X_sample, Y_sample, BINDING_TYPES_sample = self._perturb_spectra(5, X_balanced, Y_balanced
+                                            , a=0.999, b=1.001,BINDING_TYPES=BINDING_TYPES_balanced)
         probabilities = self._get_probabilities(NUM_SAMPLES, self.NUM_TARGETS)
-        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, CNCO_sample)
+        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
+        #set numbers that may form denormals to zero to improve numerics
+        Xconv[abs(Xconv[...])<2**-500] = 0
+        yconv[abs(yconv[...])<2**-500] = 0
+        self.COVERAGE = COVERAGE
+        self.LOW_FREQUENCY = LOW_FREQUENCY
+        self.HIGH_FREQUENCY = HIGH_FREQUENCY
+        self.ENERGY_POINTS = ENERGY_POINTS
         return Xconv, yconv
 
     def get_more_spectra(self, NUM_SAMPLES, indices):
-        TARGET = self.TARGET
         X = self.X
         Y = self.Y
-        CNCO_original = self.CNCOList_original
+        BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
         COVERAGE = self.COVERAGE
         if COVERAGE == 'high' and self.TARGET == 'GCN':
             HC_X = self.HC_X
             HC_classes = self.HC_classes
             num_single = Y.size
-            #b = 2105/2095 #a = 1854/1865
+            #b = 2105/2095 #a = 1854/1865 difference between experiments and DFT
             HC_X_expanded, HC_classes_expanded = self._perturb_spectra(5, HC_X, HC_classes
                                                                        , a=0.995, b=1.01)
             X = np.concatenate((X, HC_X_expanded), axis=0)
@@ -776,19 +512,17 @@ class IR_GEN:
         indices_balanced, Y_balanced = RandomOverSampler().fit_sample(np.array(indices).reshape(-1,1),Y[indices].copy())
         X_balanced = X[indices_balanced.flatten()]
         
-        CNCO_sample = None
-        #adding perturbations for improved fitting
-        if COVERAGE == 'high' and (TARGET == 'CNCO' or TARGET == 'CNCO1HOLLOW'):
-            CNCO_balanced = CNCO_original[indices_balanced.flatten()]
-            X_sample, Y_sample, CNCO_sample = self._perturb_spectra(5, X_balanced, Y_balanced
-                                                                    , a=0.995, b=1.005,CNCO=CNCO_balanced)
-        elif COVERAGE == 'high' and TARGET == 'GCN':
-            X_sample, Y_sample = self._perturb_spectra(5, X_balanced, Y_balanced
-                                                       , a=0.9975, b=1.0025)
-        else:
-            X_sample, Y_sample = self._perturb_spectra(5, X_balanced, Y_balanced, a=0.999, b=1.001)
+        #only use BINDING_TYPES_balanced if COVERAGE == 'high' and (TARGET == 'binding_type' or TARGET == 'combine_hollow_sites')
+        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
+        #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
+        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
+        X_sample, Y_sample, BINDING_TYPES_sample = self._perturb_spectra(5, X_balanced, Y_balanced
+                                            , a=0.999, b=1.001,BINDING_TYPES=BINDING_TYPES_balanced)
         probabilities = self._get_probabilities(NUM_SAMPLES, self.NUM_TARGETS)
-        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, CNCO_sample)
+        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
+        #set numbers that may form denormals to zero to improve numerics
+        Xconv[abs(Xconv[...])<2**-500] = 0
+        yconv[abs(yconv[...])<2**-500] = 0
         return Xconv, yconv
     
 def fold(frequencies, intensities, LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS,FWHM):
@@ -815,41 +549,6 @@ def HREEL_2_scaledIR(HREEL, frequency_range=np.linspace(200,2200,num=501,endpoin
     IR = np.interp(frequency_range, HREEL[0], HREEL[1]*HREEL[0]**PEAK_CONV, left=None, right=None, period=None)
     IR_scaled = IR/np.max(IR)
     return IR_scaled
-
-def wasserstein_loss(y_true, y_pred,individual=False):
-    """Compute the l2 wasserstein loss
-
-    Parameters
-    ----------
-    y_true : array-like or label indicator matrix
-    Ground truth (correct) values.
-
-    y_pred : array-like or label indicator matrix
-    Predicted values, as returned by a regression estimator.
-
-    Returns
-    -------
-    loss : float
-        The degree to which the samples are correctly predicted.
-    """
-    y_true = np.array(deepcopy(y_true))
-    y_pred = np.array(deepcopy(y_pred))
-    if len(y_true.shape) == 1:
-        y_true = y_true.reshape(-1,1)
-    if len(y_pred.shape) == 1:
-        y_pred = y_pred.reshape(-1,1)
-    Tcum = np.cumsum(y_true, axis=-1)
-    Pcum = np.cumsum(y_pred, axis=-1)
-    w_loss = (1/float(y_true.shape[1])*np.sum((Pcum-Tcum)**2, axis=1))**0.5
-    if individual == True:
-        return w_loss
-    else:
-        return w_loss.mean()
-
-def r2(y_true, y_pred):
-    SStot = np.sum((y_true-y_true.mean())**2)
-    SSres = np.sum((y_true-y_pred)**2)
-    return 1 - SSres/SStot
 
 def get_NN(dictionary):
     NN = MLPRegressor()

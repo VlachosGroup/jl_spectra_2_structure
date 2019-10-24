@@ -19,8 +19,8 @@ from scipy.optimize import curve_fit
 from matplotlib import rcParams
 from matplotlib import pyplot as plt
 from ..vibrations import Infrared
-from ..coordination import Coordination
 from ..error_metrics import get_r2
+from .coordination import Coordination
 from .file_parser import VASP_PARSER
 from .file_parser import explode
 
