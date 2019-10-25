@@ -14,9 +14,6 @@ from sklearn.cluster import KMeans
 from imblearn.over_sampling import RandomOverSampler
 from .neural_network import MLPRegressor
 
-#default values
-data_path = pkg_resources.resource_filename(__name__, 'data/')
-
 def get_defaults(adsorbate):
     """
     Returns default frequencies to project intensities onto as well as default
@@ -34,6 +31,7 @@ def get_defaults(adsorbate):
         Directory location where mixed-component spectra are stored.
     
     """
+    data_path = pkg_resources.resource_filename(__name__, 'data/')
     nanoparticle_path = os.path.join(data_path, 'dft_nanoparticle/single_'+adsorbate+'.json')
     isotope_path = os.path.join(data_path, 'dft_surface/isotope_'+adsorbate+'.json')
     high_coverage_path = os.path.join(data_path, 'dft_surface/high_coverage_'+adsorbate+'.json')
@@ -43,7 +41,7 @@ def get_defaults(adsorbate):
            , cross_validation_path, coverage_scaling_path
 
 class IR_GEN:
-    def __init__(self, ADSORBATE='CO', poc=1, TARGET='binding_type', NUM_TARGETS=4\
+    def __init__(self, ADSORBATE='CO', poc=1, TARGET='binding_type', NUM_TARGETS=None, exclude_atop=False\
                  ,nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None):
         assert TARGET in ['binding_type','GCN','combine_hollow_sites'], "incorrect TARGET given"
         assert poc in [1,2], "The adsorbate must have 1 or 2 atoms in contact with the surface."
@@ -67,8 +65,14 @@ class IR_GEN:
         is_adsorbed = BINDING_TYPES_unfiltered >0
         if poc==1:
             max_coordination=4
+            if TARGET == 'combine_hollow_sites' or exclude_atop == True:
+                NUM_TARGETS =3
+            elif TARGET == 'binding_type':
+                NUM_TARGETS = 4
         elif poc==2:
             max_coordination=2
+            if TARGET == 'binding_type':
+                NUM_TARGETS = 2
         correct_coordination = BINDING_TYPES_unfiltered<=max_coordination
         select_files = np.all((is_local_minima,is_adsorbed,correct_coordination),axis=0)
         for key in nanoparticle_data.keys():
@@ -81,7 +85,7 @@ class IR_GEN:
         self.BINDING_TYPES_with_4fold = BINDING_TYPES_with_4fold
         self.TARGET = TARGET
         self.NUM_TARGETS = NUM_TARGETS
-        self.GCNLabel = None
+        self.GCNLabels = None
         self.X0cov = np.array([(nanoparticle_data['FREQUENCIES'][i], nanoparticle_data['INTENSITIES'][i])
                                for i in range(len(nanoparticle_data['FREQUENCIES']))])
         self.BINDING_TYPES = nanoparticle_data['CN_ADSORBATE']
@@ -91,18 +95,21 @@ class IR_GEN:
         self.COV_SCALE_PATH = coverage_scaling_path
         
 
-    def get_GCNlabels(self, Minimum=7, showfigures=False):
+    def get_GCNLabels(self, Minimum=7, showfigures=False, INCLUDED_BINDING_TYPES=[1]):
+        assert type(INCLUDED_BINDING_TYPES) == list or INCLUDED_BINDING_TYPES=='ALL', "Included Binding Types should be a list"
         print('Initial number of targets: '+str(self.NUM_TARGETS))
         NUM_TARGETS = self.NUM_TARGETS
         GCNList = self.GCNList
         BINDING_TYPES = self.BINDING_TYPES
-        GCNListAtop = GCNList[BINDING_TYPES == 1]
-        KC = KMeans(n_clusters=NUM_TARGETS, random_state=0).fit(GCNListAtop.reshape(-1, 1))
+        if INCLUDED_BINDING_TYPES == 'ALL':
+            INCLUDED_BINDING_TYPES = list(set(BINDING_TYPES))
+        GCNList_selected = GCNList[np.isin(BINDING_TYPES,INCLUDED_BINDING_TYPES)]
+        KC = KMeans(n_clusters=NUM_TARGETS, random_state=0).fit(GCNList_selected.reshape(-1, 1))
         KC_new = np.zeros(NUM_TARGETS, dtype='int')
-        KC_new[0] = KC.labels_[np.argmin(GCNListAtop)]
+        KC_new[0] = KC.labels_[np.argmin(GCNList_selected)]
         for i in range(NUM_TARGETS-1):
             KC_new[i+1] = KC.labels_[np.isin(KC.labels_, KC_new[0:i+1]) == False]\
-            [np.argmin(GCNListAtop[np.isin(KC.labels_, KC_new[0:i+1]) == False])]
+            [np.argmin(GCNList_selected[np.isin(KC.labels_, KC_new[0:i+1]) == False])]
         KC2class = dict(zip(KC_new, np.arange(1, len(KC_new)+1, dtype='int')))
         KCclass = np.array([KC2class[i] for i in KC.labels_])
         for i in range(NUM_TARGETS-1)[::-1]:
@@ -138,7 +145,7 @@ class IR_GEN:
         if showfigures == True:
             import matplotlib.pyplot as plt
             plt.figure(0)
-            plt.scatter(GCNListAtop, GCNListAtop, c=KC.labels_)
+            plt.scatter(GCNList_selected, GCNList_selected, c=KC.labels_)
             for i in BreakMax:
                 plt.plot([0, i, 2*i], [2*i, i, 0], 'k-')
             plt.xlabel('GCN')
@@ -174,7 +181,7 @@ class IR_GEN:
             plt.savefig('../Figures/GCN_Clustering.png', format='png')
             plt.close()
 
-        self.GCNLabel = GCNlabel
+        self.GCNLabels = GCNlabel
         self.NUM_TARGETS = NUM_TARGETS
         print('Final number of targets: '+str(self.NUM_TARGETS))
 
@@ -222,7 +229,9 @@ class IR_GEN:
         COVERAGE: Relative spatial coverage of each binding-type
         TOTAL_COVERAGE: relative combined coverages of non-island
         """
+        POC = self.POC
         coverage_scaling_path = self.COV_SCALE_PATH
+        assert POC == 1, "Coverage shift can only be applied if on atom is in contact with the surface"
         ones = np.ones(X.shape[0])
         Xfrequencies = X[:, 0].copy()
         Xintensities = X[:, 1].copy()
@@ -258,7 +267,6 @@ class IR_GEN:
         Xintensities[np.arange(X.shape[0]), CO_STRETCH_IDX] = CO_intensities
         Xcov = np.array([np.array((Xfrequencies[i], Xintensities[i]))
                          for i in range(X.shape[0])])
-        Xcov[Xcov[...] < 2**-500] = 0
         return Xcov
 
     def _scaling_factor_shift(self, X):
@@ -274,7 +282,6 @@ class IR_GEN:
         Xfrequencies[MC_IDX] = Xfrequencies[MC_IDX]*SFMC
         X = np.array([np.array((Xfrequencies[i], Xintensities[i]))
                       for i in range(len(Xfrequencies))])
-        X[X[...] < 2**-500] = 0
         return X
 
     def _generate_spectra(self, Xfrequencies, Xintensities, energies2D, prefactor, sigma):
@@ -291,7 +298,7 @@ class IR_GEN:
     def _xyconv(self, X_sample, Y_sample, probabilities, BINDING_TYPES_sample):
         get_probabilities = self._get_probabilities
         mixed_lineshape = self._mixed_lineshape
-        coverage_shift = self._coverage_shift
+        _coverage_shift = self._coverage_shift
         generate_spectra = self._generate_spectra
         NUM_TARGETS = self.NUM_TARGETS
         LOW_FREQUENCY = self.LOW_FREQUENCY
@@ -358,7 +365,7 @@ class IR_GEN:
                           + 0.2 * SELF_COVERAGE[np.all((COVERAGE_INDICES == ii,BINDING_TYPES_sample[indices_primary] == 4),axis=0)].size \
                           )/TOTAL_COVERAGE[COVERAGE_INDICES == ii].size        
                 TOTAL_COVERAGE[COVERAGE_INDICES==0] = SELF_COVERAGE[COVERAGE_INDICES==0]
-                Xcov = coverage_shift(X_sample[indices_primary], BINDING_TYPES_sample[indices_primary], SELF_COVERAGE, TOTAL_COVERAGE)
+                Xcov = _coverage_shift(X_sample[indices_primary], BINDING_TYPES_sample[indices_primary], SELF_COVERAGE, TOTAL_COVERAGE)
                 Xcovfrequencies = Xcov[:, 0].copy()
                 Xcovintensities = Xcov[:, 1].copy()
                 int_mesh = generate_spectra(Xcovfrequencies,Xcovintensities\
@@ -376,7 +383,7 @@ class IR_GEN:
             yconv[:,2] *= 0.2
             if TARGET == 'binding_type':
                 yconv[:,3] *= 0.2
-        #10**-3 accounts for noise
+        #10**-3 accounts for noise in experimental spectra
         Xconv += 10**-3*np.max(Xconv, axis=1).reshape((-1, 1))*np.random.random_sample(Xconv.shape)
         #normalize so max X is 1 and make y a set of fractions that sum to 1
         Xconv /= np.max(Xconv, axis=1).reshape((-1, 1))
@@ -401,18 +408,19 @@ class IR_GEN:
         TARGET = self.TARGET
         BINDING_TYPES = self.BINDING_TYPES
         BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
+        _coverage_shift = self._coverage_shift
+        POC = self.POC
         #Assign the target variable Y to either GCN group or binding site
         if TARGET == 'GCN':
-            if self.GCNLabel is None:
-                #Assigns a class to ranges of GCN values
-                self.get_GCNlabels(Minimum=0, showfigures=False)
-            Y = self.GCNLabel
+            assert self.GCNLabels is not None, "get_GCNLabels must be executed before spectra can be generated"
+            Y = self.GCNLabels
         else:
             Y = BINDING_TYPES
         #correct self.NUM_TARGETS in case this method is run multiple times
         self.NUM_TARGETS = len(set(Y[indices]))
         print('NUM_TARGETS: '+str(self.NUM_TARGETS))
-        X0cov = self._scaling_factor_shift(self.X0cov)
+        if POC == 1:
+            X0cov = self._scaling_factor_shift(self.X0cov)
         #Adding Data for Extended Surfaces
         if COVERAGE == 'high' and self.TARGET == 'GCN':
             print('Adding high-coverage low index planes')
@@ -453,7 +461,7 @@ class IR_GEN:
             X = X0cov
         elif type(COVERAGE) == int or type(COVERAGE) == float:
             print('Relative coverage is ' + str(COVERAGE))
-            X = self._coverage_shift(X0cov, BINDING_TYPES, COVERAGE,COVERAGE)
+            X = _coverage_shift(X0cov, BINDING_TYPES, COVERAGE,COVERAGE)
         elif COVERAGE == 'low':
             print('Low Coverage')
             X = X0cov
