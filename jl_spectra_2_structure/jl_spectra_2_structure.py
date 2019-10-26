@@ -85,7 +85,7 @@ class IR_GEN:
         self.BINDING_TYPES_with_4fold = BINDING_TYPES_with_4fold
         self.TARGET = TARGET
         self.NUM_TARGETS = NUM_TARGETS
-        self.GCNLabels = None
+        self.GCNlabels = None
         self.X0cov = np.array([(nanoparticle_data['FREQUENCIES'][i], nanoparticle_data['INTENSITIES'][i])
                                for i in range(len(nanoparticle_data['FREQUENCIES']))])
         self.BINDING_TYPES = nanoparticle_data['CN_ADSORBATE']
@@ -95,7 +95,7 @@ class IR_GEN:
         self.COV_SCALE_PATH = coverage_scaling_path
         
 
-    def get_GCNLabels(self, Minimum=7, showfigures=False, INCLUDED_BINDING_TYPES=[1]):
+    def get_GCNlabels(self, Minimum=7, showfigures=False, INCLUDED_BINDING_TYPES=[1]):
         assert type(INCLUDED_BINDING_TYPES) == list or INCLUDED_BINDING_TYPES=='ALL', "Included Binding Types should be a list"
         print('Initial number of targets: '+str(self.NUM_TARGETS))
         NUM_TARGETS = self.NUM_TARGETS
@@ -181,7 +181,7 @@ class IR_GEN:
             plt.savefig('../Figures/GCN_Clustering.png', format='png')
             plt.close()
 
-        self.GCNLabels = GCNlabel
+        self.GCNlabels = GCNlabel
         self.NUM_TARGETS = NUM_TARGETS
         print('Final number of targets: '+str(self.NUM_TARGETS))
 
@@ -330,7 +330,7 @@ class IR_GEN:
         parray = np.zeros(Y_sample.size)
         coverage_parray = get_probabilities(num_samples, 11)
         coverage_totals = np.random.random_sample(size=[num_samples,10])
-        if COVERAGE == 'low' or TARGET not in ['binding_type', 'combine_hollow_sites']:
+        if TARGET == 'GCN' or COVERAGE == 'low':
             int_mesh = generate_spectra(Xfrequencies, Xintensities\
                                         ,energies2D, prefactor, sigma)
         for i in range(num_samples):
@@ -338,9 +338,7 @@ class IR_GEN:
                 parray[Y_sample == ii+MIN_Y] = probabilities[i, ii]
             parray /= np.sum(parray)
             indices_primary = np.random.choice(sample_indices, size=Nanos[i], replace=True, p=parray)
-            if COVERAGE == 'low' or TARGET not in ['binding_type', 'combine_hollow_sites']:
-                combined_mesh = np.sum(int_mesh[indices_primary], axis=0)
-            else:
+            if (COVERAGE =='high' or type(COVERAGE) in [float, int]) and TARGET in ['binding_type', 'combine_hollow_sites']:
                 #initialize coverages
                 SELF_COVERAGE = np.random.random_sample(Nanos[i])
                 TOTAL_COVERAGE = np.zeros_like(SELF_COVERAGE)
@@ -374,6 +372,8 @@ class IR_GEN:
                 int_mesh[BINDING_TYPES_sample[indices_primary] == 3] *= 0.2
                 int_mesh[BINDING_TYPES_sample[indices_primary] == 4] *= 0.2
                 combined_mesh = np.sum(int_mesh, axis=0)
+            else:
+                combined_mesh = np.sum(int_mesh[indices_primary], axis=0)
             yconv[i] = np.sum(y_mesh[indices_primary], axis=0, dtype='int')
             transform = mixed_lineshape(FWHMs[i], fLs[i], ENERGY_POINTS, energy_spacing)
             Xconv[i] = np.convolve(combined_mesh, transform, mode='valid')
@@ -412,8 +412,8 @@ class IR_GEN:
         POC = self.POC
         #Assign the target variable Y to either GCN group or binding site
         if TARGET == 'GCN':
-            assert self.GCNLabels is not None, "get_GCNLabels must be executed before spectra can be generated"
-            Y = self.GCNLabels
+            assert self.GCNlabels is not None, "get_GCNlabels must be executed before spectra can be generated"
+            Y = self.GCNlabels
         else:
             Y = BINDING_TYPES
         #correct self.NUM_TARGETS in case this method is run multiple times
@@ -456,7 +456,7 @@ class IR_GEN:
             HC_X = self._scaling_factor_shift(HC_X)
             offset = max_freqs-len(X0cov[0][0])
             X = np.pad(X0cov, ((0, 0), (0, 0), (0, offset)), 'constant', constant_values=0)
-        elif (COVERAGE == 'high' and (TARGET == 'binding_type' or TARGET == 'combine_hollow_sites')):
+        elif (COVERAGE == 'high' and (TARGET in ['binding_type', 'combine_hollow_sites'])):
             print('testing all coverages')
             X = X0cov
         elif type(COVERAGE) == int or type(COVERAGE) == float:
@@ -562,7 +562,7 @@ def get_NN(dictionary):
     NN = MLPRegressor()
     NN.set_params(**dictionary['parameters'])
     #catches instances where coefficients and intercepts are saved via standard json package as list of lists
-    dictionary['__getstate__']['coefs_'] = [np.array(coef_list) for coef_list in dictionary['__getstate__']['coefs_'].copy()]
-    dictionary['__getstate__']['intercepts_'] = [np.array(coef_list) for coef_list in dictionary['__getstate__']['intercepts_'].copy()]
+    dictionary['__getstate__']['coefs_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['coefs_'].copy()]
+    dictionary['__getstate__']['intercepts_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['intercepts_'].copy()]
     NN.__setstate__(dictionary['__getstate__'])
     return NN

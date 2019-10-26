@@ -4,10 +4,16 @@ Created on Wed Oct 23 10:17:05 2019
 
 @author: lansf
 """
+import os
 import numpy as np
 from scipy.special import kl_div
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+from jl_spectra_2_structure.plotting_tools import set_figure_settings
+set_figure_settings('paper')
+
+#Folder where figures are to be saved
+Downloads_folder = os.path.join(os.path.expanduser("~"),'Downloads')
 
 a = np.linspace(0,1,num=100,endpoint=True)
 B = [0,0,0,1]
@@ -48,13 +54,13 @@ for i in range(len(a)):
    
 KL/= np.max(KL)
 G = gridspec.GridSpec(2, 1)
-plt.figure(0,figsize=(3.5,3.8),dpi=300)
+plt.figure(0,figsize=(3.5,3.8),dpi=400)
 ax1 = plt.subplot(G[0,0])
 ax1.plot(a,Wl,'g',a,Wl2,'b',a,Wl3,'darkorange',a,KL,'k')
 #plt.xlabel('a')
 plt.xticks([])
 plt.ylabel('Loss')
-ax1.text(0.01,0.92,'(a)',size=8,name ='Calibri',transform=ax1.transAxes)
+ax1.text(0.01,0.92,'(a)',name ='Calibri',transform=ax1.transAxes)
 #plt.legend(['[a,0,0,1-a]','[0,a,0,1-a]','[0,0,a,1-a]','kl-div'])
 #plt.savefig('../Figures/New_Figures/Wasserstein_paper.png', format='png')
 #plt.close()
@@ -70,7 +76,7 @@ ax2.plot(a,-dKLdOi,'k:')
 plt.xlabel('a')
 plt.ylabel('Derivative wrt\n nonzero elements')
 #plt.legend(['[a,0,0,1-a]','[0,a,0,1-a]','[0,0,a,1-a]','kl-div'])
-ax2.text(0.01,0.92,'(b)',size=8,name ='Calibri',transform=ax2.transAxes)
-plt.savefig('../Figures/New_Figures/Wasserstein_paper.png', format='png')
+ax2.text(0.01,0.92,'(b)',name ='Calibri',transform=ax2.transAxes)
+plt.savefig(os.path.join(Downloads_folder,'Wasserstein.jpg'), format='jpg')
 plt.close()
 

@@ -246,7 +246,7 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
         # combinations of output activation and loss function:
         # sigmoid and binary cross entropy, softmax and categorical cross
         # entropy, and identity with squared loss
-        deltasMSE = activations[-1]-y        
+        deltas_simple_loss_functions = activations[-1]-y        
         if loss_func_name in ['wasserstein_loss','mixed']:
             P = activations[-1]
             Pcum = np.cumsum(P,axis=-1)
@@ -256,10 +256,10 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
             -np.sum(Pcum*PminusT,axis=-1).reshape((-1,1)))
             self.grads_W2 = np.mean(abs(deltas[last]), 0)
             if loss_func_name == 'mixed':
-                deltas[last] =0.05*deltas[last] + 0.95*deltasMSE
+                deltas[last] =0.05*deltas[last] + 0.95*deltas_simple_loss_functions
         else:
-            deltas[last] = deltasMSE
-        self.grads_MSE = np.mean(abs(deltasMSE), 0)
+            deltas[last] = deltas_simple_loss_functions
+        self.grads_simple_loss_functions = np.mean(abs(deltas_simple_loss_functions), 0)
         # Compute gradient for the last layer
         coef_grads, intercept_grads = self._compute_loss_grad(
             last, n_samples, activations, deltas, coef_grads, intercept_grads)
