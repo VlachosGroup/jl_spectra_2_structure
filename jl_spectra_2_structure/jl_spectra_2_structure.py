@@ -41,17 +41,17 @@ def get_defaults(adsorbate):
            , cross_validation_path, coverage_scaling_path
 
 class IR_GEN:
-    def __init__(self, ADSORBATE='CO', poc=1, TARGET='binding_type', NUM_TARGETS=None, exclude_atop=False\
+    def __init__(self, ADSORBATE='CO', POC=1, TARGET='binding_type', NUM_TARGETS=None, exclude_atop=False\
                  ,nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None):
         assert TARGET in ['binding_type','GCN','combine_hollow_sites'], "incorrect TARGET given"
-        assert poc in [1,2], "The adsorbate must have 1 or 2 atoms in contact with the surface."
+        assert POC in [1,2], "The adsorbate must have 1 or 2 atoms in contact with the surface."
         #number of target variables.
         nano_path, isotope_path, high_cov_path\
            , cross_validation_path, cov_scale_path = get_defaults(ADSORBATE)
         
         if nanoparticle_path is None:
             nanoparticle_path = nano_path
-            if poc == 1:
+            if POC == 1:
                 coverage_scaling_path = cov_scale_path
                 if ADSORBATE == 'CO':
                     high_coverage_path = high_cov_path
@@ -63,13 +63,13 @@ class IR_GEN:
         is_local_minima = np.min(Xfreq_ALL, axis=1) > 0
         BINDING_TYPES_unfiltered = np.array(nanoparticle_data['CN_ADSORBATE'])
         is_adsorbed = BINDING_TYPES_unfiltered >0
-        if poc==1:
+        if POC==1:
             max_coordination=4
             if TARGET == 'combine_hollow_sites' or exclude_atop == True:
                 NUM_TARGETS =3
             elif TARGET == 'binding_type':
                 NUM_TARGETS = 4
-        elif poc==2:
+        elif POC==2:
             max_coordination=2
             if TARGET == 'binding_type':
                 NUM_TARGETS = 2
@@ -93,7 +93,7 @@ class IR_GEN:
         self.NANO_PATH = nanoparticle_path
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
-        
+        self.POC = POC
 
     def get_GCNlabels(self, Minimum=7, showfigures=False, INCLUDED_BINDING_TYPES=[1]):
         assert type(INCLUDED_BINDING_TYPES) == list or INCLUDED_BINDING_TYPES=='ALL', "Included Binding Types should be a list"
@@ -400,7 +400,7 @@ class IR_GEN:
         X_noisey = X_noisey/np.max(X_noisey, axis=1).reshape(-1, 1)
         return X_noisey
 
-    def get_synthetic_spectra(self, NUM_SAMPLES, indices, COVERAGE=None
+    def get_synthetic_spectra(self, NUM_SAMPLES, indices, COVERAGE=None\
                               , LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
@@ -491,14 +491,14 @@ class IR_GEN:
         X_sample, Y_sample, BINDING_TYPES_sample = self._perturb_spectra(5, X_balanced, Y_balanced
                                             , a=0.999, b=1.001,BINDING_TYPES=BINDING_TYPES_balanced)
         probabilities = self._get_probabilities(NUM_SAMPLES, self.NUM_TARGETS)
-        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
-        #set numbers that may form denormals to zero to improve numerics
-        Xconv[abs(Xconv[...])<2**-500] = 0
-        yconv[abs(yconv[...])<2**-500] = 0
         self.COVERAGE = COVERAGE
         self.LOW_FREQUENCY = LOW_FREQUENCY
         self.HIGH_FREQUENCY = HIGH_FREQUENCY
         self.ENERGY_POINTS = ENERGY_POINTS
+        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
+        #set numbers that may form denormals to zero to improve numerics
+        Xconv[abs(Xconv[...])<2**-500] = 0
+        yconv[abs(yconv[...])<2**-500] = 0
         return Xconv, yconv
 
     def get_more_spectra(self, NUM_SAMPLES, indices):

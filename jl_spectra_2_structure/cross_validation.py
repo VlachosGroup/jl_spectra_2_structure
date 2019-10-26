@@ -60,7 +60,7 @@ class CROSS_VALIDATION:
                              ,'CV_indices':[],'TEST_indices':[]}\
                             ,'BINDING_TYPE_4GCN':{'train_indices':[], 'val_indices':[]\
                              ,'CV_indices':[],'TEST_indices':[]}}
-            GCNconv = IR_GEN(ADSORBATE, poc=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
+            GCNconv = IR_GEN(ADSORBATE, POC=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                              ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                              , coverage_scaling_path=COV_SCALE_PATH)
             
@@ -108,6 +108,7 @@ class CROSS_VALIDATION:
             raise
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
+        assert TARGET in ['combine_hollow_sites','binding_type','GCN'], "incorrect TARGET variable given"
         ADSORBATE = self.ADSORBATE
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
@@ -115,15 +116,15 @@ class CROSS_VALIDATION:
         POC = self.POC
         CV_SPLITS = self.CV_SPLITS
         if TARGET == 'combine_hollow_sites': 
-            MAINconv = IR_GEN(ADSORBATE, poc=1, TARGET='combine_hollow_sites'\
+            MAINconv = IR_GEN(ADSORBATE, POC=1, TARGET='combine_hollow_sites'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
         elif TARGET == 'binding_type':
-            MAINconv = IR_GEN(ADSORBATE, poc=POC, TARGET='binding_type'\
+            MAINconv = IR_GEN(ADSORBATE, POC=POC, TARGET='binding_type'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
         elif TARGET == 'GCN':
-            MAINconv = IR_GEN(ADSORBATE, poc=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
+            MAINconv = IR_GEN(ADSORBATE, POC=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
             if GCN_ALL == True:
@@ -131,7 +132,7 @@ class CROSS_VALIDATION:
             elif GCN_ALL == False:
                 INCLUDED_BINDING_TYPES = [1]
             MAINconv.get_GCNlabels(Minimum=MIN_GCN_PER_LABEL, showfigures=False, INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES)
-            OTHER_SITESconv = IR_GEN(ADSORBATE, poc=POC, TARGET='binding_type', exclude_atop=True\
+            OTHER_SITESconv = IR_GEN(ADSORBATE, POC=POC, TARGET='binding_type', exclude_atop=True\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
         
@@ -180,8 +181,8 @@ class CROSS_VALIDATION:
             raise
         CV_SPLITS = self.CV_SPLITS
         ADSORBATE = self.ADSORBATE
-        _get_results = self._get_results
-        _get_secondary_data = self._get_secondary_data
+        _run_NN = self._run_NN
+        get_secondary_data = self.get_secondary_data
         CV_PATH = self.CV_PATH
         COVERAGE = self.COVERAGE
         NN_PROPERTIES = self.NN_PROPERTIES
@@ -202,19 +203,21 @@ class CROSS_VALIDATION:
         DictList = []
         #Cross Validation
         for CV_INDEX in range(CV_SPLITS):
+            print('#########################################################')
+            print('#########################################################')
             print('The CV number is '+str(CV_INDEX))
             #Get validation spectra
-            X_compare, y_compare = _get_secondary_data(NUM_SAMPLES=NUM_VAL, INDICES=INDICES_VAL[CV_INDEX])
-            Dict =  _get_results(NUM_TRAIN, INDICES_TRAIN[CV_INDEX], NN_PROPERTIES\
-                                 , IS_TEST=False,  X_compare, y_compare) 
+            X_compare, y_compare = get_secondary_data(NUM_SAMPLES=NUM_VAL\
+                                , INDICES=INDICES_VAL[CV_INDEX],iterations=10)
+            Dict =  _run_NN(NUM_TRAIN, INDICES_TRAIN[CV_INDEX], X_compare, y_compare, IS_TEST=False) 
             DictList.append(Dict)
             
         #Train model on all CV Data and Test agains Test Set
         #Get Test Spectra
-        X_compare, y_compare = _get_secondary_data(NUM_TEST, INDICES_TEST)
+        X_compare, y_compare = get_secondary_data(NUM_TEST, INDICES_TEST\
+                                ,iterations=10)
         
-        Dict =_get_results(NUM_TRAIN, INDICES_CV_ALL, NN_PROPERTIES\
-                           , IS_TEST=True, X_compare, y_compare)
+        Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_compare, y_compare, IS_TEST=True)
         DictList.append(Dict)
         
         if write_file == True:
@@ -223,15 +226,22 @@ class CROSS_VALIDATION:
         self.CV_RESULTS_FILE = CV_RESULTS_FILE
         return DictList
     
-    def _get_secondary_data(self,NUM_SAMPLES, INDICES):
+    def get_secondary_data(self,NUM_SAMPLES, INDICES,iterations=1):
+        try:
+            TARGET = self.TARGET
+        except:
+            print("set_model_parameters must be run first")
+            raise
         GCN_ALL = self.GCN_ALL
         COVERAGE = self.COVERAGE
-        TARGET = self.TARGET
         MAINconv = self.MAINconv
         start = timer()
+        num_samples_original = NUM_SAMPLES
+        NUM_SAMPLES = int(NUM_SAMPLES/iterations)
+        ADDITIONAL_POINT = int(num_samples_original-NUM_SAMPLES*iterations)
         if TARGET == 'GCN' and GCN_ALL == False:
             OTHER_SITESconv = self.OTHER_SITESconv
-            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES[0], COVERAGE=COVERAGE)
+            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE)
             X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low')
             X = MAINconv.add_noise(X1,X2)
             del X1; del X2; del y2
@@ -242,7 +252,7 @@ class CROSS_VALIDATION:
         #Add to the validation and test sets to get more coverage options
         #(each iteration has 10 different coverage combinations
         #when TARGET in ['binding_type','combine_hollow_sites'] and COVERAGE is not 'low')
-        for _ in range(9):
+        for _ in range(iterations-1):
             if TARGET == 'GCN' and GCN_ALL == False:
                 X1_2, y_2 = MAINconv.get_more_spectra(NUM_SAMPLES, INDICES[0])
                 X2_2, y2_2 = OTHER_SITESconv.get_more_spectra(int(NUM_SAMPLES/5), INDICES[1])
@@ -257,14 +267,9 @@ class CROSS_VALIDATION:
         print('Time to generate val/test set: ' + str(stop-start))
         return X, y
 
-    def _get_results(self, NUM_SAMPLES, INDICES, IS_TEST, X_compare, y_compare):
-        COVERAGE = self.COVERAGE
+    def _run_NN(self, NUM_SAMPLES, INDICES, X_compare, y_compare, IS_TEST):
+        get_secondary_data = self.get_secondary_data
         NN_PROPERTIES = self.NN_PROPERTIES
-        GCN_ALL = self.GCN_ALL
-        TARGET = self.TARGET
-        MAINconv = self.MAINconv
-        if TARGET == 'GCN' and GCN_ALL == False:
-            OTHER_SITESconv = self.OTHER_SITESconv
         if IS_TEST == False:
             Dict = {'Wl2_Train':[], 'Score_Train':[]\
                 ,'Wl2_Val':[], 'Score_Val':[]}
@@ -286,13 +291,7 @@ class CROSS_VALIDATION:
                               ,learning_rate_init=NN_PROPERTIES['learning_rate_init'],out_activation='softmax')
         
         #Using Fit (w/ coverages)
-        if TARGET in ['binding_type','combine_hollow_sites'] or GCN_ALL == True:
-            X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE)
-        elif TARGET == 'GCN':
-            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES[0], COVERAGE=COVERAGE)
-            X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low')
-            X = MAINconv.add_noise(X1,X2)
-            del X1; del X2; del y2
+        X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1)
         NN.fit(X, y)
         y_predict = NN.predict(X)
         del X
@@ -302,17 +301,11 @@ class CROSS_VALIDATION:
         Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
         Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
         
-        for _ in range(NN_PROPERTIES['iterations']):
+        for _ in range(NN_PROPERTIES['training_sets']):
             print(_)  
-            if TARGET in ['binding_type','combine_hollow_sites']  or GCN_ALL == True:
-                X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE)
-            elif TARGET == 'GCN':
-                X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES[0], COVERAGE=COVERAGE)
-                X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low')
-                X = MAINconv.add_noise(X1,X2)
-                del X1; del X2; del y2
+            X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1)
             indices = np.arange(y.shape[0])    
-            for __ in range(NN_PROPERTIES['epochs']):
+            for __ in range(NN_PROPERTIES['epochs_per_training_set']):
                 np.random.shuffle(indices)
                 X = X[indices]
                 y = y[indices]    
@@ -345,28 +338,26 @@ class CROSS_VALIDATION:
 
     def get_test_secondary_data(self, read_file=True):
         try:
-            TARGET = self.TARGET
+            NUM_TEST = self.NUM_TEST
         except:
             print("set_model_parameters must be run first")
             raise
         INDICES_TEST = self.INDICES_TEST
-        NUM_TEST = self.NUM_TEST
         #Get Test Spectra
-        X_Test, y_Test = self._get_secondary_data(NUM_TEST, INDICES_TEST)
+        X_Test, y_Test = self.get_secondary_data(NUM_TEST, INDICES_TEST, iterations=10)
         return X_Test, y_Test
             
     def get_test_results(self, read_file=True):
         try:
-            TARGET = self.TARGET
+            NUM_TRAIN = self.NUM_TRAIN
         except:
             print("set_model_parameters must be run first")
             raise
         get_test_secondary_data = self.get_test_secondary_data
-        _get_results = self._get_results
-        NUM_TRAIN = self.NUM_TRAIN
+        _run_NN = self._run_NN
         INDICES_CV_ALL = self.INDICES_CV_ALL
         X_Test, y_Test = get_test_secondary_data(read_file=True)
-        Dict =_get_results(NUM_TRAIN, INDICES_CV_ALL, IS_TEST=True, X_Test, y_Test)
+        Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_Test, y_Test, IS_TEST=True)
         self.X_Test = X_Test
         self.Y_Test = y_Test
         return Dict
