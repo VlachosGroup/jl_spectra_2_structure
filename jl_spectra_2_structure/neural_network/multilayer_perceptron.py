@@ -129,8 +129,10 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
         deltas[layer][abs(deltas[layer][...])<2**-500] = 0
         coef_grads[layer] = safe_sparse_dot(activations[layer].T,
                                             deltas[layer])
-        #coef_grads[layer] += (self.alpha * self.coefs_[layer])
-        coef_grads[layer] += self.alpha * np.sign(self.coefs_[layer])
+        #L2 regularization
+        coef_grads[layer] += (self.alpha * self.coefs_[layer])
+        #L1 regularization
+        #coef_grads[layer] += self.alpha * np.sign(self.coefs_[layer])
         coef_grads[layer] /= n_samples
 
         intercept_grads[layer] = np.mean(deltas[layer], 0)

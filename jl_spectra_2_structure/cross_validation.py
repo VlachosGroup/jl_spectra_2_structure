@@ -17,6 +17,8 @@ from .neural_network import MLPRegressor
 from .jl_spectra_2_structure import IR_GEN
 from .jl_spectra_2_structure import get_defaults
 from . import error_metrics
+import multiprocessing
+import psutil
 
 class CROSS_VALIDATION:
     """
@@ -93,8 +95,8 @@ class CROSS_VALIDATION:
                     json.dump(INDICES_DICTIONARY, outfile, sort_keys=True, indent=4)
                     print('Generated CV indices and saved dictionary to file ' + INDICES_FILE)
         elif read_file == True:
-            with open(INDICES_FILE, 'r') as outfile:
-                INDICES_DICTIONARY = json.load(outfile)
+            with open(INDICES_FILE, 'r') as infile:
+                INDICES_DICTIONARY = json.load(infile)
         self.INDICES_DICTIONARY = INDICES_DICTIONARY
         self.CV_SPLITS = CV_SPLITS
         self.NUM_GCN_LABELS = NUM_GCN_LABELS
@@ -194,37 +196,157 @@ class CROSS_VALIDATION:
         INDICES_TEST = self.INDICES_TEST
         INDICES_CV_ALL = self.INDICES_CV_ALL
         
+        #Decide if validation spectra can be created at once
+        if ((COVERAGE == 'high' or type(COVERAGE) in [float, int]) and TARGET in ['binding_type', 'combine_hollow_sites'])\
+        or (COVERAGE == 'high' and TARGET == 'GCN'):
+            iterations = 10
+        else:
+            iterations = 1
         
         if CV_RESULTS_FILE is None:
-            CV_RESULTS_FILE = os.path.join(CV_PATH,'/CV_results_'+TARGET+'_'+str(COVERAGE)\
+            CV_RESULTS_FILE = os.path.join(CV_PATH,'CV_results_'+TARGET+'_'+str(COVERAGE)\
             +'_'+str(CV_SPLITS)+'fold'+'_reg'+'{:.2E}'.format(NN_PROPERTIES['alpha'])\
             +'_'+NN_PROPERTIES['loss']+'_'+ADSORBATE+'.json')
             
-        DictList = []
+        DictList = [{} for _ in range(CV_SPLITS)]
         #Cross Validation
+        start = timer()
         for CV_INDEX in range(CV_SPLITS):
             print('#########################################################')
             print('#########################################################')
-            print('The CV number is '+str(CV_INDEX))
+            print('The CV number is '+str(CV_INDEX+1))
             #Get validation spectra
             X_compare, y_compare = get_secondary_data(NUM_SAMPLES=NUM_VAL\
-                                , INDICES=INDICES_VAL[CV_INDEX],iterations=10)
+                                , INDICES=INDICES_VAL[CV_INDEX],iterations=iterations)
             Dict =  _run_NN(NUM_TRAIN, INDICES_TRAIN[CV_INDEX], X_compare, y_compare, IS_TEST=False) 
-            DictList.append(Dict)
-            
+            DictList[CV_INDEX] = Dict
+        stop = timer()
         #Train model on all CV Data and Test agains Test Set
         #Get Test Spectra
         X_compare, y_compare = get_secondary_data(NUM_TEST, INDICES_TEST\
-                                ,iterations=10)
+                                ,iterations=iterations)
         
         Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_compare, y_compare, IS_TEST=True)
         DictList.append(Dict)
+        stop = timer()
+        print('#########################################################')
+        print('#########################################################')
+        print('Time to run the CV+Test: ' + str(stop-start))
         
         if write_file == True:
             with open(CV_RESULTS_FILE, 'w') as outfile:
                 json_tricks.dump(DictList, outfile, sort_keys=True, indent=4)
         self.CV_RESULTS_FILE = CV_RESULTS_FILE
         return DictList
+    
+    def run_CV_multiprocess(self,write_file=False, CV_RESULTS_FILE = None, num_procs=None):
+        try:
+            TARGET = self.TARGET
+        except:
+            print("set_model_parameters must be run first")
+            raise
+        run_single_CV = self.run_single_CV
+        CV_SPLITS = self.CV_SPLITS
+        ADSORBATE = self.ADSORBATE
+        CV_PATH = self.CV_PATH
+        COVERAGE = self.COVERAGE
+        NN_PROPERTIES = self.NN_PROPERTIES
+        NUM_TRAIN = self.NUM_TRAIN
+        NUM_VAL = self.NUM_VAL
+        NUM_TEST = self.NUM_TEST
+        if CV_RESULTS_FILE is None:
+            CV_RESULTS_FILE = os.path.join(CV_PATH,'CV_results_'+TARGET+'_'+str(COVERAGE)\
+            +'_'+str(CV_SPLITS)+'fold'+'_reg'+'{:.2E}'.format(NN_PROPERTIES['alpha'])\
+            +'_'+NN_PROPERTIES['loss']+'_'+ADSORBATE+'.json')
+            
+        CV_INDEX_or_TEST = [i for i in range(CV_SPLITS)]
+        CV_INDEX_or_TEST.append('TEST')
+        #Cross Validation and Test Run
+        start = timer()
+        #memory requirment since spectra are arrays of 501 real numbers of float64
+        memory_requriement_per_run = 8*501*(NUM_TRAIN+(max(NUM_VAL,NUM_TEST)))
+        memory_available = psutil.virtual_memory()[0]
+        max_runs_with_memory = int((0.95*memory_available-1)/memory_requriement_per_run)
+        cpu_cores = multiprocessing.cpu_count()
+        num_procs_given = num_procs
+        if num_procs is None:
+            num_procs=cpu_cores
+        num_procs = min(max_runs_with_memory, cpu_cores,num_procs,CV_SPLITS+1)
+        print('#########################################################')
+        print('#########################################################')
+        if num_procs_given is not None:
+            if num_procs < num_procs_given:
+                if num_procs == CV_SPLITS+1:
+                    print('Resetting number of processes to '+str(num_procs)+', which is the necessary number of model calls.')
+                elif num_procs == max_runs_with_memory:
+                    print('Resetting number of processes to '+str(num_procs)+' due to memory limitations.')
+                elif num_procs == cpu_cores:
+                    print('Resetting number of processes to '+str(num_procs)+' which is the number of available cores.')
+        else:
+            if num_procs == CV_SPLITS+1:
+                print('Setting number of processes to '+str(num_procs)+', which is the necessary number of model calls.')
+            elif num_procs == max_runs_with_memory:
+                print('Setting number of processes to '+str(num_procs)+' due to memory limitations.')
+            elif num_procs == cpu_cores:
+                print('Setting number of processes to '+str(num_procs)+' which is the number of available cores.')
+                    
+                
+            
+        pool = multiprocessing.Pool(processes=num_procs)
+        DictList = pool.imap(run_single_CV,CV_INDEX_or_TEST)
+        DictList = [Dict for Dict in DictList]
+        stop = timer()
+        print('#########################################################')
+        print('#########################################################')
+        print('Time to run the CV+Test: ' + str(stop-start))
+        
+        
+        if write_file == True:
+            with open(CV_RESULTS_FILE, 'w') as outfile:
+                json_tricks.dump(DictList, outfile, sort_keys=True, indent=4)
+        self.CV_RESULTS_FILE = CV_RESULTS_FILE
+        return DictList
+    
+    def run_single_CV(self, CV_INDEX_or_TEST):
+        try:
+            NUM_TRAIN = self.NUM_TRAIN
+        except:
+            print("set_model_parameters must be run first")
+            raise
+        _run_NN = self._run_NN
+        get_secondary_data = self.get_secondary_data
+        NUM_VAL = self.NUM_VAL
+        INDICES_TRAIN = self.INDICES_TRAIN
+        INDICES_VAL = self.INDICES_VAL
+        NUM_TEST = self.NUM_TEST
+        INDICES_TEST = self.INDICES_TEST
+        INDICES_CV_ALL = self.INDICES_CV_ALL
+        TARGET = self.TARGET
+        COVERAGE = self.COVERAGE
+        
+        #Decide if validation spectra can be created at once
+        if ((COVERAGE == 'high' or type(COVERAGE) in [float, int]) and TARGET in ['binding_type', 'combine_hollow_sites'])\
+        or (COVERAGE == 'high' and TARGET == 'GCN'):
+            iterations = 10
+        else:
+            iterations = 1
+        
+        if CV_INDEX_or_TEST != 'TEST':
+            print('#########################################################')
+            print('#########################################################')
+            print('The CV number is '+str(CV_INDEX_or_TEST+1))
+            X_compare, y_compare = get_secondary_data(NUM_SAMPLES=NUM_VAL\
+                                , INDICES=INDICES_VAL[CV_INDEX_or_TEST],iterations=iterations)
+            Dict =  _run_NN(NUM_TRAIN, INDICES_TRAIN[CV_INDEX_or_TEST], X_compare, y_compare, IS_TEST=False) 
+        else:
+            print('#########################################################')
+            print('#########################################################')
+            print('Training on whole CV population and Testing on test set')
+             #Get Test Spectra
+            X_compare, y_compare = get_secondary_data(NUM_TEST, INDICES_TEST\
+                                    ,iterations=iterations)
+            Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_compare, y_compare, IS_TEST=True)
+        return Dict
     
     def get_secondary_data(self,NUM_SAMPLES, INDICES,iterations=1):
         try:
@@ -234,13 +356,13 @@ class CROSS_VALIDATION:
             raise
         GCN_ALL = self.GCN_ALL
         COVERAGE = self.COVERAGE
-        MAINconv = self.MAINconv
+        MAINconv = deepcopy(self.MAINconv)
         start = timer()
         num_samples_original = NUM_SAMPLES
         NUM_SAMPLES = int(NUM_SAMPLES/iterations)
         ADDITIONAL_POINT = int(num_samples_original-NUM_SAMPLES*iterations)
         if TARGET == 'GCN' and GCN_ALL == False:
-            OTHER_SITESconv = self.OTHER_SITESconv
+            OTHER_SITESconv = deepcopy(self.OTHER_SITESconv)
             X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE)
             X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low')
             X = MAINconv.add_noise(X1,X2)
@@ -248,7 +370,6 @@ class CROSS_VALIDATION:
         else:
             X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE)      
         stop = timer()
-        print('Time to generate one batch of secondary data: ' + str(stop-start))
         #Add to the validation and test sets to get more coverage options
         #(each iteration has 10 different coverage combinations
         #when TARGET in ['binding_type','combine_hollow_sites'] and COVERAGE is not 'low')
@@ -264,7 +385,7 @@ class CROSS_VALIDATION:
             y = np.append(y,y_2,axis=0)
             del X_2; del y_2
         stop = timer()
-        print('Time to generate val/test set: ' + str(stop-start))
+        print('Time to generate secondary data: ' + str(stop-start))
         return X, y
 
     def _run_NN(self, NUM_SAMPLES, INDICES, X_compare, y_compare, IS_TEST):
@@ -279,8 +400,7 @@ class CROSS_VALIDATION:
             Dict = {'NN_PROPERTIES':[]
             ,'Wl2_Train':[], 'Score_Train':[]
             ,'Wl2_Test':[], 'Score_Test': []
-            ,'parameters': [],'__getstate__':[]
-            ,'intercepts_': []}
+            ,'parameters': [],'__getstate__':[]}
             Score_compare = Dict['Score_Test']
             Wl2_compare = Dict['Wl2_Test']
         
@@ -324,16 +444,17 @@ class CROSS_VALIDATION:
             print('Score_Train: ' + str(Dict['Score_Train'][-1]))
             if IS_TEST==True:
                 state = deepcopy(NN.__getstate__())
-                #Below code is only necessary for saving data with list of lists.
-                #for key in list(state.keys()):
-                #    if type(state[key]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
-                #        del  state[key]
-                #    elif type(state[key]) in [list, tuple, type(np.array(0))]:
-                #        if type(state[key][0]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
-                #            del state[key]
+                #Below code is only necessary for removing class instances like the random and _optimizer
+                for key in list(state.keys()):
+                    if type(state[key]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
+                        del  state[key]
+                    elif type(state[key]) in [list, tuple, type(np.array(0))]:
+                        if type(state[key][0]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
+                            del state[key]
                 Dict.update({'NN_PROPERTIES':NN_PROPERTIES, 'parameters':NN.get_params()
                 ,'__getstate__': state})
-        self.NN = NN
+        if IS_TEST == True:
+            self.NN = NN
         return Dict
 
     def get_test_secondary_data(self, read_file=True):
