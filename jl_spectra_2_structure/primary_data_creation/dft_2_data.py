@@ -53,7 +53,7 @@ class Primary_DATA:
         charge_files = VASP_FILES.get_charge_files()
         
         #Initialize dictionary that will be saved as json
-        VIB_DICT = {'FREQUENCIES':[],'IMAGINARY':[],'INTENSITIES':[]\
+        VIB_DICT = {'FREQUENCIES':[],'IMAGINARY':[],'INTENSITIES':[],'MAX_FORCE':[]\
                 ,'CN_ADSORBATE':[],'GCN':[],'CN_METAL':[],'NUM_METAL':[],'COVERAGE':[]}
         #countlist is used only for testing purposes
         count_list = []
@@ -109,7 +109,8 @@ class Primary_DATA:
             atom_symbols = np.array([molecule_images[i+1][atom_positions[i]].symbol in adsorbate_atoms for i in range(num_disp)])
             #Get indices of carbon atoms
             Catoms = [atom.index for atom in molecule_images[0] if atom.symbol == adsorbate_atoms[0]]
-            num_adsorbate_atoms = len([atom.index for atom in molecule_images[0] if atom.symbol in adsorbate_atoms])
+            adsorbate_indices = [atom.index for atom in molecule_images[0] if atom.symbol in adsorbate_atoms]
+            num_adsorbate_atoms = len(adsorbate_indices)
             #Get indices of oxygen atoms
             #Oatoms = [atom.index for atom in molecule_images[0] if atom.symbol == adsorbate_atoms[1]]
             if num_adsorbates == 'single':
@@ -117,9 +118,8 @@ class Primary_DATA:
             else:
                 adsorbates_match=True
             #Get all forces on the carbon and oxygen atoms and ensure they are less than 0.05 eV/A
-            #Cforce = np.max(np.sum((molecule_images[0].get_forces()[Catoms])**2,axis=-1)**0.5)
-            #Oforce = np.max(np.sum((molecule_images[0].get_forces()[Oatoms])**2,axis=-1)**0.5)
-            #COforce_small = np.max((Cforce,Oforce)) <0.05
+            All_forces = np.max(np.sum((molecule_images[0].get_forces()[adsorbate_indices])**2,axis=-1)**0.5)
+            max_force = np.max(All_forces)
             #Ensure a valid frequency calculation was done before moving on
             if np.all([moved_25.all(),moved_unique,adsorbates_match,atom_symbols.all()]) == True:
                 #read in chargemole file to get patial charges and atomic dipoles as a dataframe
@@ -213,6 +213,7 @@ class Primary_DATA:
                         VIB_DICT['IMAGINARY'].append(FREQUENCIES.imag.tolist())
                         VIB_DICT['NUM_METAL'].append(NumPt)
                         VIB_DICT['COVERAGE'].append(NUM_CO/surface_atoms)
+                        VIB_DICT['MAX_FORCE'].append(max_force)
                         if num_adsorbates == 'single' and poc==1:
                             VIB_DICT['GCN'].append(GCN[0])
                             VIB_DICT['CN_ADSORBATE'].append(CN_CO[0])
@@ -337,7 +338,7 @@ class Primary_DATA:
             #Get all forces on the carbon and oxygen atoms and ensure they are less than 0.05 eV/A
             Cforce = np.max(np.sum((molecule_images[0].get_forces()[Catoms])**2,axis=-1)**0.5)
             Oforce = np.max(np.sum((molecule_images[0].get_forces()[Oatoms])**2,axis=-1)**0.5)
-            COforce_small = np.max((Cforce,Oforce)) <0.05
+            COforce_small = np.max((Cforce,Oforce)) < 0.05
             #Ensure a valid frequency calculation was done before moving on
             if np.all([moved_25.all(),moved_unique,atom_symbols.all(),COforce_small]) ==True:
                 #read in chargemole file to get patial charges and atomic dipoles as a dataframe

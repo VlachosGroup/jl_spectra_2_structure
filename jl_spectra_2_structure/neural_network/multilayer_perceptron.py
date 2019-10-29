@@ -378,7 +378,7 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
         activations = [X]
         activations.extend(np.empty((batch_size, n_fan_out))
                            for n_fan_out in layer_units[1:])
-        deltas = [np.empty_like(a_layer) for a_layer in activations[1:]] #[1:] not previously there
+        deltas = [np.empty_like(a_layer) for a_layer in activations[1:]] #[1:] not there in sklearn
         
         coef_grads = [np.empty((n_fan_in_, n_fan_out_)) for n_fan_in_,
                       n_fan_out_ in zip(layer_units[:-1],

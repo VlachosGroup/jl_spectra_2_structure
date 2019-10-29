@@ -41,7 +41,7 @@ class CROSS_VALIDATION:
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
         
-    def generate_test_cv_indices(self, CV_SPLITS=5, NUM_GCN_LABELS=11\
+    def generate_test_cv_indices(self, CV_SPLITS=5, NUM_GCN_LABELS=11, GCN_ALL = False\
                                  ,test_fraction=0.2,random_state=0, read_file=False, write_file=False):
         """
         """
@@ -65,11 +65,15 @@ class CROSS_VALIDATION:
             GCNconv = IR_GEN(ADSORBATE, POC=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                              ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                              , coverage_scaling_path=COV_SCALE_PATH)
-            
-            GCNconv.get_GCNlabels(Minimum=0,showfigures=False)
+            if GCN_ALL == True:
+                GCNconv.get_GCNlabels(Minimum=2,showfigures=False,INCLUDED_BINDING_TYPES='ALL')
+            else:
+                GCNconv.get_GCNlabels(Minimum=2,showfigures=False,INCLUDED_BINDING_TYPES=[1])
             #Get List of indices so we can split the data later
             #combined class to stratify data based on binding-type and GCN simultaneously
-            combined_class = 100*GCNconv.BINDING_TYPES+GCNconv.GCNlabels
+            combined_class = GCNconv.BINDING_TYPES+10*GCNconv.GCNlabels
+            num_classes = np.unique(combined_class,return_counts=True)
+            print('The class and number in each class for fold generation is '+str(num_classes))
             #split data into cross validation and test set
             sss = StratifiedShuffleSplit(n_splits=1, test_size=test_fraction, random_state=random_state)
             for CV_index, test_index in sss.split(combined_class,combined_class):
@@ -102,7 +106,8 @@ class CROSS_VALIDATION:
         self.NUM_GCN_LABELS = NUM_GCN_LABELS
     
     def set_model_parameters(self, TARGET, COVERAGE, NN_PROPERTIES, NUM_TRAIN, NUM_VAL, NUM_TEST\
-                             , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=None, GCN_ALL=False):
+                             , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=None, GCN_ALL = False\
+                             ,LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
         try:
             INDICES_DICTIONARY = self.INDICES_DICTIONARY
         except:
@@ -117,6 +122,8 @@ class CROSS_VALIDATION:
         COV_SCALE_PATH = self.COV_SCALE_PATH
         POC = self.POC
         CV_SPLITS = self.CV_SPLITS
+        if NUM_GCN_LABELS is None:
+            NUM_GCN_LABELS = self.NUM_GCN_LABELS
         if TARGET == 'combine_hollow_sites': 
             MAINconv = IR_GEN(ADSORBATE, POC=1, TARGET='combine_hollow_sites'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
@@ -129,12 +136,12 @@ class CROSS_VALIDATION:
             MAINconv = IR_GEN(ADSORBATE, POC=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
-            if GCN_ALL == True:
-                INCLUDED_BINDING_TYPES = list(set(MAINconv.BINDING_TYPES))
-            elif GCN_ALL == False:
-                INCLUDED_BINDING_TYPES = [1]
+            if GCN_ALL == False:
+                INCLUDED_BINDING_TYPES=[1]
+            else:
+                INCLUDED_BINDING_TYPES='ALL'
             MAINconv.get_GCNlabels(Minimum=MIN_GCN_PER_LABEL, showfigures=False, INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES)
-            OTHER_SITESconv = IR_GEN(ADSORBATE, POC=POC, TARGET='binding_type', exclude_atop=True\
+            OTHER_SITESconv = IR_GEN(ADSORBATE, POC=POC, TARGET='binding_type', EXCLUDE_ATOP=True\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
         
@@ -172,9 +179,75 @@ class CROSS_VALIDATION:
         self.NUM_TEST = NUM_TEST
         self.MIN_GCN_PER_LABEL = MIN_GCN_PER_LABEL
         self.GCN_ALL = GCN_ALL
+        self.LOW_FREQUENCY = LOW_FREQUENCY
+        self.HIGH_FREQUENCY = HIGH_FREQUENCY
+        self.ENERGY_POINTS = ENERGY_POINTS
+        self.GCN_ALL = GCN_ALL
         
+    def _set_pc_loadings(self,NUM_PCs,NUM_SAMPLES = 100000):
+        """
+        Returns principal component loadings after performing SVD on the
+        matrix of pure spectra where $pure-single_spectra = USV^T$
         
+        Parameters
+        ----------
+        NUM_PCs : int
+            The number of principal components of the spectra to keep.
+            
+        Attributes
+        ----------
+        TOTAL_EXPLAINED_VARIANCE : numpy.ndarray
+            Total explained variance by the $n$ principal components where
+            $n=NUM_PCs$
+                  
+        Returns
+        -------
+        PC_loadings : numpy.ndarray
+            The first loadings of the first $N$ principal components where $N$
+            is equal to NUM_PCs. $PC_loadings = V$ 
         
+        """
+        get_secondary_data = self.get_secondary_data
+        INDICES_CV_ALL = self.INDICES_CV_ALL
+        X_VAL, y_VAL = get_secondary_data(NUM_SAMPLES, INDICES_CV_ALL, iterations=10)
+        FEATURE_MEANS = X_VAL.mean(axis=0,keepdims=True)
+        X = (X_VAL - FEATURE_MEANS)
+        U, S, V = np.linalg.svd(X, full_matrices=False)
+        PC_loadings = V[:NUM_PCs]
+        self.FEATURE_MEANS = FEATURE_MEANS
+        self.TOTAL_EXPLAINED_VARIANCE = np.sum(S[:NUM_PCs]**2)/np.sum(S**2)
+        self.EXPLAINED_VARIANCE = S[:NUM_PCs]**2/np.sum(S**2)
+        self.PC_LOADINGS = PC_loadings
+    
+    def _transform_spectra(self,spectra):
+        """
+        Returns principal component loadings of the spectra as well as the
+        matrix that multiplies the principal components of a given mixed
+        spectra to return.
+                  
+        Parameters
+        ----------
+        NUM_PCs : int
+            The number of principal components of the spectra to keep.
+        
+        Returns
+        -------
+        PC_loadings : numpy.ndarray
+            The first loadings of the first $N$ principal components where $N$
+            is equal to the number of pure-component species on which model is
+            trained.
+            
+        PCs_2_concentrations : numpy.ndarray
+            Regressed matrix to compute concentrations given the principal
+            components of a mixed spectra.
+        
+        """
+        FEATURE_MEANS = self.FEATURE_MEANS
+        X = (spectra - FEATURE_MEANS)
+        PC_LOADINGS = self.PC_LOADINGS
+        PCs = np.dot(X,PC_LOADINGS.T)
+        return PCs 
+    
     def run_CV(self, write_file=False, CV_RESULTS_FILE = None):
         try:
             TARGET = self.TARGET
@@ -335,16 +408,21 @@ class CROSS_VALIDATION:
             print('#########################################################')
             print('#########################################################')
             print('The CV number is '+str(CV_INDEX_or_TEST+1))
+            start = timer()
             X_compare, y_compare = get_secondary_data(NUM_SAMPLES=NUM_VAL\
                                 , INDICES=INDICES_VAL[CV_INDEX_or_TEST],iterations=iterations)
+            stop = timer()
+            print('Time to generate one batch of secondary data is ' + str(stop-start))
+            
             Dict =  _run_NN(NUM_TRAIN, INDICES_TRAIN[CV_INDEX_or_TEST], X_compare, y_compare, IS_TEST=False) 
         else:
             print('#########################################################')
             print('#########################################################')
             print('Training on whole CV population and Testing on test set')
-             #Get Test Spectra
+                
             X_compare, y_compare = get_secondary_data(NUM_TEST, INDICES_TEST\
                                     ,iterations=iterations)
+            
             Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_compare, y_compare, IS_TEST=True)
         return Dict
     
@@ -357,19 +435,23 @@ class CROSS_VALIDATION:
         GCN_ALL = self.GCN_ALL
         COVERAGE = self.COVERAGE
         MAINconv = deepcopy(self.MAINconv)
-        start = timer()
+        LOW_FREQUENCY = self.LOW_FREQUENCY
+        HIGH_FREQUENCY = self.HIGH_FREQUENCY
+        ENERGY_POINTS = self.ENERGY_POINTS
         num_samples_original = NUM_SAMPLES
         NUM_SAMPLES = int(NUM_SAMPLES/iterations)
         ADDITIONAL_POINT = int(num_samples_original-NUM_SAMPLES*iterations)
         if TARGET == 'GCN' and GCN_ALL == False:
             OTHER_SITESconv = deepcopy(self.OTHER_SITESconv)
-            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE)
-            X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low')
+            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE\
+                                                   , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
+            X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low'\
+                                                           , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
             X = MAINconv.add_noise(X1,X2)
             del X1; del X2; del y2
         else:
-            X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE)      
-        stop = timer()
+            X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE\
+                                                  , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
         #Add to the validation and test sets to get more coverage options
         #(each iteration has 10 different coverage combinations
         #when TARGET in ['binding_type','combine_hollow_sites'] and COVERAGE is not 'low')
@@ -384,13 +466,13 @@ class CROSS_VALIDATION:
             X = np.append(X,X_2,axis=0)
             y = np.append(y,y_2,axis=0)
             del X_2; del y_2
-        stop = timer()
-        print('Time to generate secondary data: ' + str(stop-start))
         return X, y
 
     def _run_NN(self, NUM_SAMPLES, INDICES, X_compare, y_compare, IS_TEST):
+        _transform_spectra = self._transform_spectra
         get_secondary_data = self.get_secondary_data
         NN_PROPERTIES = self.NN_PROPERTIES
+        X_compare = _transform_spectra(X_compare)
         if IS_TEST == False:
             Dict = {'Wl2_Train':[], 'Score_Train':[]\
                 ,'Wl2_Val':[], 'Score_Val':[]}
@@ -411,48 +493,55 @@ class CROSS_VALIDATION:
                               ,learning_rate_init=NN_PROPERTIES['learning_rate_init'],out_activation='softmax')
         
         #Using Fit (w/ coverages)
+        if IS_TEST == True:
+            start = timer()
         X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1)
+        if IS_TEST == True:
+            stop = timer()
+            print('Time to generate one batch of secondary data is ' + str(stop-start))
+        X = _transform_spectra(X)
         NN.fit(X, y)
         y_predict = NN.predict(X)
-        del X
         ycompare_predict = NN.predict(X_compare)
         Dict['Score_Train'].append(error_metrics.get_r2(y,y_predict))
         Dict['Wl2_Train'].append(error_metrics.get_wasserstein_loss(y,y_predict))
         Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
         Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
-        
-        for _ in range(NN_PROPERTIES['training_sets']):
-            print(_)  
-            X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1)
+        for i in range(NN_PROPERTIES['training_sets']):
+            if IS_TEST == True:
+                print('Training set number ' + str(i+1))
+            if i > 0:
+                X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1)
+                X = _transform_spectra(X)
             indices = np.arange(y.shape[0])    
-            for __ in range(NN_PROPERTIES['epochs_per_training_set']):
-                np.random.shuffle(indices)
-                X = X[indices]
-                y = y[indices]    
-                NN.partial_fit(X,y)
-                y_predict = NN.predict(X)
-                ycompare_predict = NN.predict(X_compare)
-                Dict['Score_Train'].append(error_metrics.get_r2(y,y_predict))
-                Dict['Wl2_Train'].append(error_metrics.get_wasserstein_loss(y,y_predict))
-                Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
-                Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
+            for ii in range(NN_PROPERTIES['epochs_per_training_set']):
+                if i > 0 or ii > 0:
+                    np.random.shuffle(indices)
+                    X = X[indices]
+                    y = y[indices]    
+                    NN.partial_fit(X,y)
+                    y_predict = NN.predict(X)
+                    ycompare_predict = NN.predict(X_compare)
+                    Dict['Score_Train'].append(error_metrics.get_r2(y,y_predict))
+                    Dict['Wl2_Train'].append(error_metrics.get_wasserstein_loss(y,y_predict))
+                    Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
+                    Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
+            if IS_TEST == True:
+                print('Wl2_val/test: ' + str(Wl2_compare[-1]))
+                print('Wl2_Train: ' + str(Dict['Wl2_Train'][-1]))
                 print('Score val/test: ' + str(Score_compare[-1]))
-            del X; del y
-            print('Wl2_val/test: ' + str(Wl2_compare[-1]))
-            print('Wl2_Train: ' + str(Dict['Wl2_Train'][-1]))
-            print('Score val/test: ' + str(Score_compare[-1]))
-            print('Score_Train: ' + str(Dict['Score_Train'][-1]))
-            if IS_TEST==True:
-                state = deepcopy(NN.__getstate__())
-                #Below code is only necessary for removing class instances like the random and _optimizer
-                for key in list(state.keys()):
-                    if type(state[key]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
-                        del  state[key]
-                    elif type(state[key]) in [list, tuple, type(np.array(0))]:
-                        if type(state[key][0]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
-                            del state[key]
-                Dict.update({'NN_PROPERTIES':NN_PROPERTIES, 'parameters':NN.get_params()
-                ,'__getstate__': state})
+                print('Score_Train: ' + str(Dict['Score_Train'][-1]))
+        if IS_TEST==True:
+            state = deepcopy(NN.__getstate__())
+            #Below code is only necessary for removing class instances like the random and _optimizer
+            for key in list(state.keys()):
+                if type(state[key]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
+                    del  state[key]
+                elif type(state[key]) in [list, tuple, type(np.array(0))]:
+                    if type(state[key][0]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
+                        del state[key]
+            Dict.update({'NN_PROPERTIES':NN_PROPERTIES, 'parameters':NN.get_params()
+            ,'__getstate__': state})
         if IS_TEST == True:
             self.NN = NN
         return Dict

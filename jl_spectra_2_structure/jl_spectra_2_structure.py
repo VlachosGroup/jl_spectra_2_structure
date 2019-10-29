@@ -41,7 +41,7 @@ def get_defaults(adsorbate):
            , cross_validation_path, coverage_scaling_path
 
 class IR_GEN:
-    def __init__(self, ADSORBATE='CO', POC=1, TARGET='binding_type', NUM_TARGETS=None, exclude_atop=False\
+    def __init__(self, ADSORBATE='CO', POC=1, TARGET='binding_type', NUM_TARGETS=None, EXCLUDE_ATOP=False\
                  ,nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None):
         assert TARGET in ['binding_type','GCN','combine_hollow_sites'], "incorrect TARGET given"
         assert POC in [1,2], "The adsorbate must have 1 or 2 atoms in contact with the surface."
@@ -62,10 +62,11 @@ class IR_GEN:
         Xfreq_ALL = np.array(nanoparticle_data['FREQUENCIES'], dtype='float')
         is_local_minima = np.min(Xfreq_ALL, axis=1) > 0
         BINDING_TYPES_unfiltered = np.array(nanoparticle_data['CN_ADSORBATE'])
+        max_forces = np.array(nanoparticle_data['MAX_FORCE'])
         is_adsorbed = BINDING_TYPES_unfiltered >0
         if POC==1:
             max_coordination=4
-            if TARGET == 'combine_hollow_sites' or exclude_atop == True:
+            if TARGET == 'combine_hollow_sites' or EXCLUDE_ATOP == True:
                 NUM_TARGETS =3
             elif TARGET == 'binding_type':
                 NUM_TARGETS = 4
@@ -74,7 +75,8 @@ class IR_GEN:
             if TARGET == 'binding_type':
                 NUM_TARGETS = 2
         correct_coordination = BINDING_TYPES_unfiltered<=max_coordination
-        select_files = np.all((is_local_minima,is_adsorbed,correct_coordination),axis=0)
+        small_force = max_forces < 0.05
+        select_files = np.all((is_local_minima,is_adsorbed,small_force,correct_coordination),axis=0)
         for key in nanoparticle_data.keys():
             nanoparticle_data[key] = np.array(nanoparticle_data[key])[select_files]
         nanoparticle_data['INTENSITIES'][nanoparticle_data['FREQUENCIES'] == 0] = 0
@@ -94,8 +96,10 @@ class IR_GEN:
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
         self.POC = POC
+        self.EXCLUDE_ATOP = EXCLUDE_ATOP
+        self.COVERAGE = None
 
-    def get_GCNlabels(self, Minimum=7, showfigures=False, INCLUDED_BINDING_TYPES=[1]):
+    def get_GCNlabels(self, Minimum=0, showfigures=False, INCLUDED_BINDING_TYPES=[1]):
         assert type(INCLUDED_BINDING_TYPES) == list or INCLUDED_BINDING_TYPES=='ALL', "Included Binding Types should be a list"
         print('Initial number of targets: '+str(self.NUM_TARGETS))
         NUM_TARGETS = self.NUM_TARGETS
@@ -133,8 +137,8 @@ class IR_GEN:
 
         NUM_TARGETS = len(set(KCclass))
 
-        GCNlabel = np.zeros(len(GCNList), dtype='int')
-        GCNlabel[(BINDING_TYPES == 1)] = KCclass
+        GCNlabels = np.zeros(len(GCNList), dtype='int')
+        GCNlabels[np.isin(BINDING_TYPES,INCLUDED_BINDING_TYPES)] = KCclass
         BreakPoints = np.linspace(0, 8.5, num=810)
         BreakLabels = KC.predict(BreakPoints.reshape(-1, 1))
         BreakLabels = [KC2class[i] for i in BreakLabels]
@@ -157,7 +161,7 @@ class IR_GEN:
                            for count, i in enumerate(BreakString)]
             plt.figure(1)
             #ax = plt.subplot()
-            plt.hist(GCNlabel[(BINDING_TYPES == 1)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
+            plt.hist(GCNlabels[np.isin(BINDING_TYPES,INCLUDED_BINDING_TYPES)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
             plt.xticks(range(1, NUM_TARGETS+1))
             #ax.set_xticklabels(greater_than)
             plt.xlabel('GCN Group')
@@ -171,7 +175,7 @@ class IR_GEN:
             rcParams.update(params)
             plt.figure(2, figsize=(3.5, 3), dpi=300)
             #ax = plt.subplot()
-            plt.hist(GCNlabel[(BINDING_TYPES == 1)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
+            plt.hist(GCNlabels[np.isin(BINDING_TYPES,INCLUDED_BINDING_TYPES)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
             plt.xticks(range(1, NUM_TARGETS+1))
             #ax.set_xticklabels(greater_than)
             plt.xticks(fontsize=8)
@@ -181,7 +185,7 @@ class IR_GEN:
             plt.savefig('../Figures/GCN_Clustering.png', format='png')
             plt.close()
 
-        self.GCNlabels = GCNlabel
+        self.GCNlabels = GCNlabels
         self.NUM_TARGETS = NUM_TARGETS
         print('Final number of targets: '+str(self.NUM_TARGETS))
 
@@ -260,7 +264,7 @@ class IR_GEN:
             Xfrequencies[BINDING_TYPES == i+1] = (Xfrequencies[BINDING_TYPES == i+1]\
                                            *(Coverage_Scaling['PTCO_FREQ']['SELF_CO_PER_A2']*ABS_COVERAGE[BINDING_TYPES == i+1]\
                                              +Coverage_Scaling['PTCO_FREQ']['CO_PER_A2']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]\
-                                             +1))
+                                             +1).reshape((-1, 1)))
             Xintensities[BINDING_TYPES == i+1] = (Xintensities[BINDING_TYPES == i+1]\
                                          *np.exp(Coverage_Scaling['PTCO_INT_EXP']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]).reshape((-1,1)))                          
         Xfrequencies[np.arange(X.shape[0]), CO_STRETCH_IDX] = CO_frequencies
@@ -306,6 +310,9 @@ class IR_GEN:
         ENERGY_POINTS = self.ENERGY_POINTS
         COVERAGE = self.COVERAGE
         TARGET = self.TARGET
+        BINDING_TYPES = self.BINDING_TYPES
+        GCNlabels = self.GCNlabels
+        EXCLUDE_ATOP = self.EXCLUDE_ATOP
         
         energies = np.linspace(LOW_FREQUENCY, HIGH_FREQUENCY, num=ENERGY_POINTS\
                                , endpoint=True)
@@ -314,35 +321,57 @@ class IR_GEN:
         sigma = FWHM/(2.0 * np.sqrt(2.0 * np.log(2.)))
         prefactor = 1.0/(sigma * np.sqrt(2.0 * np.pi))
         energies2D = energies.reshape((-1, 1))
-        MIN_Y = int(min(Y_sample))
         Xfrequencies = X_sample[:, 0].copy()
         Xintensities = X_sample[:, 1].copy()
         np.random.shuffle(probabilities)
         num_samples = len(probabilities)
-        Nanos = np.random.randint(1, high=201, size=num_samples)
+        num_simple_spectra = np.random.randint(1, high=201, size=num_samples)
         fLs = np.random.sample(num_samples)
         FWHMs = np.random.uniform(low=2, high=75, size=num_samples)
         Xconv = np.zeros((num_samples, ENERGY_POINTS))
         yconv = np.zeros((num_samples, NUM_TARGETS))
         y_mesh = np.zeros((Y_sample.size, NUM_TARGETS))
+        #subtracting MIN_Y ensures that the number of indices in
+        #ymin is equal to the labels, even if the labels don't start at 0
+        if TARGET == 'GCN':
+            MIN_Y = min(GCNlabels[GCNlabels>0])
+        else:
+            MIN_Y = min(BINDING_TYPES)
+            if EXCLUDE_ATOP == True:
+                MIN_Y +=1
         y_mesh[np.arange(Y_sample.size), Y_sample-MIN_Y] = 1
         sample_indices = np.arange(Y_sample.size)
         parray = np.zeros(Y_sample.size)
-        coverage_parray = get_probabilities(num_samples, 11)
-        coverage_totals = np.random.random_sample(size=[num_samples,10])
-        if TARGET == 'GCN' or COVERAGE == 'low':
+        shift_vector = np.zeros(Y_sample.size)                
+        if TARGET == 'GCN' or COVERAGE == 'low' or type(COVERAGE) in [float,int]:
             int_mesh = generate_spectra(Xfrequencies, Xintensities\
                                         ,energies2D, prefactor, sigma)
+        else:
+            coverage_parray = get_probabilities(num_samples, 11)
+            coverage_totals = np.random.random_sample(size=[num_samples,10])
+            
         for i in range(num_samples):
+            shift_vector[...]=0
+            non_zeros = np.random.randint(low=1, high=Y_sample.size)
+            indices_to_shift = np.random.choice(sample_indices,size=non_zeros,replace=False)
+            shift_vector[indices_to_shift] = np.random.random_sample(size=non_zeros)
             for ii in range(NUM_TARGETS):
-                parray[Y_sample == ii+MIN_Y] = probabilities[i, ii]
+                ii_MIN_Y = ii+MIN_Y
+                shift_vector_sum = shift_vector[Y_sample == ii_MIN_Y].sum()
+                if shift_vector_sum >0:
+                    shift_vector[Y_sample == ii_MIN_Y] /= shift_vector_sum
+                    parray[Y_sample == ii_MIN_Y] = probabilities[i, ii] * shift_vector[Y_sample==ii_MIN_Y]       
+                else:
+                    parray[Y_sample == ii_MIN_Y] = probabilities[i, ii]
             parray /= np.sum(parray)
-            indices_primary = np.random.choice(sample_indices, size=Nanos[i], replace=True, p=parray)
-            if (COVERAGE =='high' or type(COVERAGE) in [float, int]) and TARGET in ['binding_type', 'combine_hollow_sites']:
+            indices_primary = np.random.choice(sample_indices, size=num_simple_spectra[i], replace=True, p=parray)
+            if TARGET == 'GCN' or COVERAGE == 'low' or type(COVERAGE) in [float,int]:
+                combined_mesh = np.sum(int_mesh[indices_primary], axis=0)
+            else:
                 #initialize coverages
-                SELF_COVERAGE = np.random.random_sample(Nanos[i])
+                SELF_COVERAGE = np.random.random_sample(num_simple_spectra[i])
                 TOTAL_COVERAGE = np.zeros_like(SELF_COVERAGE)
-                COVERAGE_INDICES = np.random.choice([0,1,2,3,4,5,6,7,8,9,10], size=Nanos[i],replace=True, p=coverage_parray[i])
+                COVERAGE_INDICES = np.random.choice([0,1,2,3,4,5,6,7,8,9,10], size=num_simple_spectra[i],replace=True, p=coverage_parray[i])
                 #self coverage corresponding to index of 0 is island so it is single coverage and is skipped
                 for ii in sorted(set(COVERAGE_INDICES.tolist()+[0]))[1:]:
                     TOTAL_COVERAGE[COVERAGE_INDICES == ii] = coverage_totals[i][ii-1]
@@ -372,13 +401,11 @@ class IR_GEN:
                 int_mesh[BINDING_TYPES_sample[indices_primary] == 3] *= 0.2
                 int_mesh[BINDING_TYPES_sample[indices_primary] == 4] *= 0.2
                 combined_mesh = np.sum(int_mesh, axis=0)
-            else:
-                combined_mesh = np.sum(int_mesh[indices_primary], axis=0)
             yconv[i] = np.sum(y_mesh[indices_primary], axis=0, dtype='int')
             transform = mixed_lineshape(FWHMs[i], fLs[i], ENERGY_POINTS, energy_spacing)
             Xconv[i] = np.convolve(combined_mesh, transform, mode='valid')
         #This part is to adjust the tabulated contribution to match that of the adjusted spectra for max coverage of bridge, 3-fold and 4-fold
-        if COVERAGE == 'high' and TARGET in ['binding_type', 'combine_hollow_sites']:
+        if COVERAGE == 'high' and TARGET in ['binding_type', 'combine_hollow_sites'] and EXCLUDE_ATOP==False:
             yconv[:,1] *= 0.7
             yconv[:,2] *= 0.2
             if TARGET == 'binding_type':
@@ -402,6 +429,8 @@ class IR_GEN:
 
     def get_synthetic_spectra(self, NUM_SAMPLES, indices, COVERAGE=None\
                               , LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
+        assert self.COVERAGE is None, "get_synthetic_spectra is intended \
+        to be run only once. Please run get_more_spectra."
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
         high_coverage_path = self.HIGH_COV_PATH
@@ -416,11 +445,10 @@ class IR_GEN:
             Y = self.GCNlabels
         else:
             Y = BINDING_TYPES
-        #correct self.NUM_TARGETS in case this method is run multiple times
-        self.NUM_TARGETS = len(set(Y[indices]))
-        print('NUM_TARGETS: '+str(self.NUM_TARGETS))
         if POC == 1:
             X0cov = self._scaling_factor_shift(self.X0cov)
+        else:
+            X0cov = self.X0cov
         #Adding Data for Extended Surfaces
         if COVERAGE == 'high' and self.TARGET == 'GCN':
             print('Adding high-coverage low index planes')
@@ -461,9 +489,8 @@ class IR_GEN:
             X = X0cov
         elif type(COVERAGE) == int or type(COVERAGE) == float:
             print('Relative coverage is ' + str(COVERAGE))
-            X = _coverage_shift(X0cov, BINDING_TYPES, COVERAGE,COVERAGE)
+            X = _coverage_shift(X0cov, BINDING_TYPES_with_4fold, COVERAGE,COVERAGE)
         elif COVERAGE == 'low':
-            print('Low Coverage')
             X = X0cov
         else:
             print('Error in Input')
@@ -540,6 +567,7 @@ def fold(frequencies, intensities, LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS,
         raise ValueError('Function input FWHM must must be at least twice\
         the energy spacing to prevent information loss. It therefore must be\
         at least' + str(2*energy_spacing))
+    assert HIGH_FREQUENCY > LOW_FREQUENCY, "The high frequency must be greater than the low frequenc"
     sigma = FWHM/(2.0 * np.sqrt(2.0 * np.log(2.)))
     prefactor = 1.0/(sigma * np.sqrt(2.0 * np.pi))
     #Reshape array energies to be (ENERGY_POINTS,1) dimensional
