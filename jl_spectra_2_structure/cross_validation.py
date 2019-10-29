@@ -71,9 +71,23 @@ class CROSS_VALIDATION:
                 GCNconv.get_GCNlabels(Minimum=2,showfigures=False,INCLUDED_BINDING_TYPES=[1])
             #Get List of indices so we can split the data later
             #combined class to stratify data based on binding-type and GCN simultaneously
-            combined_class = GCNconv.BINDING_TYPES+10*GCNconv.GCNlabels
-            num_classes = np.unique(combined_class,return_counts=True)
-            print('The class and number in each class for fold generation is '+str(num_classes))
+            GCNlabels = GCNconv.GCNlabels
+            combined_class = GCNconv.BINDING_TYPES+10*GCNlabels
+            classes_with_counts = np.unique(combined_class,return_counts=True)
+            reduce_count=0
+            num_classes = classes_with_counts[0].size
+            for count in range(num_classes):
+                if classes_with_counts[1][count-reduce_count] < 2:
+                    BINDING_CLASS = classes_with_counts[0][count-reduce_count] - 10*GCNlabels[GCNlabels==count+1][0]
+                    reduce_count+=1
+                    print('combining classes to meet kfold constraints')
+                    if count < num_classes-1:
+                        GCNlabels[np.all((GCNconv.BINDING_TYPES==BINDING_CLASS,GCNlabels==count+1),axis=0)] += 1
+                    else:
+                        GCNlabels[np.all((GCNconv.BINDING_TYPES==BINDING_CLASS,GCNlabels==count+1),axis=0)] -= 1
+                    combined_class = GCNconv.BINDING_TYPES + 10*GCNlabels
+                    classes_with_counts = np.unique(combined_class,return_counts=True)            
+            print('The class and number in each class for fold generation is '+str(classes_with_counts))
             #split data into cross validation and test set
             sss = StratifiedShuffleSplit(n_splits=1, test_size=test_fraction, random_state=random_state)
             for CV_index, test_index in sss.split(combined_class,combined_class):
@@ -183,6 +197,9 @@ class CROSS_VALIDATION:
         self.HIGH_FREQUENCY = HIGH_FREQUENCY
         self.ENERGY_POINTS = ENERGY_POINTS
         self.GCN_ALL = GCN_ALL
+        
+    def set_nn_parameters(self, NN_PROPERTIES):
+        self.NN_PROPERTIES = NN_PROPERTIES
         
     def _set_pc_loadings(self,NUM_PCs,NUM_SAMPLES = 100000):
         """
@@ -466,7 +483,7 @@ class CROSS_VALIDATION:
             X = np.append(X,X_2,axis=0)
             y = np.append(y,y_2,axis=0)
             del X_2; del y_2
-        return X, y
+        return (X, y)
 
     def _run_NN(self, NUM_SAMPLES, INDICES, X_compare, y_compare, IS_TEST):
         _transform_spectra = self._transform_spectra
@@ -500,7 +517,7 @@ class CROSS_VALIDATION:
             stop = timer()
             print('Time to generate one batch of secondary data is ' + str(stop-start))
         X = _transform_spectra(X)
-        NN.fit(X, y)
+        NN.partial_fit(X, y)
         y_predict = NN.predict(X)
         ycompare_predict = NN.predict(X_compare)
         Dict['Score_Train'].append(error_metrics.get_r2(y,y_predict))
@@ -555,7 +572,7 @@ class CROSS_VALIDATION:
         INDICES_TEST = self.INDICES_TEST
         #Get Test Spectra
         X_Test, y_Test = self.get_secondary_data(NUM_TEST, INDICES_TEST, iterations=10)
-        return X_Test, y_Test
+        return (X_Test, y_Test)
             
     def get_test_results(self, read_file=True):
         try:

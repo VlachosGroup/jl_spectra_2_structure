@@ -37,8 +37,8 @@ def get_defaults(adsorbate):
     high_coverage_path = os.path.join(data_path, 'dft_surface/high_coverage_'+adsorbate+'.json')
     cross_validation_path = os.path.join(data_path, 'cross_validation')
     coverage_scaling_path = os.path.join(data_path,'coverage_scaling_params_'+adsorbate+'.json')
-    return nanoparticle_path, isotope_path, high_coverage_path\
-           , cross_validation_path, coverage_scaling_path
+    return (nanoparticle_path, isotope_path, high_coverage_path\
+           , cross_validation_path, coverage_scaling_path)
 
 class IR_GEN:
     def __init__(self, ADSORBATE='CO', POC=1, TARGET='binding_type', NUM_TARGETS=None, EXCLUDE_ATOP=False\
@@ -212,9 +212,9 @@ class IR_GEN:
         if BINDING_TYPES is not None:
             BINDING_TYPES = BINDING_TYPES.copy()
             BINDING_TYPES_perturbed = BINDING_TYPES.repeat(perturbations,axis=0)
-            return(Xperturbed, yperturbed, BINDING_TYPES_perturbed)
         else:
-            return(Xperturbed, yperturbed)
+            BINDING_TYPES_perturbed = None
+        return (Xperturbed, yperturbed, BINDING_TYPES_perturbed)
    
     def _mixed_lineshape(self, FWHM, fL, ENERGY_POINTS, energy_spacing):
         """accepts numpy array of frequencies and intensities and FWHM
@@ -268,6 +268,8 @@ class IR_GEN:
             Xintensities[BINDING_TYPES == i+1] = (Xintensities[BINDING_TYPES == i+1]\
                                          *np.exp(Coverage_Scaling['PTCO_INT_EXP']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]).reshape((-1,1)))                          
         Xfrequencies[np.arange(X.shape[0]), CO_STRETCH_IDX] = CO_frequencies
+        #Xfrequencies cannot be less than 0
+        Xfrequencies[Xfrequencies[...]<2**-500] = 0
         Xintensities[np.arange(X.shape[0]), CO_STRETCH_IDX] = CO_intensities
         Xcov = np.array([np.array((Xfrequencies[i], Xintensities[i]))
                          for i in range(X.shape[0])])
@@ -415,7 +417,7 @@ class IR_GEN:
         #normalize so max X is 1 and make y a set of fractions that sum to 1
         Xconv /= np.max(Xconv, axis=1).reshape((-1, 1))
         yconv /= np.sum(yconv, axis=1).reshape((-1, 1))
-        return Xconv, yconv
+        return (Xconv, yconv)
 
     def add_noise(self, Xconv_main, Xconv_noise, noise2signalmax=2.0/3.0):
         X_noisey = np.zeros((len(Xconv_main), len(Xconv_main[0])))
@@ -433,29 +435,34 @@ class IR_GEN:
         to be run only once. Please run get_more_spectra."
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
+        _coverage_shift = self._coverage_shift
+        _get_probabilities = self._get_probabilities
+        _scaling_factor_shift = self._scaling_factor_shift
+        _perturb_spectra = self._perturb_spectra
+        _xyconv = self. _xyconv
         high_coverage_path = self.HIGH_COV_PATH
         TARGET = self.TARGET
+        NUM_TARGETS = self.NUM_TARGETS
         BINDING_TYPES = self.BINDING_TYPES
         BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
-        _coverage_shift = self._coverage_shift
         POC = self.POC
+        X0cov = self.X0cov
+        GCNlabels = self.GCNlabels
         #Assign the target variable Y to either GCN group or binding site
         if TARGET == 'GCN':
-            assert self.GCNlabels is not None, "get_GCNlabels must be executed before spectra can be generated"
-            Y = self.GCNlabels
+            assert GCNlabels is not None, "get_GCNlabels must be executed before spectra can be generated"
+            Y = GCNlabels
         else:
             Y = BINDING_TYPES
         if POC == 1:
-            X0cov = self._scaling_factor_shift(self.X0cov)
-        else:
-            X0cov = self.X0cov
+            X0cov = _scaling_factor_shift(X0cov)
         #Adding Data for Extended Surfaces
-        if COVERAGE == 'high' and self.TARGET == 'GCN':
+        if COVERAGE == 'high' and TARGET == 'GCN':
             print('Adding high-coverage low index planes')
             with open(high_coverage_path, 'r') as infile:
                 HC_Ext = json.load(infile)
             HC_CNPt = np.sort(np.array(list(set([np.min(i) for i in HC_Ext['CN_METAL']]))))
-            self.NUM_TARGETS += len(HC_CNPt)
+            NUM_TARGETS += len(HC_CNPt)
             HC_frequencies = []
             HC_intensities = []
             HC_classes = []
@@ -474,17 +481,17 @@ class IR_GEN:
             HC_classes = np.array(HC_classes)
             #Change all high-coverage classes to just max(y)+1
             #until more accurate experiments and DFT are available
-            self.NUM_TARGETS = self.NUM_TARGETS - len(HC_CNPt) + 1
-            HC_classes[...] = self.NUM_TARGETS
+            NUM_TARGETS = NUM_TARGETS - len(HC_CNPt) + 1
+            HC_classes[...] = NUM_TARGETS
             #
             HC_frequencies = np.array(HC_frequencies)
             HC_intensities = np.array(HC_intensities)
             HC_X = np.array([np.array((HC_frequencies[i], HC_intensities[i]))
                              for i in range(len(HC_frequencies))])
-            HC_X = self._scaling_factor_shift(HC_X)
+            HC_X = _scaling_factor_shift(HC_X)
             offset = max_freqs-len(X0cov[0][0])
             X = np.pad(X0cov, ((0, 0), (0, 0), (0, offset)), 'constant', constant_values=0)
-        elif (COVERAGE == 'high' and (TARGET in ['binding_type', 'combine_hollow_sites'])):
+        elif COVERAGE == 'high' and TARGET in ['binding_type', 'combine_hollow_sites']:
             print('testing all coverages')
             X = X0cov
         elif type(COVERAGE) == int or type(COVERAGE) == float:
@@ -492,73 +499,89 @@ class IR_GEN:
             X = _coverage_shift(X0cov, BINDING_TYPES_with_4fold, COVERAGE,COVERAGE)
         elif COVERAGE == 'low':
             X = X0cov
+        X_new = X
+        Y_new = Y
+        if COVERAGE == 'high' and TARGET == 'GCN':
+            num_single = Y_new.size
+            #b = 2105/2095 #a = 1854/1865 - difference between experiments and DFT
+            HC_X_expanded, HC_classes_expanded, _ = _perturb_spectra(5, HC_X, HC_classes
+                                                                       , a=0.995, b=1.01)
+            X_new = np.concatenate((X_new, HC_X_expanded), axis=0)
+            Y_new = np.concatenate((Y_new, HC_classes_expanded), axis=0)
+            indices = list(indices) + np.arange(Y_new.size)[num_single:].tolist()
+        if len(set(Y_new[indices])) >1:
+            indices_balanced, Y_balanced = RandomOverSampler().fit_sample(np.array(indices).reshape(-1,1),Y_new[indices].copy())
         else:
-            print('Error in Input')
-            return
-        self.X = X
-        self.Y = Y
-        if COVERAGE == 'high' and self.TARGET == 'GCN':
+            indices_balanced = np.array(indices)
+            Y_balanced = Y_new[indices]
+        X_balanced = X_new[indices_balanced.flatten()]
+        #BINDING_TYPES_balanced used only if COVERAGE == 'high' and (TARGET == 'binding_type' or TARGET == 'combine_hollow_sites')
+        if COVERAGE == 'high' and TARGET in ['binding_type', 'combine_hollow_sites']:
+            BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
+        else:
+            BINDING_TYPES_balanced = None
+        #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
+        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_spectra(5, X_balanced, Y_balanced\
+                                            , a=0.999, b=1.001,BINDING_TYPES=BINDING_TYPES_balanced)
+        probabilities = _get_probabilities(NUM_SAMPLES, NUM_TARGETS)
+        if COVERAGE == 'high' and TARGET == 'GCN':
             self.HC_X = HC_X
             self.HC_classes = HC_classes
-            num_single = Y.size
-            #b = 2105/2095 #a = 1854/1865 - difference between experiments and DFT
-            HC_X_expanded, HC_classes_expanded = self._perturb_spectra(5, HC_X, HC_classes
-                                                                       , a=0.995, b=1.01)
-            X = np.concatenate((X, HC_X_expanded), axis=0)
-            Y = np.concatenate((Y, HC_classes_expanded), axis=0)
-            indices = list(indices) + np.arange(Y.size)[num_single:].tolist()     
-       
-        indices_balanced, Y_balanced = RandomOverSampler().fit_sample(np.array(indices).reshape(-1,1),Y[indices].copy())
-        X_balanced = X[indices_balanced.flatten()]
-        
-        #only use BINDING_TYPES_balanced if COVERAGE == 'high' and (TARGET == 'binding_type' or TARGET == 'combine_hollow_sites')
-        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
-        #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
-        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
-        X_sample, Y_sample, BINDING_TYPES_sample = self._perturb_spectra(5, X_balanced, Y_balanced
-                                            , a=0.999, b=1.001,BINDING_TYPES=BINDING_TYPES_balanced)
-        probabilities = self._get_probabilities(NUM_SAMPLES, self.NUM_TARGETS)
+        self.X = X
+        self.Y = Y
+        self.NUM_TARGETS = NUM_TARGETS
+        self.X0cov = X0cov
         self.COVERAGE = COVERAGE
         self.LOW_FREQUENCY = LOW_FREQUENCY
         self.HIGH_FREQUENCY = HIGH_FREQUENCY
         self.ENERGY_POINTS = ENERGY_POINTS
-        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
+        Xconv, yconv = _xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
         #set numbers that may form denormals to zero to improve numerics
-        Xconv[abs(Xconv[...])<2**-500] = 0
-        yconv[abs(yconv[...])<2**-500] = 0
-        return Xconv, yconv
+        Xconv[Xconv[...]<2**-500] = 0
+        yconv[yconv[...]<2**-500] = 0
+        return (Xconv, yconv)
 
     def get_more_spectra(self, NUM_SAMPLES, indices):
-        X = self.X
-        Y = self.Y
+        _perturb_spectra = self._perturb_spectra
+        _get_probabilities = self._get_probabilities
+        _xyconv = self. _xyconv
+        NUM_TARGETS = self.NUM_TARGETS
+        X_new = self.X
+        Y_new = self.Y
+        TARGET = self.TARGET
         BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
         COVERAGE = self.COVERAGE
-        if COVERAGE == 'high' and self.TARGET == 'GCN':
+        if COVERAGE == 'high' and TARGET == 'GCN':
             HC_X = self.HC_X
             HC_classes = self.HC_classes
-            num_single = Y.size
+            num_single = Y_new.size
             #b = 2105/2095 #a = 1854/1865 difference between experiments and DFT
-            HC_X_expanded, HC_classes_expanded = self._perturb_spectra(5, HC_X, HC_classes
+            HC_X_expanded, HC_classes_expanded, _ = _perturb_spectra(5, HC_X, HC_classes
                                                                        , a=0.995, b=1.01)
-            X = np.concatenate((X, HC_X_expanded), axis=0)
-            Y = np.concatenate((Y, HC_classes_expanded), axis=0)
-            indices = list(indices) + np.arange(Y.size)[num_single:].tolist()        
+            X_new = np.concatenate((X_new, HC_X_expanded), axis=0)
+            Y_new = np.concatenate((Y_new, HC_classes_expanded), axis=0)
+            indices = list(indices) + np.arange(Y_new.size)[num_single:].tolist() 
        
-        indices_balanced, Y_balanced = RandomOverSampler().fit_sample(np.array(indices).reshape(-1,1),Y[indices].copy())
-        X_balanced = X[indices_balanced.flatten()]
-        
+        if len(set(Y_new[indices])) >1:
+            indices_balanced, Y_balanced = RandomOverSampler().fit_sample(np.array(indices).reshape(-1,1),Y_new[indices].copy())
+        else:
+            indices_balanced = np.array(indices)
+            Y_balanced = Y_new[indices]
+        X_balanced = X_new[indices_balanced.flatten()]
         #only use BINDING_TYPES_balanced if COVERAGE == 'high' and (TARGET == 'binding_type' or TARGET == 'combine_hollow_sites')
-        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
+        if COVERAGE == 'high' and TARGET in ['binding_type', 'combine_hollow_sites']:
+            BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
+        else:
+            BINDING_TYPES_balanced = None
         #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
-        BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
-        X_sample, Y_sample, BINDING_TYPES_sample = self._perturb_spectra(5, X_balanced, Y_balanced
+        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_spectra(5, X_balanced, Y_balanced
                                             , a=0.999, b=1.001,BINDING_TYPES=BINDING_TYPES_balanced)
-        probabilities = self._get_probabilities(NUM_SAMPLES, self.NUM_TARGETS)
-        Xconv, yconv = self._xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
+        probabilities = _get_probabilities(NUM_SAMPLES, NUM_TARGETS)
+        Xconv, yconv = _xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
         #set numbers that may form denormals to zero to improve numerics
-        Xconv[abs(Xconv[...])<2**-500] = 0
-        yconv[abs(yconv[...])<2**-500] = 0
-        return Xconv, yconv
+        Xconv[Xconv[...]<2**-500] = 0
+        yconv[yconv[...]<2**-500] = 0
+        return (Xconv, yconv)
     
 def fold(frequencies, intensities, LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS,FWHM):
     energies = np.linspace(LOW_FREQUENCY, HIGH_FREQUENCY, num=ENERGY_POINTS, endpoint=True)
