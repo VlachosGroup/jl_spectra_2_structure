@@ -234,6 +234,21 @@ def wasserstein_loss(y_true,y_pred):
     return ((1/float(y_true.shape[1])*np.sum((Pcum-Tcum)**2,axis=1))**0.5).mean()
 
 def mixed(y_true, y_pred):
+    """a mixed wasserstein and kl-divergence loss
+
+    Parameters
+    ----------
+    y_true : array-like or label indicator matrix
+        Ground truth (correct) values.
+
+    y_pred : array-like or label indicator matrix
+        Predicted values, as returned by a regression estimator.
+
+    Returns
+    -------
+    loss : float
+        The degree to which the samples are correctly predicted.
+    """
     wl = wasserstein_loss(y_true, y_pred)
     kl = kl_div_loss(y_true, y_pred)
     return 0.5 * wl + 0.5 * kl

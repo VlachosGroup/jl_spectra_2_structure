@@ -21,14 +21,21 @@ def get_defaults(adsorbate):
     
     Returns
     -------
-    frequency_range: numpy.ndarray
-        Frequencies over which to project the intensities.
     
-    pure_data_path : str
-        Directory location where pure-component spectra are stored.
+    nanoparticle_path : str
+        File path where nanoparticle or single adsorbate data will be saved.
         
-    mixture_data_path : str
-        Directory location where mixed-component spectra are stored.
+    isotope_path : str
+        File path where isotope data for CO and NO will be saved.
+
+    high_coverage_path : str
+        File path where high coverage data for CO will be saved.
+        
+    cross_validation_path : str
+        Directory location cross validation data will be stored.
+
+    coverage_scaling_path : str
+        File path where coverage scaling coefficients will be saved.
     
     """
     data_path = pkg_resources.resource_filename(__name__, 'data/')

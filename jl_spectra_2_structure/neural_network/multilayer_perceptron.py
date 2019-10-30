@@ -192,7 +192,9 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
     def _backprop(self, X, y, activations, deltas, coef_grads,
                   intercept_grads):
         """Compute the MLP loss function and its corresponding derivatives
-        with respect to each parameter: weights and bias vectors.
+        with respect to each parameter: weights and bias vectors. The derivative
+        of the Wasserstein squared with respect to the softmax activation function
+        is implemented here.
 
         Parameters
         ----------

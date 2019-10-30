@@ -168,40 +168,6 @@ class Infrared(Vibrations):
             self.free_atoms = [i for i in allatoms if i not in fixed_atoms]
             self.free_list = range(0,len(self.free_atoms))
             self.atom = atoms[0].copy()
-            """            
-            #reorder displacements in the format +x,-x,++x,--x, +y, -y, etc.
-            imageindex = range(0,len(self.atoms))
-            atoms2 = deepcopy(self.atoms)
-            #the first embedded atoms objects is assumed to be the equilbrium position
-            atoms2[0] = deepcopy(self.atoms[0])
-            poschange = [max(abs(self.atoms[i].get_distances(0,allatoms,mic=True,vector=True)-self.atoms[0].get_distances(0,allatoms,mic=True,vector=True)).ravel()) for i in imageindex[1:]]
-            negchange = [min(-1*abs(self.atoms[i].get_distances(0,allatoms,mic=True,vector=True)-self.atoms[0].get_distances(0,allatoms,mic=True,vector=True)).ravel()) for i in imageindex[1:]]
-            maxnegchange = max(negchange)
-            minposchange = min(poschange)
-            #reording embedded atoms objects in the format +x,-x,++x,--x, +y, -y, etc.
-            
-            
-            i=1
-            for j in self.free_atoms:
-                for m in [0,1,2]:
-                    for k in imageindex[1:]:
-                        if (self.atoms[k].get_distance(0,j,mic=True,vector=True)[m] - self.atoms[0].get_distance(0,j,mic=True,vector=True)[m]) < minposchange*1.5 and (self.atoms[k].get_distance(0,j,mic=True,vector=True)[m] - self.atoms[0].get_distance(0,j,mic=True,vector=True)[m])>minposchange*.5:
-                            atoms2[i] = deepcopy(self.atoms[k])
-                            i=i+1
-                    for k in imageindex[1:]:
-                        if (self.atoms[k].get_distance(0,j,mic=True,vector=True)[m] - self.atoms[0].get_distance(0,j,mic=True,vector=True)[m]) > maxnegchange*1.5 and (self.atoms[k].get_distance(0,j,mic=True,vector=True)[m] - self.atoms[0].get_distance(0,j,mic=True,vector=True)[m])<maxnegchange*.5:
-                            atoms2[i] = deepcopy(self.atoms[k])
-                            i=i+1
-                    for k in imageindex[1:]:
-                        if (self.atoms[k].get_distance(0,j,mic=True,vector=True)[m] - self.atoms[0].get_distance(0,j,mic=True,vector=True)[m]) > minposchange*1.5:
-                            atoms2[i] = deepcopy(self.atoms[k])
-                            i=i+1
-                    for k in imageindex[1:]:
-                        if (self.atoms[k].get_distance(0,j,mic=True,vector=True)[m] - self.atoms[0].get_distance(0,j,mic=True,vector=True)[m]) < maxnegchange*1.5:
-                            atoms2[i] = deepcopy(self.atoms[k])
-                            i=i+1
-            self.atoms = deepcopy(atoms2)
-            """
         else:
             self.imagetype='pickle'
             if atoms.constraints:

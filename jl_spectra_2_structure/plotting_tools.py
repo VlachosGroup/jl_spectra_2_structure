@@ -2,18 +2,6 @@
 from __future__ import absolute_import, division, print_function
 from matplotlib import rcParams
 from matplotlib import rcParamsDefault
-import numpy as np
-def r2(y_true, y_pred):
-    SStot = np.sum((y_true-y_true.mean())**2)
-    SSres = np.sum((y_true-y_pred)**2)
-    return 1 - SSres/SStot
-
-def rmse(y_true, y_pred):
-    SSres = np.mean((y_true-y_pred)**2)
-    return SSres**0.5
-
-def max_error(y_true, y_pred):
-    return np.array(y_pred-y_true)[np.argmax(np.abs(y_pred-y_true))]
 
 def set_figure_settings(Figure_Type,**kwargs):
     rcParams.update(rcParamsDefault)

@@ -47,7 +47,7 @@ All trademarks referenced herein are property of their respective holders.
 Copyright (c) 2019--, Joshua Lansford, The University of Delaware.
 """
 
-NAME = "jl_structure_2_spectra"
+NAME = "jl_spectra_2_structure"
 MAINTAINER = "Joshua Lansford"
 MAINTAINER_EMAIL = "lansford.jl@gmail.com"
 DESCRIPTION = description
@@ -63,5 +63,5 @@ MINOR = _version_minor
 MICRO = _version_micro
 VERSION = __version__
 PACKAGE_DATA = {'jl_structure_2_spectra': [pjoin('data', '*'),pjoin('data', '*','*')]}
-REQUIRES = ["numpy","scipy","matplotlib"]
+REQUIRES = ["numpy","scipy","matplotlib","scikit-learn","json_tricks","imbalanced-learn","statsmodels","pandas","ase"]
 PYTHON_REQUIRES = ">= 3.5"
