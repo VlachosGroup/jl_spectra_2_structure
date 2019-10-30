@@ -26,11 +26,11 @@ CLASSIFIERS = ["Development Status :: 3 - Alpha",
                "Topic :: Scientific/Engineering"]
 
 # Description should be a one-liner:
-description = "jl_structure_2_spectra: A method for deconvoluting spectra"
+description = "jl_spectra_2_structure: A method for deconvoluting spectra"
 # Long description will go up on the pypi page
 long_description = """
 
-jl_structure_2_spectra
+jl_spectra_2_structure
 ======================
 This module trains on known experimental pure-component spectra
 in order to deconvolute unknown mixture spectra.
@@ -38,7 +38,7 @@ in order to deconvolute unknown mixture spectra.
 
 License
 =======
-``jl_structure_2_spectra`` is licensed under the terms of the MIT license. See the file
+``jl_spectra_2_structure`` is licensed under the terms of the MIT license. See the file
 "LICENSE" for information on the history of this software, terms & conditions
 for usage, and a DISCLAIMER OF ALL WARRANTIES.
 
@@ -52,7 +52,7 @@ MAINTAINER = "Joshua Lansford"
 MAINTAINER_EMAIL = "lansford.jl@gmail.com"
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
-URL = "http://github.com/JLANS/jl_structure_2_spectra"
+URL = "http://github.com/JLANS/jl_spectra_2_structure"
 DOWNLOAD_URL = ""
 LICENSE = "MIT"
 AUTHOR = "Joshua Lansford"
@@ -62,6 +62,6 @@ MAJOR = _version_major
 MINOR = _version_minor
 MICRO = _version_micro
 VERSION = __version__
-PACKAGE_DATA = {'jl_structure_2_spectra': [pjoin('data', '*'),pjoin('data', '*','*')]}
+PACKAGE_DATA = {'jl_spectra_2_structure': [pjoin('data', '*'),pjoin('data', '*','*')]}
 REQUIRES = ["numpy","scipy","matplotlib","scikit-learn","json_tricks","imbalanced-learn","statsmodels","pandas","ase"]
 PYTHON_REQUIRES = ">= 3.5"

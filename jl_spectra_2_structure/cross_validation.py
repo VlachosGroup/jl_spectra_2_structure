@@ -15,7 +15,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from copy import deepcopy
 from .neural_network import MLPRegressor
 from .jl_spectra_2_structure import IR_GEN
-from .jl_spectra_2_structure import get_defaults
+from .jl_spectra_2_structure import get_default_data_paths
 from . import error_metrics
 import multiprocessing
 import psutil
@@ -30,16 +30,25 @@ class CROSS_VALIDATION:
         """
         assert type(ADSORBATE) == str, "ADSORBATE must be a String"
         nano_path, isotope_path, high_cov_path\
-           , cross_val_path, cov_scale_path = get_defaults(ADSORBATE)
+           , cov_scale_path = get_default_data_paths(ADSORBATE)
         
         if cross_validation_path is None:
-            cross_validation_path = cross_val_path
+            cross_validation_path = self._get_default_cross_validation_path()
         self.CV_PATH = cross_validation_path
         self.ADSORBATE = ADSORBATE
         self.POC = POC
         self.NANO_PATH = nanoparticle_path
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
+        
+    def _get_default_cross_validation_path(self):
+         work_dir = os.getcwd()
+         cross_validation_path = os.path.join(work_dir,'cross_validation')
+         already_exists = os.path.isdir(cross_validation_path)
+         if already_exists == False:
+             os.mkdir(cross_validation_path)
+         return cross_validation_path
+
         
     def generate_test_cv_indices(self, CV_SPLITS=5, NUM_GCN_LABELS=11, GCN_ALL = False\
                                  ,test_fraction=0.2,random_state=0, read_file=False, write_file=False):
@@ -588,3 +597,12 @@ class CROSS_VALIDATION:
         self.X_Test = X_Test
         self.Y_Test = y_Test
         return Dict
+    
+    def get_NN(dictionary):
+        NN = MLPRegressor()
+        NN.set_params(**dictionary['parameters'])
+        #catches instances where coefficients and intercepts are saved via standard json package as list of lists
+        dictionary['__getstate__']['coefs_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['coefs_'].copy()]
+        dictionary['__getstate__']['intercepts_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['intercepts_'].copy()]
+        NN.__setstate__(dictionary['__getstate__'])
+        return NN

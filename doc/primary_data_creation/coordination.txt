@@ -1,0 +1,7 @@
+coordination
+============
+.. automodule:: jl_spectra_2_structure.primary_data_creation.coordination
+   :members:
+   :undoc-members:
+   :private-members:
+

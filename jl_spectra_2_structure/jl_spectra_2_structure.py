@@ -8,13 +8,11 @@ from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
 import json
-import json_tricks
 import pkg_resources
 from sklearn.cluster import KMeans
 from imblearn.over_sampling import RandomOverSampler
-from .neural_network import MLPRegressor
 
-def get_defaults(adsorbate):
+def get_default_data_paths(adsorbate):
     """
     Returns default frequencies to project intensities onto as well as default
     paths for locations of the pure and mixture spectroscopic data.
@@ -42,10 +40,9 @@ def get_defaults(adsorbate):
     nanoparticle_path = os.path.join(data_path, 'dft_nanoparticle/single_'+adsorbate+'.json')
     isotope_path = os.path.join(data_path, 'dft_surface/isotope_'+adsorbate+'.json')
     high_coverage_path = os.path.join(data_path, 'dft_surface/high_coverage_'+adsorbate+'.json')
-    cross_validation_path = os.path.join(data_path, 'cross_validation')
-    coverage_scaling_path = os.path.join(data_path,'coverage_scaling_params_'+adsorbate+'.json')
+    coverage_scaling_path = os.path.join(data_path,'coverage_scaling_params_'+adsorbate+'.json') 
     return (nanoparticle_path, isotope_path, high_coverage_path\
-           , cross_validation_path, coverage_scaling_path)
+           , coverage_scaling_path)
 
 class IR_GEN:
     def __init__(self, ADSORBATE='CO', POC=1, TARGET='binding_type', NUM_TARGETS=None, EXCLUDE_ATOP=False\
@@ -615,12 +612,3 @@ def HREEL_2_scaledIR(HREEL, frequency_range=np.linspace(200,2200,num=501,endpoin
     IR = np.interp(frequency_range, HREEL[0], HREEL[1]*HREEL[0]**PEAK_CONV, left=None, right=None, period=None)
     IR_scaled = IR/np.max(IR)
     return IR_scaled
-
-def get_NN(dictionary):
-    NN = MLPRegressor()
-    NN.set_params(**dictionary['parameters'])
-    #catches instances where coefficients and intercepts are saved via standard json package as list of lists
-    dictionary['__getstate__']['coefs_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['coefs_'].copy()]
-    dictionary['__getstate__']['intercepts_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['intercepts_'].copy()]
-    NN.__setstate__(dictionary['__getstate__'])
-    return NN

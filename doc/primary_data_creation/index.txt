@@ -1,0 +1,20 @@
+.. jl_spectra_2_structure.primary_data_creation
+
+primary_data_creation
+=====================
+
+This page includes documentation for generating the primary dataset from concatenated VASP CHARGEMOL files.
+The vasp files should be in a folder called freq and should be a concatenated file called vasprun2.xml that
+contain the forces from vasprun.xmls that correspond to frequency calculations.
+The first concatenated vasprun.xml is from a local minima calcualtion. Then atoms [1-n] are perturbed in the
++x, -x, +y -y, +z, -z directions in that order. This order is important for correctly parameterizing the Hession.
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Contents:
+
+   /primary_data_creation/dft_2_data
+
+   /primary_data_creation/coordination
+
+   /primary_data_creation/file_parser

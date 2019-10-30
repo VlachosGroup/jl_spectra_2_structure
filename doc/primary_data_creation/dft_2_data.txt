@@ -1,0 +1,16 @@
+dft_2_data
+==========
+
+The ``Primary_DATA`` class
+**************************
+.. autoclass:: jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA
+   :members:
+   :undoc-members:
+   :private-members:
+
+The ``COVERAGE_SCALING`` class
+******************************
+.. autoclass:: jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING
+   :members:
+   :undoc-members:
+   :private-members:

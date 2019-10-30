@@ -1,0 +1,13 @@
+file_parser
+===========
+
+The ``VASP_PARSER`` class
+*************************
+.. autoclass:: jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER
+   :members:
+   :undoc-members:
+   :private-members:
+
+The ``explode`` function
+************************
+.. autofunction:: jl_spectra_2_structure.primary_data_creation.file_parser.explode

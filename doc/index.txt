@@ -2,7 +2,7 @@
    sphinx-quickstart on Tue Oct  1 10:58:37 2019.
 
 Welcome to jl_spectra_2_structure's documentation!
-=========================================
+==================================================
 
 .. toctree::
    :maxdepth: 4
@@ -10,9 +10,13 @@ Welcome to jl_spectra_2_structure's documentation!
 
    jl_spectra_2_structure
 
+   neural_network
+
+   primary_data_creation/index
+
    plotting_tools
 
-   error_metrics
+   error_metrics  
 
    auto_examples/index
 
