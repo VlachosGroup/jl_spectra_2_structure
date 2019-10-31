@@ -685,3 +685,67 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
              , cv_indices_path=new_cv_indices_path, cross_validation_path=new_cross_validation_path)
         super()._get_ir_gen_class(self.TARGET, self.NUM_GCN_LABELS, self.MIN_GCN_PER_LABEL, self.GCN_ALL)
         
+    def get_all_CV_data(self):
+        CV_FILES = self.CV_FILES
+        CV_RESULTS = NESTED_DICT()
+        def deep_update(ADSORBATE,TARGET,COVERAGE,KEY,VALUE=None,create_list=False):
+            if create_list == True:
+                CV_RESULTS[ADSORBATE][TARGET][COVERAGE].update({KEY:[]})
+            CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY].append(VALUE)
+        
+        KEYS = ['POC','NUM_GCN_LABELS','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
+              'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','count']
+        for count, file in enumerate(CV_FILES):
+            with open(file, 'r') as infile:
+                CV_DICT_LIST = json_tricks.load(infile)
+            ADSORBATE = CV_DICT_LIST[-1]['ADSORBATE']
+            POC = CV_DICT_LIST[-1]['POC']
+            TARGET = CV_DICT_LIST[-1]['TARGET']
+            COVERAGE = CV_DICT_LIST[-1]['COVERAGE']
+            NUM_GCN_LABELS = CV_DICT_LIST[-1]['NUM_GCN_LABELS']
+            WL_VAL = []
+            WL_TRAIN= []
+            for i in range(CV_DICT_LIST[-1]['CV_SPLITS']):
+                WL_VAL.append(CV_DICT_LIST[i]['Wl2_Val'])
+                WL_TRAIN.append(CV_DICT_LIST[i]['Wl2_Train'])
+            WL_VAL_mean = np.mean(WL_VAL,axis=0)
+            WL_VAL_std  = np.std(WL_VAL,axis=0)
+            WL_TRAIN_mean = np.mean(WL_VAL,axis=0)
+            WL_TRAIN_std  = np.std(WL_VAL,axis=0)
+            WL_TEST_TEST = CV_DICT_LIST[-2]['Wl2_Test']
+            WL_TEST_TRAIN = CV_DICT_LIST[-2]['Wl2_Train']
+            VALUES = [POC,NUM_GCN_LABELS, WL_VAL_mean, WL_VAL_std, WL_TRAIN_mean\
+                      , WL_TRAIN_std, WL_TEST_TEST, WL_TEST_TRAIN,count]
+            try:
+                for KEY, VALUE in zip(KEYS,VALUES):
+                    deep_update(ADSORBATE,TARGET,COVERAGE,KEY,VALUE, create_list=False)
+            except:
+                for KEY, VALUE in zip(KEYS,VALUES):
+                    deep_update(ADSORBATE,TARGET,COVERAGE,KEY,VALUE, create_list=True)
+                    
+            return CV_RESULTS
+            
+    def get_best_models(self, models_per_category, standard_deviations):
+        CV_RESULTS = self.get_all_CV_data()
+        BEST_MODELS = NESTED_DICT()
+        for ADSORBATE in CV_RESULTS:
+            for TARGET in CV_RESULTS[ADSORBATE]:
+                for COVERAGE in CV_RESULTS[ADSORBATE][TARGET]:
+                    WL_TRAIN = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_mean'])
+                    WL_STD = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_std'])
+                    min_score = np.min(WL_TRAIN + standard_deviations * WL_STD, axis=1)
+                    best_models = np.argsort(min_score)[0:models_per_category]
+                    SCORES = min_score[best_models]
+                    BEST_MODELS.update([ADSORBATE][TARGET][COVERAGE]['SCORES'], SCORES)
+                    for KEY in CV_RESULTS[ADSORBATE][TARGET][COVERAGE]:
+                        BEST_VALUES = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY])[best_models]
+                        BEST_MODELS.update(CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY],BEST_VALUES)
+                        
+        return BEST_MODELS
+    
+class NESTED_DICT(dict):
+    """Implementation of perl's autovivification feature."""
+    def __missing__(self, key):
+        value = self[key] = type(self)()
+        return value
+        
