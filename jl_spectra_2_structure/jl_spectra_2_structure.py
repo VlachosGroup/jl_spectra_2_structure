@@ -51,7 +51,7 @@ class IR_GEN:
         assert POC in [1,2], "The adsorbate must have 1 or 2 atoms in contact with the surface."
         #number of target variables.
         nano_path, isotope_path, high_cov_path\
-           , cross_validation_path, cov_scale_path = get_defaults(ADSORBATE)
+           , cov_scale_path = get_default_data_paths(ADSORBATE)
         
         if nanoparticle_path is None:
             nanoparticle_path = nano_path

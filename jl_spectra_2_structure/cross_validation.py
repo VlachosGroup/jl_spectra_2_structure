@@ -23,7 +23,7 @@ import psutil
 class CROSS_VALIDATION:
     """
     """
-    def __init__(self, ADSORBATE='CO', POC=1\
+    def __init__(self, ADSORBATE='CO', POC=1, cv_indices_path=None\
                  ,cross_validation_path = None, nanoparticle_path=None\
                  ,high_coverage_path=None, coverage_scaling_path=None):
         """
@@ -34,12 +34,16 @@ class CROSS_VALIDATION:
         
         if cross_validation_path is None:
             cross_validation_path = self._get_default_cross_validation_path()
+        if cv_indices_path is None:
+            cv_indices_path = self._get_default_cv_indices_path()
+        self.CV_INDICES_PATH = cv_indices_path
         self.CV_PATH = cross_validation_path
         self.ADSORBATE = ADSORBATE
         self.POC = POC
         self.NANO_PATH = nanoparticle_path
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
+        
         
     def _get_default_cross_validation_path(self):
          work_dir = os.getcwd()
@@ -48,7 +52,28 @@ class CROSS_VALIDATION:
          if already_exists == False:
              os.mkdir(cross_validation_path)
          return cross_validation_path
-
+     
+    def _get_default_cv_indices_path(self):
+         work_dir = os.getcwd()
+         cv_indices_path = os.path.join(work_dir,'cv_indices')
+         already_exists = os.path.isdir(cv_indices_path)
+         if already_exists == False:
+             os.mkdir(cv_indices_path)
+         return cv_indices_path
+     
+    def _get_state(self):
+        Dict = { 'ADSORBATE': self.ADSORBATE,'POC': self.POC\
+                , 'NUM_GCN_LABELS': self.NUM_GCN_LABELS, 'MIN_GCN_PER_LABEL': self.MIN_GCN_PER_LABEL
+                , 'GCN_ALL': self.GCN_ALL, 'CV_SPLITS': self.CV_SPLITS\
+                , 'INDICES_VAL': self.INDICES_VAL, 'INDICES_TRAIN': self.INDICES_TRAIN\
+                , 'INDICES_TEST': self.INDICES_TEST, 'INDICES_CV_ALL': self.INDICES_CV_ALL\
+                , 'TARGET': self.TARGET, 'COVERAGE': self.COVERAGE, 'NN_PROPERTIES': self.NN_PROPERTIES\
+                , 'NUM_TRAIN': self.NUM_TRAIN, 'NUM_VAL': self.NUM_VAL, 'NUM_TEST': self.NUM_TEST\
+                , 'LOW_FREQUENCY': self.LOW_FREQUENCY, 'HIGH_FREQUENCY': self.HIGH_FREQUENCY\
+                , 'ENERGY_POINTS': self.ENERGY_POINTS, 'FEATURE_MEANS': self.FEATURE_MEANS\
+                , 'TOTAL_EXPLAINED_VARIANCE': self.TOTAL_EXPLAINED_VARIANCE\
+                , 'EXPLAINED_VARIANCE': self.EXPLAINED_VARIANCE, 'PC_LOADINGS': self.PC_LOADINGS}
+        return Dict
         
     def generate_test_cv_indices(self, CV_SPLITS=5, NUM_GCN_LABELS=11, GCN_ALL = False\
                                  ,test_fraction=0.2,random_state=0, read_file=False, write_file=False):
@@ -59,8 +84,8 @@ class CROSS_VALIDATION:
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
         COV_SCALE_PATH = self.COV_SCALE_PATH
-        CV_PATH = self.CV_PATH
-        INDICES_FILE = os.path.join(CV_PATH,\
+        CV_INDICES_PATH = self.CV_INDICES_PATH
+        INDICES_FILE = os.path.join(CV_INDICES_PATH,\
         'cross_validation_indices_'+str(CV_SPLITS)+'fold_'+ADSORBATE+'.json')
         if read_file == False:
             INDICES_DICTIONARY = {'BINDING_TYPE':{'train_indices':[], 'val_indices':[]\
@@ -139,14 +164,55 @@ class CROSS_VALIDATION:
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
         assert TARGET in ['combine_hollow_sites','binding_type','GCN'], "incorrect TARGET variable given"
+        _get_ir_gen_class = self._get_ir_gen_class
+        CV_SPLITS = self.CV_SPLITS
+        if NUM_GCN_LABELS is None:
+            NUM_GCN_LABELS = self.NUM_GCN_LABELS
+
+        _get_ir_gen_class(NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL)
+        
+        if TARGET == 'GCN' and GCN_ALL == False:
+            INDICES_VAL = [(INDICES_DICTIONARY['GCN_ATOP']['val_indices'][CV_VAL]\
+                           , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['val_indices'][CV_VAL])\
+                           for CV_VAL in range(CV_SPLITS)]
+            INDICES_TRAIN = [(INDICES_DICTIONARY['GCN_ATOP']['train_indices'][CV_VAL]\
+                             , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['train_indices'][CV_VAL])\
+                             for CV_VAL in range(CV_SPLITS)]
+            INDICES_TEST = [INDICES_DICTIONARY['GCN_ATOP']['TEST_indices']\
+                            , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['TEST_indices']]
+            INDICES_CV_ALL = [INDICES_DICTIONARY['GCN_ATOP']['CV_indices']\
+                              , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['CV_indices']]
+        else:
+            INDICES_VAL = INDICES_DICTIONARY['BINDING_TYPE']['val_indices']
+            INDICES_TRAIN = INDICES_DICTIONARY['BINDING_TYPE']['train_indices']
+            INDICES_TEST = INDICES_DICTIONARY['BINDING_TYPE']['TEST_indices']
+            INDICES_CV_ALL = INDICES_DICTIONARY['BINDING_TYPE']['CV_indices']
+            
+        if NUM_GCN_LABELS is not None:
+            self.NUM_GCN_LABELS = NUM_GCN_LABELS
+        self.MIN_GCN_PER_LABEL = MIN_GCN_PER_LABEL
+        self.GCN_ALL = GCN_ALL
+        self.INDICES_VAL = INDICES_VAL
+        self.INDICES_TRAIN = INDICES_TRAIN
+        self.INDICES_TEST = INDICES_TEST
+        self.INDICES_CV_ALL = INDICES_CV_ALL
+        self.TARGET = TARGET
+        self.COVERAGE = COVERAGE
+        self.NN_PROPERTIES = NN_PROPERTIES
+        self.NUM_TRAIN = NUM_TRAIN
+        self.NUM_VAL = NUM_VAL
+        self.NUM_TEST = NUM_TEST
+        self.LOW_FREQUENCY = LOW_FREQUENCY
+        self.HIGH_FREQUENCY = HIGH_FREQUENCY
+        self.ENERGY_POINTS = ENERGY_POINTS
+        
+    def _get_ir_gen_class(self, NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL):
+        TARGET = self.TARGET
         ADSORBATE = self.ADSORBATE
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
         COV_SCALE_PATH = self.COV_SCALE_PATH
         POC = self.POC
-        CV_SPLITS = self.CV_SPLITS
-        if NUM_GCN_LABELS is None:
-            NUM_GCN_LABELS = self.NUM_GCN_LABELS
         if TARGET == 'combine_hollow_sites': 
             MAINconv = IR_GEN(ADSORBATE, POC=1, TARGET='combine_hollow_sites'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
@@ -169,44 +235,9 @@ class CROSS_VALIDATION:
                          , coverage_scaling_path=COV_SCALE_PATH)
         
         if TARGET == 'GCN' and GCN_ALL == False:
-            INDICES_VAL = [(INDICES_DICTIONARY['GCN_ATOP']['val_indices'][CV_VAL]\
-                           , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['val_indices'][CV_VAL])\
-                           for CV_VAL in range(CV_SPLITS)]
-            INDICES_TRAIN = [(INDICES_DICTIONARY['GCN_ATOP']['train_indices'][CV_VAL]\
-                             , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['train_indices'][CV_VAL])\
-                             for CV_VAL in range(CV_SPLITS)]
-            INDICES_TEST = [INDICES_DICTIONARY['GCN_ATOP']['TEST_indices']\
-                            , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['TEST_indices']]
-            INDICES_CV_ALL = [INDICES_DICTIONARY['GCN_ATOP']['CV_indices']\
-                              , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['CV_indices']]
-        else:
-            INDICES_VAL = INDICES_DICTIONARY['BINDING_TYPE']['val_indices']
-            INDICES_TRAIN = INDICES_DICTIONARY['BINDING_TYPE']['train_indices']
-            INDICES_TEST = INDICES_DICTIONARY['BINDING_TYPE']['TEST_indices']
-            INDICES_CV_ALL = INDICES_DICTIONARY['BINDING_TYPE']['CV_indices']
-            
-        if NUM_GCN_LABELS is not None:
-            self.NUM_GCN_LABELS = NUM_GCN_LABELS
-        if TARGET == 'GCN' and GCN_ALL == False:
             self.OTHER_SITESconv = OTHER_SITESconv
-        self.INDICES_VAL = INDICES_VAL
-        self.INDICES_TRAIN = INDICES_TRAIN
-        self.INDICES_TEST = INDICES_TEST
-        self.INDICES_CV_ALL = INDICES_CV_ALL
         self.MAINconv = MAINconv
-        self.TARGET = TARGET
-        self.COVERAGE = COVERAGE
-        self.NN_PROPERTIES = NN_PROPERTIES
-        self.NUM_TRAIN = NUM_TRAIN
-        self.NUM_VAL = NUM_VAL
-        self.NUM_TEST = NUM_TEST
-        self.MIN_GCN_PER_LABEL = MIN_GCN_PER_LABEL
-        self.GCN_ALL = GCN_ALL
-        self.LOW_FREQUENCY = LOW_FREQUENCY
-        self.HIGH_FREQUENCY = HIGH_FREQUENCY
-        self.ENERGY_POINTS = ENERGY_POINTS
-        self.GCN_ALL = GCN_ALL
-        
+    
     def set_nn_parameters(self, NN_PROPERTIES):
         self.NN_PROPERTIES = NN_PROPERTIES
         
@@ -269,8 +300,8 @@ class CROSS_VALIDATION:
         
         """
         FEATURE_MEANS = self.FEATURE_MEANS
-        X = (spectra - FEATURE_MEANS)
         PC_LOADINGS = self.PC_LOADINGS
+        X = (spectra - FEATURE_MEANS)
         PCs = np.dot(X,PC_LOADINGS.T)
         return PCs 
     
@@ -280,10 +311,11 @@ class CROSS_VALIDATION:
         except:
             print("set_model_parameters must be run first")
             raise
-        CV_SPLITS = self.CV_SPLITS
-        ADSORBATE = self.ADSORBATE
+        _get_state = self._get_state
         _run_NN = self._run_NN
         get_secondary_data = self.get_secondary_data
+        CV_SPLITS = self.CV_SPLITS
+        ADSORBATE = self.ADSORBATE
         CV_PATH = self.CV_PATH
         COVERAGE = self.COVERAGE
         NN_PROPERTIES = self.NN_PROPERTIES
@@ -331,7 +363,8 @@ class CROSS_VALIDATION:
         print('#########################################################')
         print('#########################################################')
         print('Time to run the CV+Test: ' + str(stop-start))
-        
+        Dict = _get_state()
+        DictList.append(Dict)
         if write_file == True:
             with open(CV_RESULTS_FILE, 'w') as outfile:
                 json_tricks.dump(DictList, outfile, sort_keys=True, indent=4)
@@ -344,6 +377,7 @@ class CROSS_VALIDATION:
         except:
             print("set_model_parameters must be run first")
             raise
+        _get_state = self._get_state
         run_single_CV = self.run_single_CV
         CV_SPLITS = self.CV_SPLITS
         ADSORBATE = self.ADSORBATE
@@ -398,8 +432,8 @@ class CROSS_VALIDATION:
         print('#########################################################')
         print('#########################################################')
         print('Time to run the CV+Test: ' + str(stop-start))
-        
-        
+        Dict = _get_state()
+        DictList.append(Dict)
         if write_file == True:
             with open(CV_RESULTS_FILE, 'w') as outfile:
                 json_tricks.dump(DictList, outfile, sort_keys=True, indent=4)
@@ -598,7 +632,28 @@ class CROSS_VALIDATION:
         self.Y_Test = y_Test
         return Dict
     
-    def get_NN(dictionary):
+class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
+    """
+    """
+    def __init__(self, cv_indices_path=None, cross_validation_path=None):
+        """
+        """
+        _get_default_cross_validation_path = self._get_default_cross_validation_path
+        _get_default_cv_indices_path = self._get_default_cv_indices_path
+        if cross_validation_path is None:
+            cross_validation_path = _get_default_cross_validation_path()
+        if cv_indices_path is None:
+            cv_indices_path = _get_default_cv_indices_path
+        is_directory = os.path.isdir(cross_validation_path)
+        assert cross_validation_path is None or is_directory == True\
+        , "input to LOAD_CROSS_VALIDATION path is not a directory"
+        CV_FILES = [os.path.join(cross_validation_path,file) for file \
+        in os.listdir(cross_validation_path) if os.path.isfile(file) ==True]
+        self.CV_FILES = CV_FILES
+        self.CV_PATH_OLD = cross_validation_path
+        self.CV_INDICES_PATH_OLD = cv_indices_path
+        
+    def get_NN(self,dictionary):
         NN = MLPRegressor()
         NN.set_params(**dictionary['parameters'])
         #catches instances where coefficients and intercepts are saved via standard json package as list of lists
@@ -606,3 +661,23 @@ class CROSS_VALIDATION:
         dictionary['__getstate__']['intercepts_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['intercepts_'].copy()]
         NN.__setstate__(dictionary['__getstate__'])
         return NN
+    
+    def load_CV_class(self,index, new_cv_indices_path = None, new_cross_validation_path=None):
+        __dict__ = self.__dict__
+        get_NN = self.get_NN
+        CV_FILES = self.CV_FILES
+        CV_PATH_OLD = self.CV_PATH_OLD
+        CV_INDICES_PATH_OLD = self.CV_INDICES_PATH_OLD
+        if new_cross_validation_path is None:
+            CV_PATH = CV_PATH_OLD.rstrip('/ \ ') + r'_v2/'
+        if new_cv_indices_path is None:
+            CV_INDICES_PATH = CV_INDICES_PATH_OLD.rstrip('/ \ ') + r'_v2/'
+        file = CV_FILES[index]
+        with open(file, 'r') as infile:
+            CV_DICT_LIST = json.load(infile)
+        __dict__.update(CV_DICT_LIST[-1])
+        self.NN = get_NN(CV_DICT_LIST[-2])
+        self.CV_DICT_LIST = CV_DICT_LIST
+        super().__init__(ADSORBATE=self.ADSORBATE, POC=self.POC, cv_indices_path=CV_INDICES_PATH, cross_validation_path=CV_PATH)
+        super()._get_ir_gen_class(self.NUM_GCN_LABELS, self.MIN_GCN_PER_LABEL, self.GCN_ALL)
+        
