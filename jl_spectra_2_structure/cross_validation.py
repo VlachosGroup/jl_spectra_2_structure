@@ -7,7 +7,6 @@ Created on Tue Dec 19 11:05:24 2017
 from __future__ import absolute_import, division, print_function
 import os
 import numpy as np
-import json
 import json_tricks
 from timeit import default_timer as timer
 from sklearn.model_selection import StratifiedKFold
@@ -144,11 +143,11 @@ class CROSS_VALIDATION:
                 INDICES_DICTIONARY['BINDING_TYPE_4GCN']['val_indices'].append(CV_indices[val_index[GCNconv.BINDING_TYPES[CV_indices[val_index]] > 1]].astype('int').tolist())    
             if write_file==True:
                 with open(INDICES_FILE, 'w') as outfile:
-                    json.dump(INDICES_DICTIONARY, outfile, sort_keys=True, indent=4)
+                    json_tricks.dump(INDICES_DICTIONARY, outfile, sort_keys=True, indent=4)
                     print('Generated CV indices and saved dictionary to file ' + INDICES_FILE)
         elif read_file == True:
             with open(INDICES_FILE, 'r') as infile:
-                INDICES_DICTIONARY = json.load(infile)
+                INDICES_DICTIONARY = json_tricks.load(infile)
         self.INDICES_DICTIONARY = INDICES_DICTIONARY
         self.CV_SPLITS = CV_SPLITS
         self.NUM_GCN_LABELS = NUM_GCN_LABELS
@@ -169,7 +168,7 @@ class CROSS_VALIDATION:
         if NUM_GCN_LABELS is None:
             NUM_GCN_LABELS = self.NUM_GCN_LABELS
 
-        _get_ir_gen_class(NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL)
+        _get_ir_gen_class(TARGET, NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL)
         
         if TARGET == 'GCN' and GCN_ALL == False:
             INDICES_VAL = [(INDICES_DICTIONARY['GCN_ATOP']['val_indices'][CV_VAL]\
@@ -206,8 +205,7 @@ class CROSS_VALIDATION:
         self.HIGH_FREQUENCY = HIGH_FREQUENCY
         self.ENERGY_POINTS = ENERGY_POINTS
         
-    def _get_ir_gen_class(self, NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL):
-        TARGET = self.TARGET
+    def _get_ir_gen_class(self, TARGET, NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL):
         ADSORBATE = self.ADSORBATE
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
@@ -643,19 +641,20 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         if cross_validation_path is None:
             cross_validation_path = _get_default_cross_validation_path()
         if cv_indices_path is None:
-            cv_indices_path = _get_default_cv_indices_path
+            cv_indices_path = _get_default_cv_indices_path()
         is_directory = os.path.isdir(cross_validation_path)
-        assert cross_validation_path is None or is_directory == True\
+        is_directory_indices = os.path.isdir(cv_indices_path)
+        assert is_directory_indices== True and is_directory == True\
         , "input to LOAD_CROSS_VALIDATION path is not a directory"
         CV_FILES = [os.path.join(cross_validation_path,file) for file \
-        in os.listdir(cross_validation_path) if os.path.isfile(file) ==True]
+        in os.listdir(cross_validation_path) \
+        if os.path.isfile(os.path.join(cross_validation_path,file)) == True]
         self.CV_FILES = CV_FILES
         self.CV_PATH_OLD = cross_validation_path
         self.CV_INDICES_PATH_OLD = cv_indices_path
         
     def get_NN(self,dictionary):
-        NN = MLPRegressor()
-        NN.set_params(**dictionary['parameters'])
+        NN = MLPRegressor(**dictionary['parameters'])
         #catches instances where coefficients and intercepts are saved via standard json package as list of lists
         dictionary['__getstate__']['coefs_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['coefs_'].copy()]
         dictionary['__getstate__']['intercepts_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['intercepts_'].copy()]
@@ -669,15 +668,20 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         CV_PATH_OLD = self.CV_PATH_OLD
         CV_INDICES_PATH_OLD = self.CV_INDICES_PATH_OLD
         if new_cross_validation_path is None:
-            CV_PATH = CV_PATH_OLD.rstrip('/ \ ') + r'_v2/'
+            new_cross_validation_path = CV_PATH_OLD.rstrip('/ \ ') + r'_continuation/'
         if new_cv_indices_path is None:
-            CV_INDICES_PATH = CV_INDICES_PATH_OLD.rstrip('/ \ ') + r'_v2/'
+            new_cv_indices_path = CV_INDICES_PATH_OLD.rstrip('/ \ ') + r'_continuation/'
+        if os.path.isdir(new_cross_validation_path) == False:
+            os.mkdir(new_cross_validation_path)
+        if os.path.isdir(new_cv_indices_path) == False:
+            os.mkdir(new_cv_indices_path)
         file = CV_FILES[index]
         with open(file, 'r') as infile:
-            CV_DICT_LIST = json.load(infile)
+            CV_DICT_LIST = json_tricks.load(infile)
         __dict__.update(CV_DICT_LIST[-1])
         self.NN = get_NN(CV_DICT_LIST[-2])
         self.CV_DICT_LIST = CV_DICT_LIST
-        super().__init__(ADSORBATE=self.ADSORBATE, POC=self.POC, cv_indices_path=CV_INDICES_PATH, cross_validation_path=CV_PATH)
-        super()._get_ir_gen_class(self.NUM_GCN_LABELS, self.MIN_GCN_PER_LABEL, self.GCN_ALL)
+        super().__init__(ADSORBATE=self.ADSORBATE, POC=self.POC\
+             , cv_indices_path=new_cv_indices_path, cross_validation_path=new_cross_validation_path)
+        super()._get_ir_gen_class(self.TARGET, self.NUM_GCN_LABELS, self.MIN_GCN_PER_LABEL, self.GCN_ALL)
         

@@ -17,7 +17,7 @@ if __name__ == "__main__":
     CV_SPLITS = 3
     CV_class.generate_test_cv_indices(CV_SPLITS=CV_SPLITS, NUM_GCN_LABELS=11\
                                       , GCN_ALL = True, test_fraction=0.25\
-    ,random_state=0, read_file=False, write_file=True)
+    ,random_state=0, read_file=True, write_file=False)
     properties_dictionary = {'batch_size':500, 'learning_rate_init':0.005\
                   , 'epsilon':10**-12,'hidden_layer_sizes':(50,50)
                   ,'alpha':0, 'epochs_per_training_set':200,'training_sets':1,'loss': 'wasserstein_loss'}
