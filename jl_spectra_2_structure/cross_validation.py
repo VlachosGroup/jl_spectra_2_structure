@@ -452,15 +452,7 @@ class CROSS_VALIDATION:
         NUM_TEST = self.NUM_TEST
         INDICES_TEST = self.INDICES_TEST
         INDICES_CV_ALL = self.INDICES_CV_ALL
-        TARGET = self.TARGET
-        COVERAGE = self.COVERAGE
-        
-        #Decide if validation spectra can be created at once
-        if ((COVERAGE == 'high' or type(COVERAGE) in [float, int]) and TARGET in ['binding_type', 'combine_hollow_sites'])\
-        or (COVERAGE == 'high' and TARGET == 'GCN'):
-            iterations = 10
-        else:
-            iterations = 1
+        iterations = 10
         
         if CV_INDEX_or_TEST != 'TEST':
             print('#########################################################')
@@ -685,7 +677,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
              , cv_indices_path=new_cv_indices_path, cross_validation_path=new_cross_validation_path)
         super()._get_ir_gen_class(self.TARGET, self.NUM_GCN_LABELS, self.MIN_GCN_PER_LABEL, self.GCN_ALL)
         
-    def get_all_CV_data(self):
+    def load_all_CV_data(self):
         CV_FILES = self.CV_FILES
         CV_RESULTS = NESTED_DICT()
         def deep_update(ADSORBATE,TARGET,COVERAGE,KEY,VALUE=None,create_list=False):
@@ -694,7 +686,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY].append(VALUE)
         
         KEYS = ['POC','NUM_GCN_LABELS','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
-              'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','count']
+              ,'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','count']
         for count, file in enumerate(CV_FILES):
             with open(file, 'r') as infile:
                 CV_DICT_LIST = json_tricks.load(infile)
@@ -710,8 +702,8 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 WL_TRAIN.append(CV_DICT_LIST[i]['Wl2_Train'])
             WL_VAL_mean = np.mean(WL_VAL,axis=0)
             WL_VAL_std  = np.std(WL_VAL,axis=0)
-            WL_TRAIN_mean = np.mean(WL_VAL,axis=0)
-            WL_TRAIN_std  = np.std(WL_VAL,axis=0)
+            WL_TRAIN_mean = np.mean(WL_TRAIN,axis=0)
+            WL_TRAIN_std  = np.std(WL_TRAIN,axis=0)
             WL_TEST_TEST = CV_DICT_LIST[-2]['Wl2_Test']
             WL_TEST_TRAIN = CV_DICT_LIST[-2]['Wl2_Train']
             VALUES = [POC,NUM_GCN_LABELS, WL_VAL_mean, WL_VAL_std, WL_TRAIN_mean\
@@ -723,25 +715,33 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 for KEY, VALUE in zip(KEYS,VALUES):
                     deep_update(ADSORBATE,TARGET,COVERAGE,KEY,VALUE, create_list=True)
                     
-            return CV_RESULTS
+        CV_RESULTS_dict = {}
+        CV_RESULTS_dict.update(CV_RESULTS.copy())
+        self.CV_RESULTS = CV_RESULTS
             
     def get_best_models(self, models_per_category, standard_deviations):
-        CV_RESULTS = self.get_all_CV_data()
+        try:
+            CV_RESULTS = self.CV_RESULTS
+        except:
+            self.load_all_CV_data()
+            CV_RESULTS = self.CV_RESULTS
         BEST_MODELS = NESTED_DICT()
-        for ADSORBATE in CV_RESULTS:
-            for TARGET in CV_RESULTS[ADSORBATE]:
-                for COVERAGE in CV_RESULTS[ADSORBATE][TARGET]:
-                    WL_TRAIN = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_mean'])
-                    WL_STD = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_std'])
-                    min_score = np.min(WL_TRAIN + standard_deviations * WL_STD, axis=1)
+        for ADSORBATE in CV_RESULTS.keys():
+            for TARGET in CV_RESULTS[ADSORBATE].keys():
+                for COVERAGE in CV_RESULTS[ADSORBATE][TARGET].keys():
+                    WL_VAL = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'])
+                    WL_STD = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
+                    min_score = np.min(WL_VAL + standard_deviations * WL_STD, axis=1)
                     best_models = np.argsort(min_score)[0:models_per_category]
                     SCORES = min_score[best_models]
-                    BEST_MODELS.update([ADSORBATE][TARGET][COVERAGE]['SCORES'], SCORES)
-                    for KEY in CV_RESULTS[ADSORBATE][TARGET][COVERAGE]:
+                    BEST_MODELS[ADSORBATE][TARGET][COVERAGE]['SCORES'] = SCORES
+                    for KEY in CV_RESULTS[ADSORBATE][TARGET][COVERAGE].keys():
                         BEST_VALUES = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY])[best_models]
-                        BEST_MODELS.update(CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY],BEST_VALUES)
+                        BEST_MODELS[ADSORBATE][TARGET][COVERAGE][KEY] = BEST_VALUES
+        BEST_MODELS_dict = {}
+        BEST_MODELS_dict.update(BEST_MODELS.copy())
                         
-        return BEST_MODELS
+        return BEST_MODELS_dict
     
 class NESTED_DICT(dict):
     """Implementation of perl's autovivification feature."""
