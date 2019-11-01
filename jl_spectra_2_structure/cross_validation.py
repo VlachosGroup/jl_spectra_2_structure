@@ -686,7 +686,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY].append(VALUE)
         
         KEYS = ['POC','NUM_GCN_LABELS','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
-              ,'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','count']
+              ,'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','CV_FILES_INDEX']
         for count, file in enumerate(CV_FILES):
             with open(file, 'r') as infile:
                 CV_DICT_LIST = json_tricks.load(infile)
@@ -714,10 +714,9 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             except:
                 for KEY, VALUE in zip(KEYS,VALUES):
                     deep_update(ADSORBATE,TARGET,COVERAGE,KEY,VALUE, create_list=True)
-                    
-        CV_RESULTS_dict = {}
-        CV_RESULTS_dict.update(CV_RESULTS.copy())
-        self.CV_RESULTS = CV_RESULTS
+            
+        CV_RESULTS_dict = NESTED_DICT_to_DICT(CV_RESULTS)
+        self.CV_RESULTS = CV_RESULTS_dict
             
     def get_best_models(self, models_per_category, standard_deviations):
         try:
@@ -738,14 +737,43 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                     for KEY in CV_RESULTS[ADSORBATE][TARGET][COVERAGE].keys():
                         BEST_VALUES = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY])[best_models]
                         BEST_MODELS[ADSORBATE][TARGET][COVERAGE][KEY] = BEST_VALUES
-        BEST_MODELS_dict = {}
-        BEST_MODELS_dict.update(BEST_MODELS.copy())
-                        
+        BEST_MODELS_dict = NESTED_DICT_to_DICT(BEST_MODELS)
+        self.BEST_MODELS = BEST_MODELS_dict
         return BEST_MODELS_dict
+    
+    def get_keys(self,dictionary):
+        dictionary_of_keys = {}
+        def recursive_items(dictionary,dictionary_of_keys):
+            for key, value in dictionary.items():
+                if type(value) is dict:
+                    next_key = list(value.keys())[0]
+                    next_value = value[next_key]
+                    value2 = value.copy()
+                    if type(next_value) is dict:
+                        dictionary_of_keys.update({key:value2})
+                        recursive_items(value,value2)
+                    else:
+                        dictionary_of_keys.update({key:list(value2.keys())})
+        
+        recursive_items(dictionary,dictionary_of_keys)
+        return dictionary_of_keys
     
 class NESTED_DICT(dict):
     """Implementation of perl's autovivification feature."""
     def __missing__(self, key):
         value = self[key] = type(self)()
         return value
+
+def NESTED_DICT_to_DICT(nested_dict):
+    dictionary = {}
+    def recursive_items(nested_dict,dictionary):
+        for key, value in nested_dict.items():
+            if type(value) in [NESTED_DICT, dict]:
+                value2 = {}
+                value2.update(value.copy())
+                dictionary.update({key:value2})
+                recursive_items(value,value2) 
+    recursive_items(nested_dict,dictionary)
+    return dictionary
+    
         
