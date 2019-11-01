@@ -29,7 +29,7 @@ if __name__ == "__main__":
                                  , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=11,GCN_ALL = True\
                          ,LOW_FREQUENCY=200, HIGH_FREQUENCY=3350, ENERGY_POINTS=750)
     
-        CV_class._set_pc_loadings(70,NUM_SAMPLES=1000)
+        CV_class._set_pc_loadings(70,NUM_SAMPLES=10000)
         print('Total Explained Variance: ' + str(CV_class.TOTAL_EXPLAINED_VARIANCE))
         for alpha in np.linspace(0,0.1,10):
             properties_dictionary.update({'alpha':alpha})

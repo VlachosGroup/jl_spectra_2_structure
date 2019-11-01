@@ -11,13 +11,14 @@ import json_tricks
 from timeit import default_timer as timer
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import StratifiedShuffleSplit
+import multiprocessing
+import psutil
 from copy import deepcopy
+import matplotlib.pyplot as plt
 from .neural_network import MLPRegressor
 from .jl_spectra_2_structure import IR_GEN
 from .jl_spectra_2_structure import get_default_data_paths
 from . import error_metrics
-import multiprocessing
-import psutil
 
 class CROSS_VALIDATION:
     """
@@ -757,6 +758,42 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         
         recursive_items(dictionary,dictionary_of_keys)
         return dictionary_of_keys
+    
+    def plot_models(self, dictionary,figure_directory='show'):
+        for ADSORBATE in dictionary.keys():
+            for TARGET in dictionary[ADSORBATE].keys():
+                for COVERAGE in dictionary[ADSORBATE][TARGET].keys():
+                    SCORES = dictionary[ADSORBATE][TARGET][COVERAGE]['SCORES']
+                    WL_VAL = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'])
+                    WL_VAL = WL_VAL.reshape(-1,WL_VAL.shape[-1])
+                    WL_STD = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
+                    WL_STD = WL_STD.reshape(-1,WL_STD.shape[-1])
+                    WL_TRAIN = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_mean'])
+                    WL_TRAIN = WL_TRAIN.reshape(-1,WL_TRAIN.shape[-1])
+                    WL_TRAIN_STD = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_std'])
+                    WL_TRAIN_STD = WL_TRAIN_STD.reshape(-1,WL_TRAIN_STD.shape[-1])
+                    WL_TEST = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'])
+                    WL_TEST = WL_TEST.reshape(-1,WL_TEST.shape[-1])
+                    CV_FILES_INDEX = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['CV_FILES_INDEX'])
+                    for model_result in range(len(SCORES)):
+                        if figure_directory == 'show':
+                            plt.figure(CV_FILES_INDEX[model_result])
+                        else:
+                            plt.figure(CV_FILES_INDEX[model_result], figsize=(3.5,2),dpi=400)
+                        plt.title('ADSORBATE: '+ADSORBATE+', TARGET: '+TARGET+', COVERAGE: '+str(COVERAGE))
+                        plt.plot(WL_VAL[model_result],'g')
+                        plt.plot(WL_TRAIN[model_result],'b')
+                        plt.plot(WL_TEST[model_result],'r')
+                        plt.plot(WL_VAL[model_result]+WL_STD[model_result],'g--')
+                        plt.plot(WL_VAL[model_result]-WL_STD[model_result],'g--')
+                        plt.plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b--')
+                        plt.plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b--')
+                        plt.legend(['Average validation loss','Average training loss','Test loss'])
+                        if figure_directory == 'show':
+                            plt.show()
+                        else:
+                            figure_path = os.path.join(figure_directory,str(CV_FILES_INDEX[model_result])+'.jpg', format='jpg')
+                            plt.savefig(figure_path)      
     
 class NESTED_DICT(dict):
     """Implementation of perl's autovivification feature."""
