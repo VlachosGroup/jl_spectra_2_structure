@@ -14,7 +14,7 @@ import numpy as np
 #coverage is 'low', 'high' or a float <= 1
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 if __name__ == "__main__":
-    for ADSORBATE in ['CO','NO','C2H4']:
+    for ADSORBATE in ['C2H4','NO','CO']:
         if ADSORBATE == 'CO':
             INCLUDED_BINDING_TYPES=[1,2,3,4]
             MAX_COVERAGES = [1, 0.7, 0.2, 0.2]

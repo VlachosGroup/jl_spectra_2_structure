@@ -107,7 +107,7 @@ class CROSS_VALIDATION:
                 except:
                     print('Attempting k-means clustering with fewer labels')
                     if NUM_GCN_LABELS >1:
-                        GCNconv = get_gcn_conv(NUM_GCN_LABELS-1)
+                        GCNconv = get_gcn_conv(NUM_GCN_LABELS-1, BINDING_TYPE_FOR_GCN)
                     else:
                         GCNconv.get_GCNlabels(Minimum=0,showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
                 return GCNconv

@@ -167,7 +167,7 @@
 <h2>The <code class="docutils literal notranslate"><span class="pre">CROSS_VALIDATION</span></code> class<a class="headerlink" href="#the-cross-validation-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION">
-<em class="property">class </em><code class="sig-name descname">CROSS_VALIDATION</code><span class="sig-paren">(</span><em class="sig-param">ADSORBATE='CO'</em>, <em class="sig-param">POC=1</em>, <em class="sig-param">cv_indices_path=None</em>, <em class="sig-param">cross_validation_path=None</em>, <em class="sig-param">nanoparticle_path=None</em>, <em class="sig-param">high_coverage_path=None</em>, <em class="sig-param">coverage_scaling_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">CROSS_VALIDATION</code><span class="sig-paren">(</span><em class="sig-param">ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1, 2, 3, 4], cv_indices_path=None, cross_validation_path=None, nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cross_validation_path">
 <code class="sig-name descname">_get_default_cross_validation_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_default_cross_validation_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cross_validation_path" title="Permalink to this definition">¶</a></dt>
@@ -192,29 +192,6 @@
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN">
 <code class="sig-name descname">_run_NN</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES</em>, <em class="sig-param">INDICES</em>, <em class="sig-param">X_compare</em>, <em class="sig-param">y_compare</em>, <em class="sig-param">IS_TEST</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._run_NN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
-
-<dl class="method">
-<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_pc_loadings">
-<code class="sig-name descname">_set_pc_loadings</code><span class="sig-paren">(</span><em class="sig-param">NUM_PCs</em>, <em class="sig-param">NUM_SAMPLES=100000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._set_pc_loadings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_pc_loadings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns principal component loadings after performing SVD on the
-matrix of pure spectra where <span class="math notranslate nohighlight">\(pure-single_spectra = USV^T\)</span></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>NUM_PCs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of principal components of the spectra to keep.</p>
-</dd>
-<dt class="field-even">Variables</dt>
-<dd class="field-even"><p><strong>TOTAL_EXPLAINED_VARIANCE</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Total explained variance by the <span class="math notranslate nohighlight">\(n\)</span> principal components where
-<span class="math notranslate nohighlight">\(n=NUM_PCs\)</span></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>PC_loadings</strong> – The first loadings of the first <span class="math notranslate nohighlight">\(N\)</span> principal components where <span class="math notranslate nohighlight">\(N\)</span>
-is equal to NUM_PCs. <span class="math notranslate nohighlight">\(PC_loadings = V\)</span></p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
-</dd>
-</dl>
-</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._transform_spectra">
@@ -276,13 +253,36 @@ components of a mixed spectra.</p></li>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters">
-<code class="sig-name descname">set_model_parameters</code><span class="sig-paren">(</span><em class="sig-param">TARGET</em>, <em class="sig-param">COVERAGE</em>, <em class="sig-param">NN_PROPERTIES</em>, <em class="sig-param">NUM_TRAIN</em>, <em class="sig-param">NUM_VAL</em>, <em class="sig-param">NUM_TEST</em>, <em class="sig-param">MIN_GCN_PER_LABEL=0</em>, <em class="sig-param">NUM_GCN_LABELS=None</em>, <em class="sig-param">GCN_ALL=False</em>, <em class="sig-param">LOW_FREQUENCY=200</em>, <em class="sig-param">HIGH_FREQUENCY=2200</em>, <em class="sig-param">ENERGY_POINTS=501</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_model_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_model_parameters</code><span class="sig-paren">(</span><em class="sig-param">TARGET</em>, <em class="sig-param">COVERAGE</em>, <em class="sig-param">MAX_COVERAGES</em>, <em class="sig-param">NN_PROPERTIES</em>, <em class="sig-param">NUM_TRAIN</em>, <em class="sig-param">NUM_VAL</em>, <em class="sig-param">NUM_TEST</em>, <em class="sig-param">MIN_GCN_PER_LABEL=0</em>, <em class="sig-param">NUM_GCN_LABELS=11</em>, <em class="sig-param">GCN_ALL=False</em>, <em class="sig-param">LOW_FREQUENCY=200</em>, <em class="sig-param">HIGH_FREQUENCY=2200</em>, <em class="sig-param">ENERGY_POINTS=501</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_model_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters">
 <code class="sig-name descname">set_nn_parameters</code><span class="sig-paren">(</span><em class="sig-param">NN_PROPERTIES</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_nn_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_pc_loadings">
+<code class="sig-name descname">set_pc_loadings</code><span class="sig-paren">(</span><em class="sig-param">NUM_PCs</em>, <em class="sig-param">NUM_SAMPLES=100000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_pc_loadings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_pc_loadings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns principal component loadings after performing SVD on the
+matrix of pure spectra where <span class="math notranslate nohighlight">\(pure-single_spectra = USV^T\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>NUM_PCs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of principal components of the spectra to keep.</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>TOTAL_EXPLAINED_VARIANCE</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Total explained variance by the <span class="math notranslate nohighlight">\(n\)</span> principal components where
+<span class="math notranslate nohighlight">\(n=NUM_PCs\)</span></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>PC_loadings</strong> – The first loadings of the first <span class="math notranslate nohighlight">\(N\)</span> principal components where <span class="math notranslate nohighlight">\(N\)</span>
+is equal to NUM_PCs. <span class="math notranslate nohighlight">\(PC_loadings = V\)</span></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
