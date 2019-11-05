@@ -1,0 +1,281 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dft_2_data &mdash; jl_spectra_2_structure 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="coordination" href="coordination.html" />
+    <link rel="prev" title="primary_data_creation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> jl_spectra_2_structure
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../jl_spectra_2_structure.html">jl_spectra_2_structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cross_validation.html">cross_validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../neural_network.html">neural_network</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">primary_data_creation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">dft_2_data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-primary-data-class">The <code class="docutils literal notranslate"><span class="pre">Primary_DATA</span></code> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-coverage-scaling-class">The <code class="docutils literal notranslate"><span class="pre">COVERAGE_SCALING</span></code> class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="coordination.html">coordination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="file_parser.html">file_parser</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting_tools.html">plotting_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../error_metrics.html">error_metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">jl_spectra_2_structure</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">primary_data_creation</a> &raquo;</li>
+        
+      <li>dft_2_data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/primary_data_creation/dft_2_data.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dft-2-data">
+<h1>dft_2_data<a class="headerlink" href="#dft-2-data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-primary-data-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">Primary_DATA</span></code> class<a class="headerlink" href="#the-primary-data-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA">
+<em class="property">class </em><code class="sig-name descname">Primary_DATA</code><span class="sig-paren">(</span><em class="sig-param">metal_atoms=['Pt'], adsorbate_atoms=['C', 'O'], create_new_vasp_files=False, delta=0.025</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_isotope_data">
+<code class="sig-name descname">generate_isotope_data</code><span class="sig-paren">(</span><em class="sig-param">vasp_directory, output_file, masses1=[12, 16], masses2=[24, 32]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA.generate_isotope_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_isotope_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>FREQUENCIES: frequencies of normal modes
+INTENSITIES: intensities of normal modes
+CO_CN_CO: number of CO to which each CO is coordinated
+MIN_SEPARATION: smallest distance (A) between each CO
+CN_CO: number of Pt to which each CO is coordinated
+GCN: generalized coordination number of each adsorption site
+CN_PT: coordination of each adsorption site
+NUM_PT: Number of Pt atoms in each slab
+SURFACE_AREA: surface area in each slab (A2)
+CO_PER_A2: CO per surface area (A2)
+NUM_CO: number of CO on the surface
+SURFACE_PT: Number of Pt atoms on the adsorbate surface
+NUM_C12O16: Number of C12O16 on the surface
+COVERAGE: CO molecules/surface Pt atoms
+SELF_COVERAGE: major contributing CO molecules of the normal mode per surface Pt atom
+NUM_C12O32: number of C12O32 molecules
+NUM_C24O16: number of C24O16 molecules
+NUM_C24O32: number of C24O32 molecules
+SELF_CO_PER_A2: major contributing CO moldecules of the normal mode per A2
+MODE_ID: ID of each mode
+REDUCED_MASS: simple reduced mass of each molecule
+REDUCED_MASS_NORMED: normalized reduced mass of each normal mode
+MIXED_FACTOR: contribution to each normal from secondary contributing CO isotopes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data">
+<code class="sig-name descname">generate_primary_data</code><span class="sig-paren">(</span><em class="sig-param">vasp_directory</em>, <em class="sig-param">output_path</em>, <em class="sig-param">data_type='nanoparticle'</em>, <em class="sig-param">num_adsorbates='single'</em>, <em class="sig-param">poc=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA.generate_primary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="the-coverage-scaling-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">COVERAGE_SCALING</span></code> class<a class="headerlink" href="#the-coverage-scaling-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING">
+<em class="property">class </em><code class="sig-name descname">COVERAGE_SCALING</code><span class="sig-paren">(</span><em class="sig-param">primary_data_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#COVERAGE_SCALING"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.get_coverage_parameters">
+<code class="sig-name descname">get_coverage_parameters</code><span class="sig-paren">(</span><em class="sig-param">coverage_scaling_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#COVERAGE_SCALING.get_coverage_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.get_coverage_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.save_coverage_figures">
+<code class="sig-name descname">save_coverage_figures</code><span class="sig-paren">(</span><em class="sig-param">figure_directory, adsorbate='CO', metal='Pt', frequency_scale_axis1=[0.98, 1.1], frequency_scale_axis2=[0.995, 1.138], y_2_ticks=[1, 1.02, 1.04, 1.06, 1.08, 1.1, 1.12]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#COVERAGE_SCALING.save_coverage_figures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.save_coverage_figures" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="coordination.html" class="btn btn-neutral float-right" title="coordination" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="primary_data_creation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Joshua Lansford
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

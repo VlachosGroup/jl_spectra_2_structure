@@ -10,6 +10,8 @@ Welcome to jl_spectra_2_structure's documentation!
 
    jl_spectra_2_structure
 
+   cross_validation
+
    neural_network
 
    primary_data_creation/index

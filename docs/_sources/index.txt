@@ -1,0 +1,30 @@
+.. jl_spectra_2_structure documentation master file, created by
+   sphinx-quickstart on Tue Oct  1 10:58:37 2019.
+
+Welcome to jl_spectra_2_structure's documentation!
+==================================================
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Contents:
+
+   jl_spectra_2_structure
+
+   cross_validation
+
+   neural_network
+
+   primary_data_creation/index
+
+   plotting_tools
+
+   error_metrics  
+
+   auto_examples/index
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

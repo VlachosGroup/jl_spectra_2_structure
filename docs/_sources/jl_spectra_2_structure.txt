@@ -1,0 +1,23 @@
+jl_spectra_2_structure
+======================
+
+The ``get_defaults`` function
+*****************************
+.. autofunction:: jl_spectra_2_structure.jl_spectra_2_structure.get_default_data_paths
+
+The ``IR_GEN`` class
+********************
+.. autoclass:: jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN
+   :members:
+   :undoc-members:
+   :private-members:
+
+The ``fold`` function
+*********************
+.. autofunction:: jl_spectra_2_structure.jl_spectra_2_structure.fold
+
+The ``HREEL_2_scaledIR`` function
+*********************************
+.. autofunction:: jl_spectra_2_structure.jl_spectra_2_structure.HREEL_2_scaledIR
+
+

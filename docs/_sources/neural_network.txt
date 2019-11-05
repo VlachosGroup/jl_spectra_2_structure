@@ -1,0 +1,26 @@
+neural_network
+==============
+
+The ``_backprop`` function
+**************************
+.. autofunction:: jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._backprop
+
+The ``softmax`` function
+************************
+.. autofunction:: jl_spectra_2_structure.neural_network._base.softmax
+
+The ``kl_div_loss`` function
+****************************
+.. autofunction:: jl_spectra_2_structure.neural_network._base.kl_div_loss
+
+The ``wasserstein_loss`` function
+*********************************
+.. autofunction:: jl_spectra_2_structure.neural_network._base.wasserstein_loss
+
+The ``mixed`` function
+**********************
+.. autofunction:: jl_spectra_2_structure.neural_network._base.mixed
+
+
+
+

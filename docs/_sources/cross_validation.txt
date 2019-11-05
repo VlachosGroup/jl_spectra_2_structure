@@ -1,0 +1,30 @@
+cross_validation
+================
+
+The ``CROSS_VALIDATION`` class
+******************************
+.. autoclass:: jl_spectra_2_structure.cross_validation.CROSS_VALIDATION
+   :members:
+   :undoc-members:
+   :private-members:
+
+The ``LOAD_CROSS_VALIDATION`` class
+***********************************
+.. autoclass:: jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION
+   :members:
+   :undoc-members:
+   :private-members:
+
+The ``NESTED_DICT`` class
+*************************
+.. autoclass:: jl_spectra_2_structure.cross_validation.NESTED_DICT
+   :members:
+   :undoc-members:
+   :private-members:
+
+
+The ``NESTED_DICT_to_DICT`` function
+************************************
+.. autofunction:: jl_spectra_2_structure.cross_validation.NESTED_DICT_to_DICT
+
+

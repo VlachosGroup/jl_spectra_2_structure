@@ -1,0 +1,345 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>neural_network &mdash; jl_spectra_2_structure 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="primary_data_creation" href="primary_data_creation/index.html" />
+    <link rel="prev" title="cross_validation" href="cross_validation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> jl_spectra_2_structure
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="jl_spectra_2_structure.html">jl_spectra_2_structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cross_validation.html">cross_validation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">neural_network</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-backprop-function">The <code class="docutils literal notranslate"><span class="pre">_backprop</span></code> function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-softmax-function">The <code class="docutils literal notranslate"><span class="pre">softmax</span></code> function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-kl-div-loss-function">The <code class="docutils literal notranslate"><span class="pre">kl_div_loss</span></code> function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-wasserstein-loss-function">The <code class="docutils literal notranslate"><span class="pre">wasserstein_loss</span></code> function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-mixed-function">The <code class="docutils literal notranslate"><span class="pre">mixed</span></code> function</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="primary_data_creation/index.html">primary_data_creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting_tools.html">plotting_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error_metrics.html">error_metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">jl_spectra_2_structure</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>neural_network</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/neural_network.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="neural-network">
+<h1>neural_network<a class="headerlink" href="#neural-network" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-backprop-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">_backprop</span></code> function<a class="headerlink" href="#the-backprop-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._backprop">
+<code class="sig-name descname">_backprop</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">activations</em>, <em class="sig-param">deltas</em>, <em class="sig-param">coef_grads</em>, <em class="sig-param">intercept_grads</em><span class="sig-paren">)</span><a class="headerlink" href="#jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._backprop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the MLP loss function and its corresponding derivatives
+with respect to each parameter: weights and bias vectors. The derivative
+of the Wasserstein squared with respect to the softmax activation function
+is implemented here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>{array-like</em><em>, </em><em>sparse matrix}</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – The input data.</p></li>
+<li><p><strong>y</strong> (<em>array-like</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – The target values.</p></li>
+<li><p><strong>activations</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>length = n_layers - 1</em>) – The ith element of the list holds the values of the ith layer.</p></li>
+<li><p><strong>deltas</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>length = n_layers - 1</em>) – The ith element of the list holds the difference between the
+activations of the i + 1 layer and the backpropagated error.
+More specifically, deltas are gradients of loss with respect to z
+in each layer, where z = wx + b is the value of a particular layer
+before passing through the activation function</p></li>
+<li><p><strong>coef_grad</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>length = n_layers - 1</em>) – The ith element contains the amount of change used to update the
+coefficient parameters of the ith layer in an iteration.</p></li>
+<li><p><strong>intercept_grads</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>length = n_layers - 1</em>) – The ith element contains the amount of change used to update the
+intercept parameters of the ith layer in an iteration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>loss</strong> (<em>float</em>)</p></li>
+<li><p><strong>coef_grads</strong> (<em>list, length = n_layers - 1</em>)</p></li>
+<li><p><strong>intercept_grads</strong> (<em>list, length = n_layers - 1</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="the-softmax-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">softmax</span></code> function<a class="headerlink" href="#the-softmax-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.neural_network._base.softmax">
+<code class="sig-name descname">softmax</code><span class="sig-paren">(</span><em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/neural_network/_base.html#softmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.neural_network._base.softmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the K-way softmax function inplace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>{array-like</em><em>, </em><em>sparse matrix}</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – The input data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>X_new</strong> – The transformed data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>{array-like, sparse matrix}, shape (n_samples, n_features)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="the-kl-div-loss-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">kl_div_loss</span></code> function<a class="headerlink" href="#the-kl-div-loss-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.neural_network._base.kl_div_loss">
+<code class="sig-name descname">kl_div_loss</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/neural_network/_base.html#kl_div_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.neural_network._base.kl_div_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the KL divergence for regression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_true</strong> (<em>array-like</em><em> or </em><em>label indicator matrix</em>) – Ground truth (correct) values.</p></li>
+<li><p><strong>y_pred</strong> (<em>array-like</em><em> or </em><em>label indicator matrix</em>) – Predicted values, as returned by a regression estimator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss</strong> – The degree to which the samples are correctly predicted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="the-wasserstein-loss-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">wasserstein_loss</span></code> function<a class="headerlink" href="#the-wasserstein-loss-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.neural_network._base.wasserstein_loss">
+<code class="sig-name descname">wasserstein_loss</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/neural_network/_base.html#wasserstein_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.neural_network._base.wasserstein_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the l2 wasserstein loss</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_true</strong> (<em>array-like</em><em> or </em><em>label indicator matrix</em>) – Ground truth (correct) values.</p></li>
+<li><p><strong>y_pred</strong> (<em>array-like</em><em> or </em><em>label indicator matrix</em>) – Predicted values, as returned by a regression estimator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss</strong> – The degree to which the samples are correctly predicted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="the-mixed-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">mixed</span></code> function<a class="headerlink" href="#the-mixed-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.neural_network._base.mixed">
+<code class="sig-name descname">mixed</code><span class="sig-paren">(</span><em class="sig-param">y_true</em>, <em class="sig-param">y_pred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/neural_network/_base.html#mixed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.neural_network._base.mixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>a mixed wasserstein and kl-divergence loss</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_true</strong> (<em>array-like</em><em> or </em><em>label indicator matrix</em>) – Ground truth (correct) values.</p></li>
+<li><p><strong>y_pred</strong> (<em>array-like</em><em> or </em><em>label indicator matrix</em>) – Predicted values, as returned by a regression estimator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>loss</strong> – The degree to which the samples are correctly predicted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="primary_data_creation/index.html" class="btn btn-neutral float-right" title="primary_data_creation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cross_validation.html" class="btn btn-neutral float-left" title="cross_validation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Joshua Lansford
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

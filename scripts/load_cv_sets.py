@@ -24,5 +24,7 @@ if __name__ == "__main__":
     BEST_MODELS = CV_class.get_best_models(3, 1)
     keys = CV_class.get_keys(BEST_MODELS)
     print(keys)
-    CV_class.plot_models(BEST_MODELS)
+    #CV_class.plot_models(BEST_MODELS)
     CV_class.plot_models(BEST_MODELS,figure_directory=Downloads_folder)
+    CV_class.plot_models(CV_class.CV_RESULTS,figure_directory=Downloads_folder,model_list=[6,7,9,10])
+    CV_class.plot_parity_plots(figure_directory=Downloads_folder,model_list=[6,7,9,10])

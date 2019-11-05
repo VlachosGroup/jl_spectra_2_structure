@@ -15,6 +15,7 @@ import multiprocessing
 import psutil
 from copy import deepcopy
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 from .neural_network import MLPRegressor
 from .jl_spectra_2_structure import IR_GEN
 from .jl_spectra_2_structure import get_default_data_paths
@@ -23,8 +24,8 @@ from . import error_metrics
 class CROSS_VALIDATION:
     """
     """
-    def __init__(self, ADSORBATE='CO', POC=1, cv_indices_path=None\
-                 ,cross_validation_path = None, nanoparticle_path=None\
+    def __init__(self, ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1,2,3,4]\
+                 , cv_indices_path=None, cross_validation_path = None, nanoparticle_path=None\
                  ,high_coverage_path=None, coverage_scaling_path=None):
         """
         """
@@ -39,7 +40,7 @@ class CROSS_VALIDATION:
         self.CV_INDICES_PATH = cv_indices_path
         self.CV_PATH = cross_validation_path
         self.ADSORBATE = ADSORBATE
-        self.POC = POC
+        self.INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES
         self.NANO_PATH = nanoparticle_path
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
@@ -62,12 +63,13 @@ class CROSS_VALIDATION:
          return cv_indices_path
      
     def _get_state(self):
-        Dict = { 'ADSORBATE': self.ADSORBATE,'POC': self.POC\
+        Dict = { 'ADSORBATE': self.ADSORBATE,'INCLUDED_BINDING_TYPES': self.INCLUDED_BINDING_TYPES\
                 , 'NUM_GCN_LABELS': self.NUM_GCN_LABELS, 'MIN_GCN_PER_LABEL': self.MIN_GCN_PER_LABEL
-                , 'GCN_ALL': self.GCN_ALL, 'CV_SPLITS': self.CV_SPLITS\
+                , 'GCN_ALL': self.GCN_ALL, 'CV_SPLITS': self.CV_SPLITS, 'BINDING_TYPE_FOR_GCN': self.BINDING_TYPE_FOR_GCN\
                 , 'INDICES_VAL': self.INDICES_VAL, 'INDICES_TRAIN': self.INDICES_TRAIN\
                 , 'INDICES_TEST': self.INDICES_TEST, 'INDICES_CV_ALL': self.INDICES_CV_ALL\
-                , 'TARGET': self.TARGET, 'COVERAGE': self.COVERAGE, 'NN_PROPERTIES': self.NN_PROPERTIES\
+                , 'TARGET': self.TARGET, 'COVERAGE': self.COVERAGE, 'MAX_COVERAGES': self.MAX_COVERAGES\
+                , 'NN_PROPERTIES': self.NN_PROPERTIES\
                 , 'NUM_TRAIN': self.NUM_TRAIN, 'NUM_VAL': self.NUM_VAL, 'NUM_TEST': self.NUM_TEST\
                 , 'LOW_FREQUENCY': self.LOW_FREQUENCY, 'HIGH_FREQUENCY': self.HIGH_FREQUENCY\
                 , 'ENERGY_POINTS': self.ENERGY_POINTS, 'FEATURE_MEANS': self.FEATURE_MEANS\
@@ -75,12 +77,12 @@ class CROSS_VALIDATION:
                 , 'EXPLAINED_VARIANCE': self.EXPLAINED_VARIANCE, 'PC_LOADINGS': self.PC_LOADINGS}
         return Dict
         
-    def generate_test_cv_indices(self, CV_SPLITS=5, NUM_GCN_LABELS=11, GCN_ALL = False\
-                                 ,test_fraction=0.2,random_state=0, read_file=False, write_file=False):
+    def generate_test_cv_indices(self, CV_SPLITS=3, BINDING_TYPE_FOR_GCN=[1]\
+                                 ,test_fraction=0.25,random_state=0, read_file=False, write_file=False):
         """
         """
         ADSORBATE = self.ADSORBATE
-        POC = self.POC
+        INCLUDED_BINDING_TYPES = self.INCLUDED_BINDING_TYPES
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
         COV_SCALE_PATH = self.COV_SCALE_PATH
@@ -90,37 +92,54 @@ class CROSS_VALIDATION:
         if read_file == False:
             INDICES_DICTIONARY = {'BINDING_TYPE':{'train_indices':[], 'val_indices':[]\
                              ,'CV_indices':[],'TEST_indices':[]}\
-                            ,'GCN_ALL':{'train_indices':[], 'val_indices':[]\
+                            ,'GCN':{'train_indices':[], 'val_indices':[]\
                              ,'CV_indices':[],'TEST_indices':[]}\
-                            ,'GCN_ATOP':{'train_indices':[], 'val_indices':[]\
-                             ,'CV_indices':[],'TEST_indices':[]}\
-                            ,'BINDING_TYPE_4GCN':{'train_indices':[], 'val_indices':[]\
+                            ,'OTHER_BINDING_TYPE':{'train_indices':[], 'val_indices':[]\
                              ,'CV_indices':[],'TEST_indices':[]}}
-            GCNconv = IR_GEN(ADSORBATE, POC=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
+            #recursive function that runs GCNconv until n_samples >= n_clusters
+            def get_gcn_conv(NUM_GCN_LABELS, BINDING_TYPE_FOR_GCN):
+                GCNconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
+                                 , TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                              ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                              , coverage_scaling_path=COV_SCALE_PATH)
-            if GCN_ALL == True:
-                GCNconv.get_GCNlabels(Minimum=2,showfigures=False,INCLUDED_BINDING_TYPES='ALL')
-            else:
-                GCNconv.get_GCNlabels(Minimum=2,showfigures=False,INCLUDED_BINDING_TYPES=[1])
+                try:
+                    GCNconv.get_GCNlabels(Minimum=2*(CV_SPLITS+1),showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
+                except:
+                    print('Attempting k-means clustering with fewer labels')
+                    if NUM_GCN_LABELS >1:
+                        GCNconv = get_gcn_conv(NUM_GCN_LABELS-1)
+                    else:
+                        GCNconv.get_GCNlabels(Minimum=0,showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
+                return GCNconv
+            GCNconv = get_gcn_conv(11, BINDING_TYPE_FOR_GCN=INCLUDED_BINDING_TYPES)
+            BINDING_TYPES = GCNconv.BINDING_TYPES
+            if BINDING_TYPE_FOR_GCN == 'ALL':
+                BINDING_TYPE_FOR_GCN = list(set(BINDING_TYPES))
+            GCNlabels = np.zeros_like(GCNconv.GCNlabels)
+            for i in INCLUDED_BINDING_TYPES:
+                MAX_GCN_LABELS = int(BINDING_TYPES[BINDING_TYPES == i].size/(2*(CV_SPLITS+1)))
+                NUM_GCN_LABELS = min(MAX_GCN_LABELS,11)
+                if NUM_GCN_LABELS > 1:
+                    GCNconv = get_gcn_conv(NUM_GCN_LABELS,BINDING_TYPE_FOR_GCN=[i])
+                    GCNlabels += GCNconv.GCNlabels
             #Get List of indices so we can split the data later
             #combined class to stratify data based on binding-type and GCN simultaneously
-            GCNlabels = GCNconv.GCNlabels
-            combined_class = GCNconv.BINDING_TYPES+10*GCNlabels
+            combined_class = 1000*BINDING_TYPES+GCNlabels
             classes_with_counts = np.unique(combined_class,return_counts=True)
             reduce_count=0
             num_classes = classes_with_counts[0].size
+            #Below for loop is not necessary if GCNlabels are generated separately
+            #for each binding-type as it is now done.
+            #ensure that each class as at least 2 members
             for count in range(num_classes):
                 if classes_with_counts[1][count-reduce_count] < 2:
-                    BINDING_CLASS = classes_with_counts[0][count-reduce_count] - 10*GCNlabels[GCNlabels==count+1][0]
-                    reduce_count+=1
                     print('combining classes to meet kfold constraints')
                     if count < num_classes-1:
-                        GCNlabels[np.all((GCNconv.BINDING_TYPES==BINDING_CLASS,GCNlabels==count+1),axis=0)] += 1
+                        combined_class[combined_class == classes_with_counts[0][count-reduce_count]] += 1
                     else:
-                        GCNlabels[np.all((GCNconv.BINDING_TYPES==BINDING_CLASS,GCNlabels==count+1),axis=0)] -= 1
-                    combined_class = GCNconv.BINDING_TYPES + 10*GCNlabels
-                    classes_with_counts = np.unique(combined_class,return_counts=True)            
+                        combined_class[combined_class == classes_with_counts[0][count-reduce_count]] -= 1
+                    classes_with_counts = np.unique(combined_class,return_counts=True)    
+                    reduce_count+=1
             print('The class and number in each class for fold generation is '+str(classes_with_counts))
             #split data into cross validation and test set
             sss = StratifiedShuffleSplit(n_splits=1, test_size=test_fraction, random_state=random_state)
@@ -129,19 +148,19 @@ class CROSS_VALIDATION:
                 TEST_indices = test_index
             INDICES_DICTIONARY['BINDING_TYPE'].update({'CV_indices':CV_indices.astype('int').tolist()})
             INDICES_DICTIONARY['BINDING_TYPE'].update({'TEST_indices':TEST_indices.astype('int').tolist()})
-            INDICES_DICTIONARY['GCN_ATOP'].update({'CV_indices':CV_indices[GCNconv.BINDING_TYPES[CV_indices] == 1].astype('int').tolist()})
-            INDICES_DICTIONARY['GCN_ATOP'].update({'TEST_indices':TEST_indices[GCNconv.BINDING_TYPES[TEST_indices] == 1].astype('int').tolist()})
-            INDICES_DICTIONARY['BINDING_TYPE_4GCN'].update({'CV_indices':CV_indices[GCNconv.BINDING_TYPES[CV_indices] > 1].astype('int').tolist()})
-            INDICES_DICTIONARY['BINDING_TYPE_4GCN'].update({'TEST_indices':TEST_indices[GCNconv.BINDING_TYPES[TEST_indices] > 1].astype('int').tolist()})
+            INDICES_DICTIONARY['GCN'].update({'CV_indices':CV_indices[np.isin(BINDING_TYPES[CV_indices], BINDING_TYPE_FOR_GCN)].astype('int').tolist()})
+            INDICES_DICTIONARY['GCN'].update({'TEST_indices':TEST_indices[np.isin(BINDING_TYPES[TEST_indices], BINDING_TYPE_FOR_GCN)].astype('int').tolist()})
+            INDICES_DICTIONARY['OTHER_BINDING_TYPE'].update({'CV_indices':CV_indices[np.isin(BINDING_TYPES[CV_indices], BINDING_TYPE_FOR_GCN, invert=True)].astype('int').tolist()})
+            INDICES_DICTIONARY['OTHER_BINDING_TYPE'].update({'TEST_indices':TEST_indices[np.isin(BINDING_TYPES[TEST_indices], BINDING_TYPE_FOR_GCN, invert=True)].astype('int').tolist()})
             #split data into training and validation sets
             skf = StratifiedKFold(n_splits=CV_SPLITS, shuffle = True, random_state=random_state)
             for train_index, val_index in skf.split(combined_class[CV_indices], combined_class[CV_indices]):
                 INDICES_DICTIONARY['BINDING_TYPE']['train_indices'].append(CV_indices[train_index].astype('int').tolist())
                 INDICES_DICTIONARY['BINDING_TYPE']['val_indices'].append(CV_indices[val_index].astype('int').tolist())
-                INDICES_DICTIONARY['GCN_ATOP']['train_indices'].append(CV_indices[train_index[GCNconv.BINDING_TYPES[CV_indices[train_index]] == 1]].astype('int').tolist())
-                INDICES_DICTIONARY['GCN_ATOP']['val_indices'].append(CV_indices[val_index[GCNconv.BINDING_TYPES[CV_indices[val_index]] == 1]].astype('int').tolist())
-                INDICES_DICTIONARY['BINDING_TYPE_4GCN']['train_indices'].append(CV_indices[train_index[GCNconv.BINDING_TYPES[CV_indices[train_index]] > 1]].astype('int').tolist())
-                INDICES_DICTIONARY['BINDING_TYPE_4GCN']['val_indices'].append(CV_indices[val_index[GCNconv.BINDING_TYPES[CV_indices[val_index]] > 1]].astype('int').tolist())    
+                INDICES_DICTIONARY['GCN']['train_indices'].append(CV_indices[train_index[np.isin(BINDING_TYPES[CV_indices[train_index]], BINDING_TYPE_FOR_GCN)]].astype('int').tolist())
+                INDICES_DICTIONARY['GCN']['val_indices'].append(CV_indices[val_index[np.isin(BINDING_TYPES[CV_indices[val_index]], BINDING_TYPE_FOR_GCN)]].astype('int').tolist())
+                INDICES_DICTIONARY['OTHER_BINDING_TYPE']['train_indices'].append(CV_indices[train_index[np.isin(BINDING_TYPES[CV_indices[train_index]], BINDING_TYPE_FOR_GCN, invert=True)]].astype('int').tolist())
+                INDICES_DICTIONARY['OTHER_BINDING_TYPE']['val_indices'].append(CV_indices[val_index[np.isin(BINDING_TYPES[CV_indices[val_index]], BINDING_TYPE_FOR_GCN, invert=True)]].astype('int').tolist())    
             if write_file==True:
                 with open(INDICES_FILE, 'w') as outfile:
                     json_tricks.dump(INDICES_DICTIONARY, outfile, sort_keys=True, indent=4)
@@ -151,10 +170,10 @@ class CROSS_VALIDATION:
                 INDICES_DICTIONARY = json_tricks.load(infile)
         self.INDICES_DICTIONARY = INDICES_DICTIONARY
         self.CV_SPLITS = CV_SPLITS
-        self.NUM_GCN_LABELS = NUM_GCN_LABELS
+        self.BINDING_TYPE_FOR_GCN = BINDING_TYPE_FOR_GCN
     
-    def set_model_parameters(self, TARGET, COVERAGE, NN_PROPERTIES, NUM_TRAIN, NUM_VAL, NUM_TEST\
-                             , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=None, GCN_ALL = False\
+    def set_model_parameters(self, TARGET, COVERAGE, MAX_COVERAGES, NN_PROPERTIES, NUM_TRAIN, NUM_VAL, NUM_TEST\
+                             , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=11, GCN_ALL = False\
                              ,LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
         try:
             INDICES_DICTIONARY = self.INDICES_DICTIONARY
@@ -166,30 +185,27 @@ class CROSS_VALIDATION:
         assert TARGET in ['combine_hollow_sites','binding_type','GCN'], "incorrect TARGET variable given"
         _get_ir_gen_class = self._get_ir_gen_class
         CV_SPLITS = self.CV_SPLITS
-        if NUM_GCN_LABELS is None:
-            NUM_GCN_LABELS = self.NUM_GCN_LABELS
 
         _get_ir_gen_class(TARGET, NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL)
         
         if TARGET == 'GCN' and GCN_ALL == False:
-            INDICES_VAL = [(INDICES_DICTIONARY['GCN_ATOP']['val_indices'][CV_VAL]\
-                           , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['val_indices'][CV_VAL])\
+            INDICES_VAL = [(INDICES_DICTIONARY['GCN']['val_indices'][CV_VAL]\
+                           , INDICES_DICTIONARY['OTHER_BINDING_TYPE']['val_indices'][CV_VAL])\
                            for CV_VAL in range(CV_SPLITS)]
-            INDICES_TRAIN = [(INDICES_DICTIONARY['GCN_ATOP']['train_indices'][CV_VAL]\
-                             , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['train_indices'][CV_VAL])\
+            INDICES_TRAIN = [(INDICES_DICTIONARY['GCN']['train_indices'][CV_VAL]\
+                             , INDICES_DICTIONARY['OTHER_BINDING_TYPE']['train_indices'][CV_VAL])\
                              for CV_VAL in range(CV_SPLITS)]
-            INDICES_TEST = [INDICES_DICTIONARY['GCN_ATOP']['TEST_indices']\
-                            , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['TEST_indices']]
-            INDICES_CV_ALL = [INDICES_DICTIONARY['GCN_ATOP']['CV_indices']\
-                              , INDICES_DICTIONARY['BINDING_TYPE_4GCN']['CV_indices']]
+            INDICES_TEST = [INDICES_DICTIONARY['GCN']['TEST_indices']\
+                            , INDICES_DICTIONARY['OTHER_BINDING_TYPE']['TEST_indices']]
+            INDICES_CV_ALL = [INDICES_DICTIONARY['GCN']['CV_indices']\
+                              , INDICES_DICTIONARY['OTHER_BINDING_TYPE']['CV_indices']]
         else:
             INDICES_VAL = INDICES_DICTIONARY['BINDING_TYPE']['val_indices']
             INDICES_TRAIN = INDICES_DICTIONARY['BINDING_TYPE']['train_indices']
             INDICES_TEST = INDICES_DICTIONARY['BINDING_TYPE']['TEST_indices']
             INDICES_CV_ALL = INDICES_DICTIONARY['BINDING_TYPE']['CV_indices']
             
-        if NUM_GCN_LABELS is not None:
-            self.NUM_GCN_LABELS = NUM_GCN_LABELS
+        self.NUM_GCN_LABELS = NUM_GCN_LABELS
         self.MIN_GCN_PER_LABEL = MIN_GCN_PER_LABEL
         self.GCN_ALL = GCN_ALL
         self.INDICES_VAL = INDICES_VAL
@@ -198,6 +214,7 @@ class CROSS_VALIDATION:
         self.INDICES_CV_ALL = INDICES_CV_ALL
         self.TARGET = TARGET
         self.COVERAGE = COVERAGE
+        self.MAX_COVERAGES = MAX_COVERAGES
         self.NN_PROPERTIES = NN_PROPERTIES
         self.NUM_TRAIN = NUM_TRAIN
         self.NUM_VAL = NUM_VAL
@@ -211,27 +228,30 @@ class CROSS_VALIDATION:
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
         COV_SCALE_PATH = self.COV_SCALE_PATH
-        POC = self.POC
+        INCLUDED_BINDING_TYPES = self.INCLUDED_BINDING_TYPES
+        BINDING_TYPE_FOR_GCN = self.BINDING_TYPE_FOR_GCN
         if TARGET == 'combine_hollow_sites': 
-            MAINconv = IR_GEN(ADSORBATE, POC=1, TARGET='combine_hollow_sites'\
+            MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='combine_hollow_sites'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
         elif TARGET == 'binding_type':
-            MAINconv = IR_GEN(ADSORBATE, POC=POC, TARGET='binding_type'\
+            MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='binding_type'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
         elif TARGET == 'GCN':
-            MAINconv = IR_GEN(ADSORBATE, POC=POC, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
+            if GCN_ALL == True:
+                MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
-            if GCN_ALL == False:
-                INCLUDED_BINDING_TYPES=[1]
             else:
-                INCLUDED_BINDING_TYPES='ALL'
-            MAINconv.get_GCNlabels(Minimum=MIN_GCN_PER_LABEL, showfigures=False, INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES)
-            OTHER_SITESconv = IR_GEN(ADSORBATE, POC=POC, TARGET='binding_type', EXCLUDE_ATOP=True\
+                MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = BINDING_TYPE_FOR_GCN, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH)
+                OTHER_BINDING_TYPES = np.array(INCLUDED_BINDING_TYPES)[np.isin(INCLUDED_BINDING_TYPES,BINDING_TYPE_FOR_GCN,invert=True)]
+                OTHER_SITESconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = OTHER_BINDING_TYPES, TARGET='binding_type'\
+                         ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
+                         , coverage_scaling_path=COV_SCALE_PATH)
+            MAINconv.get_GCNlabels(Minimum=MIN_GCN_PER_LABEL, showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
         
         if TARGET == 'GCN' and GCN_ALL == False:
             self.OTHER_SITESconv = OTHER_SITESconv
@@ -240,7 +260,7 @@ class CROSS_VALIDATION:
     def set_nn_parameters(self, NN_PROPERTIES):
         self.NN_PROPERTIES = NN_PROPERTIES
         
-    def _set_pc_loadings(self,NUM_PCs,NUM_SAMPLES = 100000):
+    def set_pc_loadings(self,NUM_PCs,NUM_SAMPLES = 100000):
         """
         Returns principal component loadings after performing SVD on the
         matrix of pure spectra where $pure-single_spectra = USV^T$
@@ -337,6 +357,11 @@ class CROSS_VALIDATION:
             CV_RESULTS_FILE = os.path.join(CV_PATH,'CV_results_'+TARGET+'_'+str(COVERAGE)\
             +'_'+str(CV_SPLITS)+'fold'+'_reg'+'{:.2E}'.format(NN_PROPERTIES['alpha'])\
             +'_'+NN_PROPERTIES['loss']+'_'+ADSORBATE+'.json')
+        elif r'/' not in CV_RESULTS_FILE and r'\\' not in CV_RESULTS_FILE:
+            if '.json' in CV_RESULTS_FILE:
+                CV_RESULTS_FILE = os.path.join(CV_PATH,CV_RESULTS_FILE)
+            else:
+                CV_RESULTS_FILE = os.path.join(CV_PATH,CV_RESULTS_FILE+'.json')
             
         DictList = [{} for _ in range(CV_SPLITS)]
         #Cross Validation
@@ -420,13 +445,11 @@ class CROSS_VALIDATION:
             elif num_procs == max_runs_with_memory:
                 print('Setting number of processes to '+str(num_procs)+' due to memory limitations.')
             elif num_procs == cpu_cores:
-                print('Setting number of processes to '+str(num_procs)+' which is the number of available cores.')
-                    
-                
+                print('Setting number of processes to '+str(num_procs)+' which is the number of available cores.')          
             
-        pool = multiprocessing.Pool(processes=num_procs)
-        DictList = pool.imap(run_single_CV,CV_INDEX_or_TEST)
-        DictList = [Dict for Dict in DictList]
+        with multiprocessing.Pool(processes=num_procs) as pool:
+            DictList = pool.imap(run_single_CV,CV_INDEX_or_TEST)
+            DictList = [Dict for Dict in DictList]
         stop = timer()
         print('#########################################################')
         print('#########################################################')
@@ -489,19 +512,20 @@ class CROSS_VALIDATION:
         LOW_FREQUENCY = self.LOW_FREQUENCY
         HIGH_FREQUENCY = self.HIGH_FREQUENCY
         ENERGY_POINTS = self.ENERGY_POINTS
+        MAX_COVERAGES = self.MAX_COVERAGES
         num_samples_original = NUM_SAMPLES
         NUM_SAMPLES = int(NUM_SAMPLES/iterations)
         ADDITIONAL_POINT = int(num_samples_original-NUM_SAMPLES*iterations)
         if TARGET == 'GCN' and GCN_ALL == False:
             OTHER_SITESconv = deepcopy(self.OTHER_SITESconv)
-            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE\
-                                                   , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
-            X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low'\
-                                                           , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
+            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE, MAX_COVERAGES = [1,1,1,1]\
+            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
+            X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low', MAX_COVERAGES= [1,1,1,1]\
+            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
             X = MAINconv.add_noise(X1,X2)
             del X1; del X2; del y2
         else:
-            X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE\
+            X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE, MAX_COVERAGES = MAX_COVERAGES\
                                                   , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
         #Add to the validation and test sets to get more coverage options
         #(each iteration has 10 different coverage combinations
@@ -629,8 +653,8 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
     def __init__(self, cv_indices_path=None, cross_validation_path=None):
         """
         """
-        _get_default_cross_validation_path = self._get_default_cross_validation_path
-        _get_default_cv_indices_path = self._get_default_cv_indices_path
+        _get_default_cross_validation_path = super()._get_default_cross_validation_path
+        _get_default_cv_indices_path = super()._get_default_cv_indices_path
         if cross_validation_path is None:
             cross_validation_path = _get_default_cross_validation_path()
         if cv_indices_path is None:
@@ -674,7 +698,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         __dict__.update(CV_DICT_LIST[-1])
         self.NN = get_NN(CV_DICT_LIST[-2])
         self.CV_DICT_LIST = CV_DICT_LIST
-        super().__init__(ADSORBATE=self.ADSORBATE, POC=self.POC\
+        super().__init__(ADSORBATE=self.ADSORBATE, INCLUDED_BINDING_TYPES=self.INCLUDED_BINDING_TYPES\
              , cv_indices_path=new_cv_indices_path, cross_validation_path=new_cross_validation_path)
         super()._get_ir_gen_class(self.TARGET, self.NUM_GCN_LABELS, self.MIN_GCN_PER_LABEL, self.GCN_ALL)
         
@@ -686,13 +710,13 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 CV_RESULTS[ADSORBATE][TARGET][COVERAGE].update({KEY:[]})
             CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY].append(VALUE)
         
-        KEYS = ['POC','NUM_GCN_LABELS','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
+        KEYS = ['INCLUDED_BINDING_TYPES','NUM_GCN_LABELS','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
               ,'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','CV_FILES_INDEX']
         for count, file in enumerate(CV_FILES):
             with open(file, 'r') as infile:
                 CV_DICT_LIST = json_tricks.load(infile)
             ADSORBATE = CV_DICT_LIST[-1]['ADSORBATE']
-            POC = CV_DICT_LIST[-1]['POC']
+            INCLUDED_BINDING_TYPES = CV_DICT_LIST[-1]['INCLUDED_BINDING_TYPES']
             TARGET = CV_DICT_LIST[-1]['TARGET']
             COVERAGE = CV_DICT_LIST[-1]['COVERAGE']
             NUM_GCN_LABELS = CV_DICT_LIST[-1]['NUM_GCN_LABELS']
@@ -707,7 +731,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             WL_TRAIN_std  = np.std(WL_TRAIN,axis=0)
             WL_TEST_TEST = CV_DICT_LIST[-2]['Wl2_Test']
             WL_TEST_TRAIN = CV_DICT_LIST[-2]['Wl2_Train']
-            VALUES = [POC,NUM_GCN_LABELS, WL_VAL_mean, WL_VAL_std, WL_TRAIN_mean\
+            VALUES = [INCLUDED_BINDING_TYPES,NUM_GCN_LABELS, WL_VAL_mean, WL_VAL_std, WL_TRAIN_mean\
                       , WL_TRAIN_std, WL_TEST_TEST, WL_TEST_TRAIN,count]
             try:
                 for KEY, VALUE in zip(KEYS,VALUES):
@@ -759,11 +783,31 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         recursive_items(dictionary,dictionary_of_keys)
         return dictionary_of_keys
     
-    def plot_models(self, dictionary,figure_directory='show'):
+    def plot_models(self,dictionary,figure_directory='show',model_list = None\
+                    ,xlim=[0, 200], ylim1=[0, 0.3], ylim2=[0, 0.3]):
+        if model_list is not None:
+            params = {'figure.autolayout': False,'axes.labelpad':2}
+            rcParams.update(params)
+            if len(model_list) == 4:
+                if figure_directory == 'show':
+                    fig = plt.figure()
+                else:
+                    fig = plt.figure(0,figsize=(7.2,4),dpi=400)
+                axes = fig.subplots(nrows=2, ncols=2)
+                axis_list = [axes[0, 0],axes[0, 1], axes[1, 0], axes[1, 1]]
+                plt.gcf().subplots_adjust(bottom=0.09,top=0.98,left=0.08,right=0.97,wspace=0.05,hspace=0.05)
+            elif len(model_list) == 2:
+                if figure_directory == 'show':
+                    fig = plt.figure()
+                else:
+                    fig = plt.figure(0,figsize=(3.5,4),dpi=400)
+                axes = fig.subplots(nrows=2, ncols=1)
+                axis_list = [axes[0],axes[1]]
+                plt.gcf().subplots_adjust(bottom=0.09,top=0.98,left=0.14,right=0.97,wspace=0.05,hspace=0.05)
+            abcd = ['(a)','(b)','(c)','(d)']
         for ADSORBATE in dictionary.keys():
             for TARGET in dictionary[ADSORBATE].keys():
                 for COVERAGE in dictionary[ADSORBATE][TARGET].keys():
-                    SCORES = dictionary[ADSORBATE][TARGET][COVERAGE]['SCORES']
                     WL_VAL = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'])
                     WL_VAL = WL_VAL.reshape(-1,WL_VAL.shape[-1])
                     WL_STD = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
@@ -775,26 +819,116 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                     WL_TEST = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'])
                     WL_TEST = WL_TEST.reshape(-1,WL_TEST.shape[-1])
                     CV_FILES_INDEX = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['CV_FILES_INDEX'])
-                    for model_result in range(len(SCORES)):
-                        if figure_directory == 'show':
-                            plt.figure(CV_FILES_INDEX[model_result])
-                        else:
-                            plt.figure(CV_FILES_INDEX[model_result], figsize=(3.5,2),dpi=400)
-                        plt.title('ADSORBATE: '+ADSORBATE+', TARGET: '+TARGET+', COVERAGE: '+str(COVERAGE))
-                        plt.plot(WL_VAL[model_result],'g')
-                        plt.plot(WL_TRAIN[model_result],'b')
-                        plt.plot(WL_TEST[model_result],'r')
-                        plt.plot(WL_VAL[model_result]+WL_STD[model_result],'g--')
-                        plt.plot(WL_VAL[model_result]-WL_STD[model_result],'g--')
-                        plt.plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b--')
-                        plt.plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b--')
-                        plt.legend(['Average validation loss','Average training loss','Test loss'])
-                        if figure_directory == 'show':
-                            plt.show()
-                        else:
-                            figure_path = os.path.join(figure_directory,str(CV_FILES_INDEX[model_result])+'.jpg', format='jpg')
-                            plt.savefig(figure_path)      
-    
+                    for model_result in range(len(CV_FILES_INDEX)):
+                        if model_list is None:
+                            if figure_directory == 'show':
+                                plt.figure(CV_FILES_INDEX[model_result])
+                            else:
+                                plt.figure(CV_FILES_INDEX[model_result], figsize=(3.5,2),dpi=400)
+                            plt.title('ADSORBATE: '+ADSORBATE+', TARGET: '+TARGET+', COVERAGE: '+str(COVERAGE))
+                            plt.plot(WL_VAL[model_result],'g')
+                            plt.plot(WL_TRAIN[model_result],'b')
+                            plt.plot(WL_TEST[model_result],'r')
+                            plt.plot(WL_VAL[model_result]+WL_STD[model_result],'g--')
+                            plt.plot(WL_VAL[model_result]-WL_STD[model_result],'g--')
+                            plt.plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b--')
+                            plt.plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b--')
+                            plt.legend(['Average validation loss','Average training loss','Test loss'])
+                            if figure_directory == 'show':
+                                plt.show()
+                            else:
+                                figure_path = os.path.join(figure_directory,str(CV_FILES_INDEX[model_result])+'.jpg')
+                                plt.savefig(figure_path, format='jpg')
+                                plt.close()
+                        elif CV_FILES_INDEX[model_result] in model_list:
+                            index_val = model_list.index(CV_FILES_INDEX[model_result])
+                            axis_list[index_val].plot(WL_VAL[model_result],'g')
+                            axis_list[index_val].plot(WL_TRAIN[model_result],'b')
+                            axis_list[index_val].plot(WL_TEST[model_result],'r')
+                            axis_list[index_val].plot(WL_VAL[model_result]+WL_STD[model_result],'g--')
+                            axis_list[index_val].plot(WL_VAL[model_result]-WL_STD[model_result],'g--')
+                            axis_list[index_val].plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b--')
+                            axis_list[index_val].plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b--')
+                            axis_list[index_val].legend(['Average validation loss','Average training loss','Test loss'])
+                            if len(model_list) == 4:
+                                if index_val < 2:
+                                    axis_list[index_val].set_xticks([])
+                                    axis_list[index_val].set_ylim(ylim1)
+                                else:
+                                    axis_list[index_val].set_ylim(ylim2)
+                                if index_val == 1 or index_val == 3:
+                                    axis_list[index_val].set_yticks([])
+                            elif len(model_list) == 2:
+                                if index_val == 0:
+                                    axis_list[index_val].set_xticks([])
+                                    axis_list[index_val].set_ylim(ylim1)
+                                else:
+                                    axis_list[index_val].set_ylim(ylim2)
+                            axis_list[index_val].set_xlim(xlim)
+                            axis_list[index_val].text(0.01,0.93,abcd[index_val],transform=axis_list[index_val].transAxes)
+        if model_list is not None:
+            fig.text(0.01, 0.5, 'Wasserstein Loss', va='center', rotation='vertical')
+            fig.text(0.5, 0.01, 'Epochs', ha='center')
+            if figure_directory == 'show':
+                plt.show()
+            else:
+                figure_path = os.path.join(figure_directory,'Learning_Cuves.jpg')
+                plt.savefig(figure_path, format='jpg')
+                plt.close()
+        rcParams.update({'figure.autolayout': True})
+        
+    def plot_parity_plots(self,figure_directory='show',model_list=None):
+        rcParams.update({'lines.markersize': 2.5})
+        if model_list is None:
+            try:
+                NN = self.NN
+                num_runs = 1
+            except:
+                print("LOAD_CROSS_VALIDATION.load_CV_class(index) must be run")
+                raise
+        else:
+            assert type(model_list) == list, "model_list must be None or list"
+            num_runs = len(model_list)
+        
+        for i in range(num_runs):
+            if model_list is None:
+                model_list = ['no_index']
+            else:
+                self.load_CV_class(model_list[i])
+                NN = self.NN
+            print('Model index: '+ str(model_list[i]))
+            get_secondary_data = super().get_secondary_data
+            _transform_spectra = super()._transform_spectra
+            INDICES_TEST = self.INDICES_TEST
+            
+            X_Test, Y_Test = get_secondary_data(200, INDICES_TEST,iterations=10)
+            X = _transform_spectra(X_Test)
+            y_test_predict = NN.predict(X)
+            NUM_TARGETS = Y_Test.shape[1]
+            if figure_directory == 'show':
+                plt.figure()
+            else:
+                plt.figure(0,figsize=(3.5,2),dpi=400)
+            marker = ['o','s','^','D']
+            ax = plt.subplot()
+            for ii in range(NUM_TARGETS):
+                ax.plot(Y_Test[:,ii],y_test_predict[:,ii],marker[ii],zorder=10-i)
+                print('R2: ' + str(error_metrics.get_r2(Y_Test[:,ii],y_test_predict[:,ii])))
+                print('RMSE: ' + str(error_metrics.get_rmse(Y_Test[:,ii],y_test_predict[:,ii])))
+                print('WL: ' + str(error_metrics.get_wasserstein_loss(Y_Test[:,ii],y_test_predict[:,ii])))
+            ax.plot([0,1],[0,1],'k')
+            ax.set_xlabel('Actual Percent')
+            ax.set_ylabel('Predicted Percent')
+            #plt.gcf().subplots_adjust(bottom=0.12,top=0.98,left=0.09,right=0.97)
+            ax.tick_params(axis='both', which='major')
+            if figure_directory == 'show':
+                plt.show()
+            else:
+                figure_path = os.path.join(figure_directory,'Parity_plot_'+str(model_list[i])+'.jpg')
+                plt.savefig(figure_path, format='jpg')
+                plt.close()
+        rcParams.update({'lines.markersize': 5})
+        
 class NESTED_DICT(dict):
     """Implementation of perl's autovivification feature."""
     def __missing__(self, key):
@@ -812,5 +946,3 @@ def NESTED_DICT_to_DICT(nested_dict):
                 recursive_items(value,value2) 
     recursive_items(nested_dict,dictionary)
     return dictionary
-    
-        

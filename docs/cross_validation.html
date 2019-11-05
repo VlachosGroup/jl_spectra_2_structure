@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cross_validation &mdash; jl_spectra_2_structure 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="neural_network" href="neural_network.html" />
+    <link rel="prev" title="jl_spectra_2_structure" href="jl_spectra_2_structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> jl_spectra_2_structure
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="jl_spectra_2_structure.html">jl_spectra_2_structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">cross_validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-cross-validation-class">The <code class="docutils literal notranslate"><span class="pre">CROSS_VALIDATION</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-load-cross-validation-class">The <code class="docutils literal notranslate"><span class="pre">LOAD_CROSS_VALIDATION</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-nested-dict-class">The <code class="docutils literal notranslate"><span class="pre">NESTED_DICT</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-nested-dict-to-dict-function">The <code class="docutils literal notranslate"><span class="pre">NESTED_DICT_to_DICT</span></code> function</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="neural_network.html">neural_network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="primary_data_creation/index.html">primary_data_creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting_tools.html">plotting_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="error_metrics.html">error_metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">jl_spectra_2_structure</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>cross_validation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/cross_validation.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cross-validation">
+<h1>cross_validation<a class="headerlink" href="#cross-validation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-cross-validation-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">CROSS_VALIDATION</span></code> class<a class="headerlink" href="#the-cross-validation-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION">
+<em class="property">class </em><code class="sig-name descname">CROSS_VALIDATION</code><span class="sig-paren">(</span><em class="sig-param">ADSORBATE='CO'</em>, <em class="sig-param">POC=1</em>, <em class="sig-param">cv_indices_path=None</em>, <em class="sig-param">cross_validation_path=None</em>, <em class="sig-param">nanoparticle_path=None</em>, <em class="sig-param">high_coverage_path=None</em>, <em class="sig-param">coverage_scaling_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cross_validation_path">
+<code class="sig-name descname">_get_default_cross_validation_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_default_cross_validation_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cross_validation_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cv_indices_path">
+<code class="sig-name descname">_get_default_cv_indices_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_default_cv_indices_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cv_indices_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_ir_gen_class">
+<code class="sig-name descname">_get_ir_gen_class</code><span class="sig-paren">(</span><em class="sig-param">TARGET</em>, <em class="sig-param">NUM_GCN_LABELS</em>, <em class="sig-param">MIN_GCN_PER_LABEL</em>, <em class="sig-param">GCN_ALL</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_ir_gen_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_ir_gen_class" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_state">
+<code class="sig-name descname">_get_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN">
+<code class="sig-name descname">_run_NN</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES</em>, <em class="sig-param">INDICES</em>, <em class="sig-param">X_compare</em>, <em class="sig-param">y_compare</em>, <em class="sig-param">IS_TEST</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._run_NN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_pc_loadings">
+<code class="sig-name descname">_set_pc_loadings</code><span class="sig-paren">(</span><em class="sig-param">NUM_PCs</em>, <em class="sig-param">NUM_SAMPLES=100000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._set_pc_loadings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_pc_loadings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns principal component loadings after performing SVD on the
+matrix of pure spectra where <span class="math notranslate nohighlight">\(pure-single_spectra = USV^T\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>NUM_PCs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of principal components of the spectra to keep.</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>TOTAL_EXPLAINED_VARIANCE</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Total explained variance by the <span class="math notranslate nohighlight">\(n\)</span> principal components where
+<span class="math notranslate nohighlight">\(n=NUM_PCs\)</span></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>PC_loadings</strong> – The first loadings of the first <span class="math notranslate nohighlight">\(N\)</span> principal components where <span class="math notranslate nohighlight">\(N\)</span>
+is equal to NUM_PCs. <span class="math notranslate nohighlight">\(PC_loadings = V\)</span></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._transform_spectra">
+<code class="sig-name descname">_transform_spectra</code><span class="sig-paren">(</span><em class="sig-param">spectra</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._transform_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._transform_spectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns principal component loadings of the spectra as well as the
+matrix that multiplies the principal components of a given mixed
+spectra to return.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>NUM_PCs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of principal components of the spectra to keep.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>PC_loadings</strong> (<em>numpy.ndarray</em>) – The first loadings of the first <span class="math notranslate nohighlight">\(N\)</span> principal components where <span class="math notranslate nohighlight">\(N\)</span>
+is equal to the number of pure-component species on which model is
+trained.</p></li>
+<li><p><strong>PCs_2_concentrations</strong> (<em>numpy.ndarray</em>) – Regressed matrix to compute concentrations given the principal
+components of a mixed spectra.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.generate_test_cv_indices">
+<code class="sig-name descname">generate_test_cv_indices</code><span class="sig-paren">(</span><em class="sig-param">CV_SPLITS=3, BINDING_TYPE_FOR_GCN=[1], test_fraction=0.25, random_state=0, read_file=False, write_file=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.generate_test_cv_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.generate_test_cv_indices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_secondary_data">
+<code class="sig-name descname">get_secondary_data</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES</em>, <em class="sig-param">INDICES</em>, <em class="sig-param">iterations=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_secondary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_secondary_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_results">
+<code class="sig-name descname">get_test_results</code><span class="sig-paren">(</span><em class="sig-param">read_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_test_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_results" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_secondary_data">
+<code class="sig-name descname">get_test_secondary_data</code><span class="sig-paren">(</span><em class="sig-param">read_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_test_secondary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_secondary_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV">
+<code class="sig-name descname">run_CV</code><span class="sig-paren">(</span><em class="sig-param">write_file=False</em>, <em class="sig-param">CV_RESULTS_FILE=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.run_CV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV_multiprocess">
+<code class="sig-name descname">run_CV_multiprocess</code><span class="sig-paren">(</span><em class="sig-param">write_file=False</em>, <em class="sig-param">CV_RESULTS_FILE=None</em>, <em class="sig-param">num_procs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.run_CV_multiprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV_multiprocess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_single_CV">
+<code class="sig-name descname">run_single_CV</code><span class="sig-paren">(</span><em class="sig-param">CV_INDEX_or_TEST</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.run_single_CV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_single_CV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters">
+<code class="sig-name descname">set_model_parameters</code><span class="sig-paren">(</span><em class="sig-param">TARGET</em>, <em class="sig-param">COVERAGE</em>, <em class="sig-param">NN_PROPERTIES</em>, <em class="sig-param">NUM_TRAIN</em>, <em class="sig-param">NUM_VAL</em>, <em class="sig-param">NUM_TEST</em>, <em class="sig-param">MIN_GCN_PER_LABEL=0</em>, <em class="sig-param">NUM_GCN_LABELS=None</em>, <em class="sig-param">GCN_ALL=False</em>, <em class="sig-param">LOW_FREQUENCY=200</em>, <em class="sig-param">HIGH_FREQUENCY=2200</em>, <em class="sig-param">ENERGY_POINTS=501</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_model_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters">
+<code class="sig-name descname">set_nn_parameters</code><span class="sig-paren">(</span><em class="sig-param">NN_PROPERTIES</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_nn_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="the-load-cross-validation-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">LOAD_CROSS_VALIDATION</span></code> class<a class="headerlink" href="#the-load-cross-validation-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION">
+<em class="property">class </em><code class="sig-name descname">LOAD_CROSS_VALIDATION</code><span class="sig-paren">(</span><em class="sig-param">cv_indices_path=None</em>, <em class="sig-param">cross_validation_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_NN">
+<code class="sig-name descname">get_NN</code><span class="sig-paren">(</span><em class="sig-param">dictionary</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.get_NN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_NN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_best_models">
+<code class="sig-name descname">get_best_models</code><span class="sig-paren">(</span><em class="sig-param">models_per_category</em>, <em class="sig-param">standard_deviations</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.get_best_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_best_models" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_keys">
+<code class="sig-name descname">get_keys</code><span class="sig-paren">(</span><em class="sig-param">dictionary</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.get_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_CV_class">
+<code class="sig-name descname">load_CV_class</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">new_cv_indices_path=None</em>, <em class="sig-param">new_cross_validation_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.load_CV_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_CV_class" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_all_CV_data">
+<code class="sig-name descname">load_all_CV_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.load_all_CV_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_all_CV_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_models">
+<code class="sig-name descname">plot_models</code><span class="sig-paren">(</span><em class="sig-param">dictionary, figure_directory='show', model_list=None, xlim=[0, 200], ylim1=[0, 0.3], ylim2=[0, 0.3]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.plot_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_models" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_parity_plots">
+<code class="sig-name descname">plot_parity_plots</code><span class="sig-paren">(</span><em class="sig-param">figure_directory='show'</em>, <em class="sig-param">model_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.plot_parity_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_parity_plots" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="the-nested-dict-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">NESTED_DICT</span></code> class<a class="headerlink" href="#the-nested-dict-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="jl_spectra_2_structure.cross_validation.NESTED_DICT">
+<em class="property">class </em><code class="sig-name descname">NESTED_DICT</code><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#NESTED_DICT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.NESTED_DICT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of perl’s autovivification feature.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="the-nested-dict-to-dict-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">NESTED_DICT_to_DICT</span></code> function<a class="headerlink" href="#the-nested-dict-to-dict-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.cross_validation.NESTED_DICT_to_DICT">
+<code class="sig-name descname">NESTED_DICT_to_DICT</code><span class="sig-paren">(</span><em class="sig-param">nested_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#NESTED_DICT_to_DICT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.NESTED_DICT_to_DICT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="neural_network.html" class="btn btn-neutral float-right" title="neural_network" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="jl_spectra_2_structure.html" class="btn btn-neutral float-left" title="jl_spectra_2_structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Joshua Lansford
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

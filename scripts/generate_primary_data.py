@@ -36,6 +36,7 @@ vasp_CO_high_coverage = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\VASP_FI
 nanoparticle_path, isotope_path, high_coverage_path\
 , coverage_scaling_path = get_default_data_paths('CO')
 
+print(nanoparticle_path)
 
 CO_DATA = Primary_DATA(metal_atoms=['Pt'], adsorbate_atoms=['C','O']\
                        , create_new_vasp_files=False, delta=0.025)
