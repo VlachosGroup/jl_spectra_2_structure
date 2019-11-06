@@ -105,7 +105,7 @@ if __name__ == "__main__":
         print('GCN_ALL: ' + str(GCN_ALL))
         
         work_dir = os.getcwd()
-        cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET'+'_'+str(COVERAGE))
+        cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
         CV_class = CROSS_VALIDATION(ADSORBATE=ADSORBATE,INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
                                     ,cross_validation_path=cross_validation_path)
         CV_SPLITS = 3
