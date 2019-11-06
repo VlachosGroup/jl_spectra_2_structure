@@ -486,7 +486,7 @@ class CROSS_VALIDATION:
         INDICES_TEST = self.INDICES_TEST
         INDICES_CV_ALL = self.INDICES_CV_ALL
         iterations = 10
-        
+        print(str(multiprocessing.cpu_count())+ ' cores available to this instance.')
         if CV_INDEX_or_TEST != 'TEST':
             print('#########################################################')
             print('#########################################################')
