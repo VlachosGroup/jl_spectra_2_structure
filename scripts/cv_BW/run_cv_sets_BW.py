@@ -49,7 +49,7 @@ if __name__ == "__main__":
     
         batch_size = int(10**(3*random_numbers[0]+1))
         learning_rate = 10**(2*random_numbers[1]-4)
-        epsilon = 10**(6*random_numbers[2]-14)
+        epsilon = 10**(4*random_numbers[2]-14)
         alpha = 10**(7*random_numbers[3]-6)
         NUM_TRAIN = int(10**(random_numbers[4]+4))
         training_sets = int(10**(2*random_numbers[5]+1))
@@ -65,6 +65,7 @@ if __name__ == "__main__":
         print('NUM_TRAIN: '+str(NUM_TRAIN))
         print('training_sets: '+str(training_sets))
         print('epochs: '+str(epochs))
+        print('hidden layers: '+str(hidden_layers))
         #batch_size: 2297
         #learning_rate = 0.06651629336077657
         #epsilon = 0.02872678693613251
