@@ -100,8 +100,9 @@ class IR_GEN:
         self.INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES
         self.COVERAGE = None
 
-    def get_GCNlabels(self, Minimum=0, showfigures=False, BINDING_TYPE_FOR_GCN=[1]):
+    def get_GCNlabels(self, Minimum=0, showfigures=False, figure_directory='show', BINDING_TYPE_FOR_GCN=[1]):
         print('Initial number of targets: '+str(self.NUM_TARGETS))
+        ADSORBATE = self.ADSORBATE
         NUM_TARGETS = self.NUM_TARGETS
         GCNList = self.GCNList
         BINDING_TYPES = self.BINDING_TYPES
@@ -146,7 +147,7 @@ class IR_GEN:
                              for i in np.arange(1, NUM_TARGETS+1)])
         if showfigures == True:
             import matplotlib.pyplot as plt
-            plt.figure(0)
+            plt.figure()
             plt.scatter(GCNList_selected, GCNList_selected, c=KC.labels_)
             for i in BreakMax:
                 plt.plot([0, i, 2*i], [2*i, i, 0], 'k-')
@@ -157,7 +158,7 @@ class IR_GEN:
             BreakString = zip(np.around(BreakMin, decimals=1), np.around(BreakMax, decimals=1))
             BreakString = [str(count+1)+': '+str(i[0])+'-'+str(i[1])
                            for count, i in enumerate(BreakString)]
-            plt.figure(1)
+            plt.figure()
             #ax = plt.subplot()
             plt.hist(GCNlabels[np.isin(BINDING_TYPES,BINDING_TYPE_FOR_GCN)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
             plt.xticks(range(1, NUM_TARGETS+1))
@@ -171,17 +172,21 @@ class IR_GEN:
             rcParams['lines.markersize'] = 5
             params = {'figure.autolayout': True}
             rcParams.update(params)
-            plt.figure(2, figsize=(3.5, 3), dpi=300)
+            if figure_directory == 'show':
+                plt.figure()
+            else:
+                plt.figure(0, figsize=(3.5, 3), dpi=400)
             #ax = plt.subplot()
             plt.hist(GCNlabels[np.isin(BINDING_TYPES,BINDING_TYPE_FOR_GCN)], bins=np.arange(0.5, NUM_TARGETS+1.5), rwidth=0.5)
             plt.xticks(range(1, NUM_TARGETS+1))
             #ax.set_xticklabels(greater_than)
-            plt.xticks(fontsize=8)
-            plt.yticks(fontsize=8)
-            plt.xlabel('GCN Group', fontsize=8)
-            plt.ylabel('DFT Samples', fontsize=8)
-            plt.savefig('../Figures/GCN_Clustering.png', format='png')
-            plt.close()
+            plt.xlabel('GCN Group')
+            plt.ylabel('DFT Samples')
+            if figure_directory == 'show':
+                plt.show()
+            else:
+                plt.savefig(os.path.join(figure_directory,ADSORBATE+'GCN_Clustering.jpg'), format='jpg')
+                plt.close()
 
         self.GCNlabels = GCNlabels
         self.NUM_TARGETS = NUM_TARGETS

@@ -63,5 +63,5 @@ MINOR = _version_minor
 MICRO = _version_micro
 VERSION = __version__
 PACKAGE_DATA = {'jl_spectra_2_structure': [pjoin('data', '*'),pjoin('data', '*','*')]}
-REQUIRES = ["numpy","scipy","matplotlib","scikit-learn","json_tricks","imbalanced-learn","statsmodels","pandas","ase","pillow"]
+REQUIRES = ["numpy","scipy","matplotlib","scikit-learn","json_tricks","imbalanced-learn","statsmodels","pandas","ase","pillow","uuid"]
 PYTHON_REQUIRES = ">= 3.5"
