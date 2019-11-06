@@ -29,7 +29,7 @@ if __name__ == "__main__":
         hidden_layer2 = np.random.randint(50,151)
         hidden_layer_3 = np.random.randint(50,151)
         num_layers = np.random.randint(2,3+1)
-        elif num_layers == 2:
+        if num_layers == 2:
             hidden_layers = (hidden_layer1, hidden_layer2)
         elif num_layers == 3:
             hidden_layers = (hidden_layer1, hidden_layer2, hidden_layer_3)
