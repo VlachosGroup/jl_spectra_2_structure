@@ -12,7 +12,6 @@ from timeit import default_timer as timer
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import StratifiedShuffleSplit
 import multiprocessing
-import psutil
 from copy import deepcopy
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
@@ -431,14 +430,14 @@ class CROSS_VALIDATION:
         #Cross Validation and Test Run
         start = timer()
         #memory requirment since spectra are arrays of 501 real numbers of float64
-        memory_requriement_per_run = 8*501*(NUM_TRAIN+(max(NUM_VAL,NUM_TEST)))
-        memory_available = psutil.virtual_memory()[0]
-        max_runs_with_memory = int((0.95*memory_available-1)/memory_requriement_per_run)
+        #memory_requriement_per_run = 8*501*(NUM_TRAIN+(max(NUM_VAL,NUM_TEST)))
+        #memory_available = psutil.virtual_memory()[0]
+        #max_runs_with_memory = int((0.95*memory_available-1)/memory_requriement_per_run)
         cpu_cores = multiprocessing.cpu_count()
         num_procs_given = num_procs
         if num_procs is None:
             num_procs=cpu_cores
-        num_procs = min(max_runs_with_memory, cpu_cores,num_procs,CV_SPLITS+1)
+        num_procs = min(cpu_cores,num_procs,CV_SPLITS+1)
         print('#########################################################')
         print('#########################################################')
         if num_procs_given is not None:
