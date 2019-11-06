@@ -52,8 +52,8 @@ if __name__ == "__main__":
     epsilon = 10**(4*random_numbers[2]-14)
     alpha = 10**(5*random_numbers[3]-6)
     NUM_TRAIN = int(10**(random_numbers[4]+4))
-    training_sets = int(2*10**(random_numbers[5]+1))
-    epochs = int(10**(2*random_numbers[6]))
+    training_sets = int(10**(random_numbers[5]+1))
+    epochs = int(2*10**(random_numbers[6]))
     if which_setup[1] == 'high' and which_setup[2] in ['binding_type','combine_hollow_sites']:
         NUM_TRAIN = 10000
     print('batch_size: '+str(batch_size))
@@ -72,7 +72,6 @@ if __name__ == "__main__":
     #epochs=2
     #training_sets = 2
     ADSORBATE = which_setup[0]
-    ADSORBATE = 'CO'
     if ADSORBATE == 'CO':
         INCLUDED_BINDING_TYPES=[1,2,3,4]
         MAX_COVERAGES = [1, 0.7, 0.2, 0.2]
@@ -99,8 +98,6 @@ if __name__ == "__main__":
             GCN_ALL = False
     COVERAGE = which_setup[1]
     TARGET = which_setup[2]
-    TARGET = 'GCN'
-    COVERAGE = 'low'
     print('ADSORBATE: '+ADSORBATE)
     print('TARGET: ' + str(TARGET))
     print('COVERAGE: ' + str(COVERAGE))

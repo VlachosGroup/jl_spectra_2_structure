@@ -258,9 +258,18 @@ class AdamOptimizer(BaseOptimizer):
                    for m, grad in zip(self.ms, grads)]
         self.vs = [self.beta_2 * v + (1 - self.beta_2) * (grad ** 2)
                    for v, grad in zip(self.vs, grads)]
-        self.learning_rate = (self.learning_rate_init *
-                              np.sqrt(1 - self.beta_2 ** self.t) /
-                              (1 - self.beta_1 ** self.t))
+        #avoid overflow
+        try:
+            self.learning_rate = (self.learning_rate_init *
+                                  np.sqrt(1 - self.beta_2 ** min(self.t,1022)) /
+                                  (1 - self.beta_1 ** min(self.t,1022)))
+        except:
+            print('Lets figure out this error')
+            print('t: '+str(self.t)+'_'+type(self.t))
+            print('learning_rate_init: '+str(self.learning_rate_init)+'_'+type(self.learning_rate_init))
+            print('beta2: '+str(self.beta_2)+'_'+type(self.beta_2))
+            print('beta1: '+str(self.beta_1)+'_'+type(self.beta_1))
+            raise
         updates = [-self.learning_rate * m / (np.sqrt(v) + self.epsilon)
                    for m, v in zip(self.ms, self.vs)]
         return updates
