@@ -17,7 +17,7 @@ import numpy as np
 #coverage is 'low', 'high' or a float <= 1
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 if __name__ == "__main__":
-    for run_number in range(1000):
+    for run_number in np.arange(1000,2000):
         print('run_number: ' + str(run_number))
         #try:
         #    run_number = sys.argv[1]
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         
     
         batch_size = int(10**(3*random_numbers[0]+1))
-        learning_rate = 10**(3*random_numbers[1]-4)
+        learning_rate = 10**(2*random_numbers[1]-4)
         epsilon = 10**(13.5*random_numbers[2]-14)
         alpha = 10**(7*random_numbers[3]-6)
         NUM_TRAIN = int(10**(random_numbers[4]+4))
