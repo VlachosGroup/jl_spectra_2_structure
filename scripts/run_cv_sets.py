@@ -14,13 +14,13 @@ import numpy as np
 #coverage is 'low', 'high' or a float <= 1
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 if __name__ == "__main__":
-    for ADSORBATE in ['C2H4','NO','CO']:
+    for ADSORBATE in ['CO']:
         if ADSORBATE == 'CO':
             INCLUDED_BINDING_TYPES=[1,2,3,4]
             MAX_COVERAGES = [1, 0.7, 0.2, 0.2]
             BINDING_TYPE_FOR_GCN=[1]
-            BINDING_COVERAGE = [1,'low','high']
-            GCN_COVERAGE = [1,'low','high']
+            BINDING_COVERAGE = ['low']
+            GCN_COVERAGE = []
             TARGET_SITES = ['binding_type']
             HIGH_FREQUENCY = 2200
             ENERGY_POINTS=500
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         CV_class = CROSS_VALIDATION(ADSORBATE=ADSORBATE,INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES)
         CV_SPLITS = 3
         CV_class.generate_test_cv_indices(CV_SPLITS=CV_SPLITS, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN\
-        , test_fraction=0.25, random_state=0, read_file=False, write_file=True)
+        , test_fraction=0.25, random_state=0, read_file=True, write_file=False)
         properties_dictionary = {'batch_size':500, 'learning_rate_init':0.005\
                       , 'epsilon':10**-12,'hidden_layer_sizes':(50,50)
                       ,'alpha':0, 'epochs_per_training_set':200,'training_sets':1,'loss': 'wasserstein_loss'}
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                 , LOW_FREQUENCY=200, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
                 CV_class.set_pc_loadings(70,NUM_SAMPLES=10000)
                 print('Total Explained Variance: ' + str(CV_class.TOTAL_EXPLAINED_VARIANCE))
-                for alpha in np.linspace(0, 1, 2, endpoint=True):
+                for alpha in 10**np.linspace(-4,1,10,endpoint=True):
                     print('alpha: ' + str(alpha))
                     properties_dictionary.update({'alpha':alpha})
                     CV_class.set_nn_parameters(properties_dictionary)
@@ -78,9 +78,9 @@ if __name__ == "__main__":
                 , NUM_TRAIN=1000, NUM_VAL=1000, NUM_TEST=1000\
                 , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=11, GCN_ALL = True\
                 , LOW_FREQUENCY=200, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
-                CV_class.set_pc_loadings(70,NUM_SAMPLES=1000)
+                CV_class.set_pc_loadings(70,NUM_SAMPLES=10000)
                 print('Total Explained Variance: ' + str(CV_class.TOTAL_EXPLAINED_VARIANCE))
-                for alpha in np.linspace(0, 1, 10, endpoint=True):
+                for alpha in 10**np.linspace(-4,1,10,endpoint=True):
                     print('alpha: ' + str(alpha))
                     properties_dictionary.update({'alpha':alpha})
                     CV_class.set_nn_parameters(properties_dictionary)

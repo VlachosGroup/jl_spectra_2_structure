@@ -267,24 +267,63 @@ class IR_GEN:
         #Xfrequencies cannot be less than 0
         Xfrequencies[Xfrequencies[...]<2**-500] = 0
         Xintensities[np.arange(X.shape[0]), CO_STRETCH_IDX] = CO_intensities
-        Xcov = np.array([np.array((Xfrequencies[i], Xintensities[i]))
-                         for i in range(X.shape[0])])
+        Xcov = np.stack((Xfrequencies,Xintensities),axis=1)
         return Xcov
 
-    def _scaling_factor_shift(self, X):
+    def scaling_factor_shift(self, X):
         Xfrequencies = X[:, 0].copy()
         Xintensities = X[:, 1].copy()
         CO_STRETCH_IDX = Xfrequencies > 1000
         MC_IDX = Xfrequencies < 1000
         #Scaling Factor determined from comparing experiment to DFT
-        #uncertainties are 9.3e-6 and 0.00182 respectively
-        SFCO = 1.012111
-        SFMC = 0.96851
+        #uncertainties are 0.00097 and 0.00182 respectively
+        
+        SFCO = 1.0121
+        SFMC = 0.969
         Xfrequencies[CO_STRETCH_IDX] = Xfrequencies[CO_STRETCH_IDX]*SFCO
         Xfrequencies[MC_IDX] = Xfrequencies[MC_IDX]*SFMC
-        X = np.array([np.array((Xfrequencies[i], Xintensities[i]))
-                      for i in range(len(Xfrequencies))])
+        X = np.stack((Xfrequencies,Xintensities),axis=1)
         return X
+    
+    def _perturb_and_shift(self,perturbations, X, y, BINDING_TYPES=None):
+        ADSORBATE = self.ADSORBATE
+        X = X.copy()
+        y = y.copy()
+        Xperturbed = X.repeat(perturbations, axis=0)
+        yperturbed = y.repeat(perturbations, axis=0)
+        if BINDING_TYPES is not None:
+            BINDING_TYPES = BINDING_TYPES.copy()
+            BINDING_TYPES_perturbed = BINDING_TYPES.repeat(perturbations,axis=0)
+        else:
+            BINDING_TYPES_perturbed = None
+            
+        Xfrequencies = Xperturbed[:, 0].copy()
+        Xintensities = Xperturbed[:, 1].copy()
+        CO_STRETCH_IDX = Xfrequencies > 1000
+        MC_IDX = Xfrequencies < 1000
+        #Scaling Factor determined from comparing experiment to DFT
+        #uncertainties are 0.00097 and 0.00182 respectively
+        SFCO = 1.0121
+        SFMC = 0.969
+        if ADSORBATE == 'CO':
+            perturb_CO_freq = 0.00097044 * np.random.standard_normal((Xfrequencies[CO_STRETCH_IDX].shape)) + SFCO
+            perturb_MC_freq = 0.00183104 * np.random.standard_normal((Xfrequencies[MC_IDX].shape)) + SFMC
+        else:
+            perturb_CO_freq = 0.00097044 * np.random.standard_normal((Xfrequencies[CO_STRETCH_IDX].shape)) + 1
+            perturb_MC_freq = 0.00183104 * np.random.standard_normal((Xfrequencies[MC_IDX].shape)) + 1
+        
+        perturb_CO_int = 0.00097044 * np.random.standard_normal((Xintensities[CO_STRETCH_IDX].shape)) + 1
+        perturb_MC_int = 0.00183104 * np.random.standard_normal((Xintensities[MC_IDX].shape)) + 1
+        
+        Xfrequencies[CO_STRETCH_IDX] *= perturb_CO_freq
+        Xfrequencies[MC_IDX] *= perturb_MC_freq
+        
+        Xintensities[CO_STRETCH_IDX] *= perturb_CO_int
+        Xintensities[MC_IDX] *= perturb_MC_int
+        
+        Xperturbed_and_shifted = np.stack((Xfrequencies,Xintensities),axis=1)
+        Xperturbed_and_shifted[Xperturbed_and_shifted[...]<2**-500] = 0
+        return (Xperturbed_and_shifted, yperturbed, BINDING_TYPES_perturbed)
 
     def _generate_spectra(self, Xfrequencies, Xintensities, energies2D, prefactor, sigma):
         ENERGY_POINTS = self.ENERGY_POINTS
@@ -432,8 +471,8 @@ class IR_GEN:
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
         _coverage_shift = self._coverage_shift
         _get_probabilities = self._get_probabilities
-        _scaling_factor_shift = self._scaling_factor_shift
         _perturb_spectra = self._perturb_spectra
+        _perturb_and_shift = self._perturb_and_shift
         _xyconv = self. _xyconv
         high_coverage_path = self.HIGH_COV_PATH
         TARGET = self.TARGET
@@ -442,15 +481,12 @@ class IR_GEN:
         BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
         X0cov = self.X0cov
         GCNlabels = self.GCNlabels
-        ADSORBATE = self.ADSORBATE
         #Assign the target variable Y to either GCN group or binding site
         if TARGET == 'GCN':
             assert GCNlabels is not None, "get_GCNlabels must be executed before spectra can be generated"
             Y = GCNlabels
         else:
             Y = BINDING_TYPES
-        if ADSORBATE in ['CO']:
-            X0cov = _scaling_factor_shift(X0cov)
         #Adding Data for Extended Surfaces
         if COVERAGE == 'high' and TARGET == 'GCN':
             print('Adding high-coverage low index planes')
@@ -484,7 +520,6 @@ class IR_GEN:
             HC_intensities = np.array(HC_intensities)
             HC_X = np.array([np.array((HC_frequencies[i], HC_intensities[i]))
                              for i in range(len(HC_frequencies))])
-            HC_X = _scaling_factor_shift(HC_X)
             offset = max_freqs-len(X0cov[0][0])
             X = np.pad(X0cov, ((0, 0), (0, 0), (0, offset)), 'constant', constant_values=0)
             print('Final number of targets: '+str(NUM_TARGETS))
@@ -496,13 +531,13 @@ class IR_GEN:
             X = _coverage_shift(X0cov, BINDING_TYPES_with_4fold, COVERAGE,COVERAGE)
         elif COVERAGE == 'low':
             X = X0cov
-        X_new = X
-        Y_new = Y
+        X_new = X.copy()
+        Y_new = Y.copy()
         if COVERAGE == 'high' and TARGET == 'GCN':
             num_single = Y_new.size
             #b = 2105/2095 #a = 1854/1865 - difference between experiments and DFT
             HC_X_expanded, HC_classes_expanded, _ = _perturb_spectra(5, HC_X, HC_classes
-                                                                       , a=0.995, b=1.01)
+                                                                       , a=0.997, b=1.007)
             X_new = np.concatenate((X_new, HC_X_expanded), axis=0)
             Y_new = np.concatenate((Y_new, HC_classes_expanded), axis=0)
             indices = list(indices) + np.arange(Y_new.size)[num_single:].tolist()
@@ -518,8 +553,7 @@ class IR_GEN:
         else:
             BINDING_TYPES_balanced = None
         #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
-        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_spectra(5, X_balanced, Y_balanced\
-                                            , a=0.997, b=1.003,BINDING_TYPES=BINDING_TYPES_balanced)
+        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_and_shift(5, X_balanced, Y_balanced, BINDING_TYPES_balanced)
         probabilities = _get_probabilities(NUM_SAMPLES, NUM_TARGETS)
         if COVERAGE == 'high' and TARGET == 'GCN':
             self.HC_X = HC_X
@@ -541,11 +575,12 @@ class IR_GEN:
 
     def get_more_spectra(self, NUM_SAMPLES, indices):
         _perturb_spectra = self._perturb_spectra
+        _perturb_and_shift = self._perturb_and_shift
         _get_probabilities = self._get_probabilities
         _xyconv = self. _xyconv
         NUM_TARGETS = self.NUM_TARGETS
-        X_new = self.X
-        Y_new = self.Y
+        X_new = self.X.copy()
+        Y_new = self.Y.copy()
         TARGET = self.TARGET
         BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
         COVERAGE = self.COVERAGE
@@ -555,7 +590,7 @@ class IR_GEN:
             num_single = Y_new.size
             #b = 2105/2095 #a = 1854/1865 difference between experiments and DFT
             HC_X_expanded, HC_classes_expanded, _ = _perturb_spectra(5, HC_X, HC_classes
-                                                                       , a=0.995, b=1.01)
+                                                                       , a=0.997, b=1.07)
             X_new = np.concatenate((X_new, HC_X_expanded), axis=0)
             Y_new = np.concatenate((Y_new, HC_classes_expanded), axis=0)
             indices = list(indices) + np.arange(Y_new.size)[num_single:].tolist() 
@@ -572,8 +607,7 @@ class IR_GEN:
         else:
             BINDING_TYPES_balanced = None
         #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
-        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_spectra(5, X_balanced, Y_balanced
-                                            , a=0.997, b=1.003,BINDING_TYPES=BINDING_TYPES_balanced)
+        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_and_shift(5, X_balanced, Y_balanced, BINDING_TYPES_balanced)
         probabilities = _get_probabilities(NUM_SAMPLES, NUM_TARGETS)
         Xconv, yconv = _xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
         #set numbers that may form denormals to zero to improve numerics

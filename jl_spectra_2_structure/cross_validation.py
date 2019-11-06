@@ -37,6 +37,11 @@ class CROSS_VALIDATION:
             cross_validation_path = self._get_default_cross_validation_path()
         if cv_indices_path is None:
             cv_indices_path = self._get_default_cv_indices_path()
+        if r'/' not in cross_validation_path and r'\\' not in cross_validation_path:
+            cross_validation_path = os.path.join(os.getcwd(),cross_validation_path)
+        already_exists = os.path.isdir(cross_validation_path)
+        if already_exists == False:
+            os.mkdir(cross_validation_path)
         self.CV_INDICES_PATH = cv_indices_path
         self.CV_PATH = cross_validation_path
         self.ADSORBATE = ADSORBATE
@@ -260,7 +265,7 @@ class CROSS_VALIDATION:
     def set_nn_parameters(self, NN_PROPERTIES):
         self.NN_PROPERTIES = NN_PROPERTIES
         
-    def set_pc_loadings(self,NUM_PCs,NUM_SAMPLES = 100000):
+    def set_pc_loadings(self,NUM_PCs,NUM_SAMPLES = 10000):
         """
         Returns principal component loadings after performing SVD on the
         matrix of pure spectra where $pure-single_spectra = USV^T$
@@ -415,6 +420,11 @@ class CROSS_VALIDATION:
             CV_RESULTS_FILE = os.path.join(CV_PATH,'CV_results_'+TARGET+'_'+str(COVERAGE)\
             +'_'+str(CV_SPLITS)+'fold'+'_reg'+'{:.2E}'.format(NN_PROPERTIES['alpha'])\
             +'_'+NN_PROPERTIES['loss']+'_'+ADSORBATE+'.json')
+        elif r'/' not in CV_RESULTS_FILE and r'\\' not in CV_RESULTS_FILE:
+            if '.json' in CV_RESULTS_FILE:
+                CV_RESULTS_FILE = os.path.join(CV_PATH,CV_RESULTS_FILE)
+            else:
+                CV_RESULTS_FILE = os.path.join(CV_PATH,CV_RESULTS_FILE+'.json')
             
         CV_INDEX_or_TEST = [i for i in range(CV_SPLITS)]
         CV_INDEX_or_TEST.append('TEST')
@@ -659,9 +669,14 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             cross_validation_path = _get_default_cross_validation_path()
         if cv_indices_path is None:
             cv_indices_path = _get_default_cv_indices_path()
+        if r'/' not in cross_validation_path and r'\\' not in cross_validation_path:
+            cross_validation_path = os.path.join(os.getcwd(),cross_validation_path)
+        already_exists = os.path.isdir(cross_validation_path)
+        if already_exists == False:
+            os.mkdir(cross_validation_path)
         is_directory = os.path.isdir(cross_validation_path)
         is_directory_indices = os.path.isdir(cv_indices_path)
-        assert is_directory_indices== True and is_directory == True\
+        assert is_directory_indices == True and is_directory == True\
         , "input to LOAD_CROSS_VALIDATION path is not a directory"
         CV_FILES = [os.path.join(cross_validation_path,file) for file \
         in os.listdir(cross_validation_path) \
