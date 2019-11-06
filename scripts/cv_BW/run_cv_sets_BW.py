@@ -48,7 +48,7 @@ if __name__ == "__main__":
     
 
     batch_size = int(10**(3*random_numbers[0]+1))
-    learning_rate = 10**(2*random_numbers[1]-4)
+    learning_rate = 10**(random_numbers[1]-3)
     epsilon = 10**(4*random_numbers[2]-14)
     alpha = 10**(5*random_numbers[3]-6)
     NUM_TRAIN = int(10**(random_numbers[4]+4))
