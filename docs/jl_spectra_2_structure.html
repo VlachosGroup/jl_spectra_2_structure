@@ -216,13 +216,13 @@ Wertheim 1974</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra">
-<code class="sig-name descname">_perturb_spectra</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">a=0.999</em>, <em class="sig-param">b=1.001</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra" title="Permalink to this definition">¶</a></dt>
+<dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_and_shift">
+<code class="sig-name descname">_perturb_and_shift</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_and_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_and_shift" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._scaling_factor_shift">
-<code class="sig-name descname">_scaling_factor_shift</code><span class="sig-paren">(</span><em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._scaling_factor_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._scaling_factor_shift" title="Permalink to this definition">¶</a></dt>
+<dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra">
+<code class="sig-name descname">_perturb_spectra</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">a=0.999</em>, <em class="sig-param">b=1.001</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -237,7 +237,7 @@ Wertheim 1974</p>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_GCNlabels">
-<code class="sig-name descname">get_GCNlabels</code><span class="sig-paren">(</span><em class="sig-param">Minimum=0, showfigures=False, BINDING_TYPE_FOR_GCN=[1]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_GCNlabels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_GCNlabels" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_GCNlabels</code><span class="sig-paren">(</span><em class="sig-param">Minimum=0, showfigures=False, figure_directory='show', BINDING_TYPE_FOR_GCN=[1]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_GCNlabels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_GCNlabels" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -248,6 +248,11 @@ Wertheim 1974</p>
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_synthetic_spectra">
 <code class="sig-name descname">get_synthetic_spectra</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES, indices, COVERAGE=None, MAX_COVERAGES=[1, 1, 1, 1], LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_synthetic_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_synthetic_spectra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.scaling_factor_shift">
+<code class="sig-name descname">scaling_factor_shift</code><span class="sig-paren">(</span><em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.scaling_factor_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.scaling_factor_shift" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
