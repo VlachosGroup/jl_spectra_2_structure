@@ -774,7 +774,7 @@ class COVERAGE_SCALING:
             
     def save_coverage_figures(self, figure_directory, adsorbate='CO',metal='Pt'\
                               ,frequency_scale_axis1=[0.98,1.10], frequency_scale_axis2=[0.995,1.138]\
-                              ,y_2_ticks=[1,1.02,1.04,1.06,1.08,1.10,1.12]):
+                              ,y_2_ticks=[1,1.02,1.04,1.06,1.08,1.10,1.12],presentation=False):
         PRIMARY_DATA_PATH = self.PRIMARY_DATA_PATH
         with open(PRIMARY_DATA_PATH, 'r') as infile:
             ES_compressed = pd.io.json.read_json(infile)
@@ -856,17 +856,25 @@ class COVERAGE_SCALING:
         popt_n, pcov = curve_fit(INT_func, ES_joined['CO_PER_A2'][CO_Filter], ES_joined['INTENSITY_SCALE'][CO_Filter])
         print('Intensity coverage scaling factors')
         print(popt_n[0])
-        #Plot C-O intensity scaling vs total spatial coverage 
-        plt.figure(0,figsize=(3.5,2),dpi=400)
+        
+        #Plot C-O intensity scaling vs total spatial coverage
+        if presentation == False:
+            plt.figure(0,figsize=(3.5,2),dpi=400)
+            sizey = 10
+        else:
+            plt.figure()
+            sizey=26
         plt.plot(np.sort(ES_joined['CO_PER_A2'][CO_Filter]),INT_func(np.sort(ES_joined['CO_PER_A2'][CO_Filter]),popt_n[0]),'k-')
         for i in range(4):
             plt.plot(ES_joined['CO_PER_A2'][CO_Filter & (ES_joined['CN_CO']==i+1)],ES_joined['INTENSITY_SCALE'][CO_Filter & (ES_joined['CN_CO']==i+1)],'o',marker=markers[i])
-        plt.ylabel(r'$\mathrm{\frac{Intensity\ @\ \theta}{Intensity\ @\ 1/36\ ML}}$',size=10) 
+        
+        plt.ylabel(r'$\mathrm{\frac{Intensity\ @\ \theta}{Intensity\ @\ 1/36\ ML}}$',size=sizey) 
         plt.xlabel('Total spatial coverage ['+adsorbate+' per $\mathrm{\AA}^{2}$]')
-        #plt.legend(['Exponential fit','Atop','Bridge','3-fold','4-fold'])
+        if presentation == True:
+            plt.legend([r'$\mathrm{e^{%.1f\theta}}$' %(popt_n[0]),'Atop','Bridge','3-fold','4-fold'])
         plt.savefig(os.path.join(figure_directory,adsorbate+'_intensity_scale.jpg'), format='jpg')
         plt.close()
-        
+
         R2 = get_r2(ES_joined['INTENSITY_SCALE'][CO_Filter],INT_func(ES_joined['CO_PER_A2'][CO_Filter],popt_n[0]))
         print(R2)
         

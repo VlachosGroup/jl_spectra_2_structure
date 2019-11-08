@@ -65,6 +65,7 @@ NO_DATA.generate_primary_data(vasp_NO_nano, nanoparticle_path, poc=1\
 
 NO_DATA.generate_isotope_data(vasp_NO_isotope, isotope_path\
                               ,masses1=[14,16], masses2=[28,32])
+
 #Coverage Scaling
 NO_coverage = COVERAGE_SCALING(isotope_path)
 NO_coverage.get_coverage_parameters(coverage_scaling_path)

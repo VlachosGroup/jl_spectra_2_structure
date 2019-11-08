@@ -5,7 +5,6 @@ import os
 from jl_spectra_2_structure.cross_validation import  CROSS_VALIDATION
 import numpy as np
 import uuid
-import time
 
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor

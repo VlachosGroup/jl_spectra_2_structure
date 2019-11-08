@@ -25,7 +25,7 @@ class CROSS_VALIDATION:
     """
     def __init__(self, ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1,2,3,4]\
                  , cv_indices_path=None, cross_validation_path = None, nanoparticle_path=None\
-                 ,high_coverage_path=None, coverage_scaling_path=None):
+                 ,high_coverage_path=None, coverage_scaling_path=None,VERBOSE=False):
         """
         """
         assert type(ADSORBATE) == str, "ADSORBATE must be a String"
@@ -48,6 +48,7 @@ class CROSS_VALIDATION:
         self.NANO_PATH = nanoparticle_path
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
+        self.VERBOSE = VERBOSE
         
         
     def _get_default_cross_validation_path(self):
@@ -76,9 +77,7 @@ class CROSS_VALIDATION:
                 , 'NN_PROPERTIES': self.NN_PROPERTIES\
                 , 'NUM_TRAIN': self.NUM_TRAIN, 'NUM_VAL': self.NUM_VAL, 'NUM_TEST': self.NUM_TEST\
                 , 'LOW_FREQUENCY': self.LOW_FREQUENCY, 'HIGH_FREQUENCY': self.HIGH_FREQUENCY\
-                , 'ENERGY_POINTS': self.ENERGY_POINTS, 'FEATURE_MEANS': self.FEATURE_MEANS\
-                , 'TOTAL_EXPLAINED_VARIANCE': self.TOTAL_EXPLAINED_VARIANCE\
-                , 'EXPLAINED_VARIANCE': self.EXPLAINED_VARIANCE, 'PC_LOADINGS': self.PC_LOADINGS}
+                , 'ENERGY_POINTS': self.ENERGY_POINTS}
         return Dict
         
     def generate_test_cv_indices(self, CV_SPLITS=3, BINDING_TYPE_FOR_GCN=[1]\
@@ -91,6 +90,7 @@ class CROSS_VALIDATION:
         HIGH_COV_PATH = self.HIGH_COV_PATH
         COV_SCALE_PATH = self.COV_SCALE_PATH
         CV_INDICES_PATH = self.CV_INDICES_PATH
+        VERBOSE = self.VERBOSE
         INDICES_FILE = os.path.join(CV_INDICES_PATH,\
         'cross_validation_indices_'+str(CV_SPLITS)+'fold_'+ADSORBATE+'.json')
         if read_file == False:
@@ -105,7 +105,7 @@ class CROSS_VALIDATION:
                 GCNconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
                                  , TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                              ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
-                             , coverage_scaling_path=COV_SCALE_PATH)
+                             , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
                 try:
                     GCNconv.get_GCNlabels(Minimum=2*(CV_SPLITS+1),showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
                 except:
@@ -115,6 +115,14 @@ class CROSS_VALIDATION:
                     else:
                         GCNconv.get_GCNlabels(Minimum=0,showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
                 return GCNconv
+            
+            #GCNconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
+            #                 ,TARGET='GCN',NUM_TARGETS=10)
+            #GCNconv.get_GCNlabels(Minimum=0,showfigures=False,BINDING_TYPE_FOR_GCN=[1])
+            #BINDING_TYPES = GCNconv.BINDING_TYPES
+            #combined_class = 100*BINDING_TYPES+GCNconv.GCNlabels
+            #classes_with_counts = np.unique(combined_class,return_counts=True)
+            
             GCNconv = get_gcn_conv(11, BINDING_TYPE_FOR_GCN=INCLUDED_BINDING_TYPES)
             BINDING_TYPES = GCNconv.BINDING_TYPES
             if BINDING_TYPE_FOR_GCN == 'ALL':
@@ -137,14 +145,16 @@ class CROSS_VALIDATION:
             #ensure that each class as at least 2 members
             for count in range(num_classes):
                 if classes_with_counts[1][count-reduce_count] < 2:
-                    print('combining classes to meet kfold constraints')
+                    if VERBOSE == True:
+                        print('combining classes to meet kfold constraints')
                     if count < num_classes-1:
                         combined_class[combined_class == classes_with_counts[0][count-reduce_count]] += 1
                     else:
                         combined_class[combined_class == classes_with_counts[0][count-reduce_count]] -= 1
                     classes_with_counts = np.unique(combined_class,return_counts=True)    
                     reduce_count+=1
-            print('The class and number in each class for fold generation is '+str(classes_with_counts))
+            if VERBOSE == True:
+                print('The class and number in each class for fold generation is '+str(classes_with_counts))
             #split data into cross validation and test set
             sss = StratifiedShuffleSplit(n_splits=1, test_size=test_fraction, random_state=random_state)
             for CV_index, test_index in sss.split(combined_class,combined_class):
@@ -168,7 +178,8 @@ class CROSS_VALIDATION:
             if write_file==True:
                 with open(INDICES_FILE, 'w') as outfile:
                     json_tricks.dump(INDICES_DICTIONARY, outfile, sort_keys=True, indent=4)
-                    print('Generated CV indices and saved dictionary to file ' + INDICES_FILE)
+                    if VERBOSE == True:
+                        print('Generated CV indices and saved dictionary to file ' + INDICES_FILE)
         elif read_file == True:
             with open(INDICES_FILE, 'r') as infile:
                 INDICES_DICTIONARY = json_tricks.load(infile)
@@ -234,27 +245,30 @@ class CROSS_VALIDATION:
         COV_SCALE_PATH = self.COV_SCALE_PATH
         INCLUDED_BINDING_TYPES = self.INCLUDED_BINDING_TYPES
         BINDING_TYPE_FOR_GCN = self.BINDING_TYPE_FOR_GCN
+        VERBOSE = self.VERBOSE
         if TARGET == 'combine_hollow_sites': 
             MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='combine_hollow_sites'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
-                         , coverage_scaling_path=COV_SCALE_PATH)
+                         , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
         elif TARGET == 'binding_type':
             MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='binding_type'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
-                         , coverage_scaling_path=COV_SCALE_PATH)
+                         , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
         elif TARGET == 'GCN':
             if GCN_ALL == True:
                 MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
-                         , coverage_scaling_path=COV_SCALE_PATH)
+                         , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
             else:
                 MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = BINDING_TYPE_FOR_GCN, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
-                         , coverage_scaling_path=COV_SCALE_PATH)
+                         , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
                 OTHER_BINDING_TYPES = np.array(INCLUDED_BINDING_TYPES)[np.isin(INCLUDED_BINDING_TYPES,BINDING_TYPE_FOR_GCN,invert=True)]
+                if VERBOSE == True:
+                    print('OTHER_BINDING_TYPES: ' + str(OTHER_BINDING_TYPES))
                 OTHER_SITESconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = OTHER_BINDING_TYPES, TARGET='binding_type'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
-                         , coverage_scaling_path=COV_SCALE_PATH)
+                         , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
             MAINconv.get_GCNlabels(Minimum=MIN_GCN_PER_LABEL, showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
         
         if TARGET == 'GCN' and GCN_ALL == False:
@@ -263,70 +277,6 @@ class CROSS_VALIDATION:
     
     def set_nn_parameters(self, NN_PROPERTIES):
         self.NN_PROPERTIES = NN_PROPERTIES
-        
-    def set_pc_loadings(self,NUM_PCs,NUM_SAMPLES = 10000):
-        """
-        Returns principal component loadings after performing SVD on the
-        matrix of pure spectra where $pure-single_spectra = USV^T$
-        
-        Parameters
-        ----------
-        NUM_PCs : int
-            The number of principal components of the spectra to keep.
-            
-        Attributes
-        ----------
-        TOTAL_EXPLAINED_VARIANCE : numpy.ndarray
-            Total explained variance by the $n$ principal components where
-            $n=NUM_PCs$
-                  
-        Returns
-        -------
-        PC_loadings : numpy.ndarray
-            The first loadings of the first $N$ principal components where $N$
-            is equal to NUM_PCs. $PC_loadings = V$ 
-        
-        """
-        get_secondary_data = self.get_secondary_data
-        INDICES_CV_ALL = self.INDICES_CV_ALL
-        X_VAL, y_VAL = get_secondary_data(NUM_SAMPLES, INDICES_CV_ALL, iterations=10)
-        FEATURE_MEANS = X_VAL.mean(axis=0,keepdims=True)
-        X = (X_VAL - FEATURE_MEANS)
-        U, S, V = np.linalg.svd(X, full_matrices=False)
-        PC_loadings = V[:NUM_PCs]
-        self.FEATURE_MEANS = FEATURE_MEANS
-        self.TOTAL_EXPLAINED_VARIANCE = np.sum(S[:NUM_PCs]**2)/np.sum(S**2)
-        self.EXPLAINED_VARIANCE = S[:NUM_PCs]**2/np.sum(S**2)
-        self.PC_LOADINGS = PC_loadings
-    
-    def _transform_spectra(self,spectra):
-        """
-        Returns principal component loadings of the spectra as well as the
-        matrix that multiplies the principal components of a given mixed
-        spectra to return.
-                  
-        Parameters
-        ----------
-        NUM_PCs : int
-            The number of principal components of the spectra to keep.
-        
-        Returns
-        -------
-        PC_loadings : numpy.ndarray
-            The first loadings of the first $N$ principal components where $N$
-            is equal to the number of pure-component species on which model is
-            trained.
-            
-        PCs_2_concentrations : numpy.ndarray
-            Regressed matrix to compute concentrations given the principal
-            components of a mixed spectra.
-        
-        """
-        FEATURE_MEANS = self.FEATURE_MEANS
-        PC_LOADINGS = self.PC_LOADINGS
-        X = (spectra - FEATURE_MEANS)
-        PCs = np.dot(X,PC_LOADINGS.T)
-        return PCs 
     
     def run_CV(self, write_file=False, CV_RESULTS_FILE = None):
         try:
@@ -349,6 +299,7 @@ class CROSS_VALIDATION:
         INDICES_VAL = self.INDICES_VAL
         INDICES_TEST = self.INDICES_TEST
         INDICES_CV_ALL = self.INDICES_CV_ALL
+        VERBOSE = self.VERBOSE
         
         #Decide if validation spectra can be created at once
         if ((COVERAGE == 'high' or type(COVERAGE) in [float, int]) and TARGET in ['binding_type', 'combine_hollow_sites'])\
@@ -371,9 +322,10 @@ class CROSS_VALIDATION:
         #Cross Validation
         start = timer()
         for CV_INDEX in range(CV_SPLITS):
-            print('#########################################################')
-            print('#########################################################')
-            print('The CV number is '+str(CV_INDEX+1))
+            if VERBOSE == True:
+                print('#########################################################')
+                print('#########################################################')
+                print('The CV number is '+str(CV_INDEX+1))
             #Get validation spectra
             X_compare, y_compare = get_secondary_data(NUM_SAMPLES=NUM_VAL\
                                 , INDICES=INDICES_VAL[CV_INDEX],iterations=iterations)
@@ -388,9 +340,10 @@ class CROSS_VALIDATION:
         Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_compare, y_compare, IS_TEST=True)
         DictList.append(Dict)
         stop = timer()
-        print('#########################################################')
-        print('#########################################################')
-        print('Time to run the CV+Test: ' + str(stop-start))
+        if VERBOSE == True:
+            print('#########################################################')
+            print('#########################################################')
+            print('Time to run the CV+Test: ' + str(stop-start))
         Dict = _get_state()
         DictList.append(Dict)
         if write_file == True:
@@ -412,9 +365,7 @@ class CROSS_VALIDATION:
         CV_PATH = self.CV_PATH
         COVERAGE = self.COVERAGE
         NN_PROPERTIES = self.NN_PROPERTIES
-        NUM_TRAIN = self.NUM_TRAIN
-        NUM_VAL = self.NUM_VAL
-        NUM_TEST = self.NUM_TEST
+        VERBOSE = self.VERBOSE
         if CV_RESULTS_FILE is None:
             CV_RESULTS_FILE = os.path.join(CV_PATH,'CV_results_'+TARGET+'_'+str(COVERAGE)\
             +'_'+str(CV_SPLITS)+'fold'+'_reg'+'{:.2E}'.format(NN_PROPERTIES['alpha'])\
@@ -438,21 +389,18 @@ class CROSS_VALIDATION:
         if num_procs is None:
             num_procs=cpu_cores
         num_procs = min(cpu_cores,num_procs,CV_SPLITS+1)
-        print('#########################################################')
-        print('#########################################################')
-        if num_procs_given is not None:
+
+        if num_procs_given is not None and VERBOSE == True:
+            print('#########################################################')
+            print('#########################################################')
             if num_procs < num_procs_given:
                 if num_procs == CV_SPLITS+1:
                     print('Resetting number of processes to '+str(num_procs)+', which is the necessary number of model calls.')
-                elif num_procs == max_runs_with_memory:
-                    print('Resetting number of processes to '+str(num_procs)+' due to memory limitations.')
                 elif num_procs == cpu_cores:
                     print('Resetting number of processes to '+str(num_procs)+' which is the number of available cores.')
         else:
             if num_procs == CV_SPLITS+1:
                 print('Setting number of processes to '+str(num_procs)+', which is the necessary number of model calls.')
-            elif num_procs == max_runs_with_memory:
-                print('Setting number of processes to '+str(num_procs)+' due to memory limitations.')
             elif num_procs == cpu_cores:
                 print('Setting number of processes to '+str(num_procs)+' which is the number of available cores.')          
             
@@ -460,9 +408,10 @@ class CROSS_VALIDATION:
             DictList = pool.imap(run_single_CV,CV_INDEX_or_TEST)
             DictList = [Dict for Dict in DictList]
         stop = timer()
-        print('#########################################################')
-        print('#########################################################')
-        print('Time to run the CV+Test: ' + str(stop-start))
+        if VERBOSE == True:
+            print('#########################################################')
+            print('#########################################################')
+            print('Time to run the CV+Test: ' + str(stop-start))
         Dict = _get_state()
         DictList.append(Dict)
         if write_file == True:
@@ -485,23 +434,28 @@ class CROSS_VALIDATION:
         NUM_TEST = self.NUM_TEST
         INDICES_TEST = self.INDICES_TEST
         INDICES_CV_ALL = self.INDICES_CV_ALL
+        VERBOSE = self.VERBOSE
         iterations = 10
-        print(str(multiprocessing.cpu_count())+ ' cores available to this instance.')
+        if VERBOSE == True:
+            print(str(multiprocessing.cpu_count())+ ' cores available to this instance.')
         if CV_INDEX_or_TEST != 'TEST':
-            print('#########################################################')
-            print('#########################################################')
-            print('The CV number is '+str(CV_INDEX_or_TEST+1))
+            if VERBOSE == True:
+                print('#########################################################')
+                print('#########################################################')
+                print('The CV number is '+str(CV_INDEX_or_TEST+1))
             start = timer()
             X_compare, y_compare = get_secondary_data(NUM_SAMPLES=NUM_VAL\
                                 , INDICES=INDICES_VAL[CV_INDEX_or_TEST],iterations=iterations)
             stop = timer()
-            print('Time to generate one batch of secondary data is ' + str(stop-start))
+            if VERBOSE == True:
+                print('Time to generate one batch of secondary data is ' + str(stop-start))
             
             Dict =  _run_NN(NUM_TRAIN, INDICES_TRAIN[CV_INDEX_or_TEST], X_compare, y_compare, IS_TEST=False) 
         else:
-            print('#########################################################')
-            print('#########################################################')
-            print('Training on whole CV population and Testing on test set')
+            if VERBOSE == True:
+                print('#########################################################')
+                print('#########################################################')
+                print('Training on whole CV population and Testing on test set')
                 
             X_compare, y_compare = get_secondary_data(NUM_TEST, INDICES_TEST\
                                     ,iterations=iterations)
@@ -509,7 +463,7 @@ class CROSS_VALIDATION:
             Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_compare, y_compare, IS_TEST=True)
         return Dict
     
-    def get_secondary_data(self,NUM_SAMPLES, INDICES,iterations=1):
+    def get_secondary_data(self,NUM_SAMPLES, INDICES, iterations=1, IS_TRAINING_SET=False):
         try:
             TARGET = self.TARGET
         except:
@@ -528,35 +482,34 @@ class CROSS_VALIDATION:
         if TARGET == 'GCN' and GCN_ALL == False:
             OTHER_SITESconv = deepcopy(self.OTHER_SITESconv)
             X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE, MAX_COVERAGES = [1,1,1,1]\
-            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
+            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS, IS_TRAINING_SET=IS_TRAINING_SET)
             X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low', MAX_COVERAGES= [1,1,1,1]\
-            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
+            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS, IS_TRAINING_SET=IS_TRAINING_SET)
             X = MAINconv.add_noise(X1,X2)
             del X1; del X2; del y2
         else:
             X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE, MAX_COVERAGES = MAX_COVERAGES\
-                                                  , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
+                , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS, IS_TRAINING_SET=IS_TRAINING_SET)
         #Add to the validation and test sets to get more coverage options
         #(each iteration has 10 different coverage combinations
         #when TARGET in ['binding_type','combine_hollow_sites'] and COVERAGE is not 'low')
         for _ in range(iterations-1):
             if TARGET == 'GCN' and GCN_ALL == False:
-                X1_2, y_2 = MAINconv.get_more_spectra(NUM_SAMPLES, INDICES[0])
-                X2_2, y2_2 = OTHER_SITESconv.get_more_spectra(int(NUM_SAMPLES/5), INDICES[1])
+                X1_2, y_2 = MAINconv.get_more_spectra(NUM_SAMPLES, INDICES[0], IS_TRAINING_SET=IS_TRAINING_SET)
+                X2_2, y2_2 = OTHER_SITESconv.get_more_spectra(int(NUM_SAMPLES/5), INDICES[1], IS_TRAINING_SET=IS_TRAINING_SET)
                 X_2 = MAINconv.add_noise(X1_2, X2_2)
                 del X1_2; del X2_2; del y2_2
             else:
-                X_2, y_2 = MAINconv.get_more_spectra(NUM_SAMPLES, INDICES)
+                X_2, y_2 = MAINconv.get_more_spectra(NUM_SAMPLES, INDICES, IS_TRAINING_SET=IS_TRAINING_SET)
             X = np.append(X,X_2,axis=0)
             y = np.append(y,y_2,axis=0)
             del X_2; del y_2
         return (X, y)
 
     def _run_NN(self, NUM_SAMPLES, INDICES, X_compare, y_compare, IS_TEST):
-        _transform_spectra = self._transform_spectra
         get_secondary_data = self.get_secondary_data
         NN_PROPERTIES = self.NN_PROPERTIES
-        X_compare = _transform_spectra(X_compare)
+        VERBOSE = self.VERBOSE
         if IS_TEST == False:
             Dict = {'Wl2_Train':[], 'Score_Train':[]\
                 ,'Wl2_Val':[], 'Score_Val':[]}
@@ -573,17 +526,15 @@ class CROSS_VALIDATION:
         NN = MLPRegressor(hidden_layer_sizes=NN_PROPERTIES['hidden_layer_sizes'], activation='relu', solver='adam'
                               , tol=10**-9, alpha=NN_PROPERTIES['alpha'], verbose=False, batch_size=NN_PROPERTIES['batch_size']
                               , max_iter=1, epsilon= NN_PROPERTIES['epsilon'], early_stopping=False
-                              ,warm_start=True,loss=NN_PROPERTIES['loss']
+                              ,warm_start=True,loss=NN_PROPERTIES['loss'], regularization=NN_PROPERTIES['regularization']
                               ,learning_rate_init=NN_PROPERTIES['learning_rate_init'],out_activation='softmax')
         
         #Using Fit (w/ coverages)
-        if IS_TEST == True:
-            start = timer()
-        X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1)
-        if IS_TEST == True:
-            stop = timer()
-            print('Time to generate one batch of secondary data is ' + str(stop-start))
-        X = _transform_spectra(X)
+        start = timer()
+        X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1, IS_TRAINING_SET=True)
+        stop = timer()
+        if IS_TEST == True and VERBOSE == True:
+                print('Time to generate one batch of secondary data is ' + str(stop-start))
         NN.partial_fit(X, y)
         y_predict = NN.predict(X)
         ycompare_predict = NN.predict(X_compare)
@@ -592,11 +543,10 @@ class CROSS_VALIDATION:
         Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
         Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
         for i in range(NN_PROPERTIES['training_sets']):
-            if IS_TEST == True:
+            if IS_TEST == True and VERBOSE == True:
                 print('Training set number ' + str(i+1))
             if i > 0:
-                X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1)
-                X = _transform_spectra(X)
+                X, y = get_secondary_data(NUM_SAMPLES, INDICES, iterations=1, IS_TRAINING_SET=True)
             indices = np.arange(y.shape[0])    
             for ii in range(NN_PROPERTIES['epochs_per_training_set']):
                 if i > 0 or ii > 0:
@@ -610,7 +560,7 @@ class CROSS_VALIDATION:
                     Dict['Wl2_Train'].append(error_metrics.get_wasserstein_loss(y,y_predict))
                     Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
                     Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
-            if IS_TEST == True:
+            if IS_TEST == True and VERBOSE==True:
                 print('Wl2_val/test: ' + str(Wl2_compare[-1]))
                 print('Wl2_Train: ' + str(Dict['Wl2_Train'][-1]))
                 print('Score val/test: ' + str(Score_compare[-1]))
@@ -638,7 +588,10 @@ class CROSS_VALIDATION:
             raise
         INDICES_TEST = self.INDICES_TEST
         #Get Test Spectra
+        start = timer()
         X_Test, y_Test = self.get_secondary_data(NUM_TEST, INDICES_TEST, iterations=10)
+        stop = timer()
+        print('Time to generate Test set is ' + str(stop-start))
         return (X_Test, y_Test)
             
     def get_test_results(self, read_file=True):
@@ -912,12 +865,10 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 NN = self.NN
             print('Model index: '+ str(model_list[i]))
             get_secondary_data = super().get_secondary_data
-            _transform_spectra = super()._transform_spectra
             INDICES_TEST = self.INDICES_TEST
             
             X_Test, Y_Test = get_secondary_data(200, INDICES_TEST,iterations=10)
-            X = _transform_spectra(X_Test)
-            y_test_predict = NN.predict(X)
+            y_test_predict = NN.predict(X_Test)
             NUM_TARGETS = Y_Test.shape[1]
             if figure_directory == 'show':
                 plt.figure()

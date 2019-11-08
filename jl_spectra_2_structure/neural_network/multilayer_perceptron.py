@@ -51,7 +51,8 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
                  alpha, batch_size, learning_rate, learning_rate_init, power_t,
                  max_iter, loss, shuffle, random_state, tol, verbose,
                  warm_start, momentum, nesterovs_momentum, early_stopping,
-                 validation_fraction, beta_1, beta_2, epsilon,out_activation):
+                 validation_fraction, beta_1, beta_2, epsilon,out_activation,
+                 regularization):
         self.activation = activation
         self.solver = solver
         self.alpha = alpha
@@ -75,6 +76,9 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
         self.beta_2 = beta_2
         self.epsilon = epsilon
         self.out_activation = out_activation
+        self.regularization = regularization
+        
+        assert regularization in ['L1','L2'], "regularization must be L1 or L2"
 
     def _unpack(self, packed_parameters):
         """Extract the coefficients and intercepts from packed_parameters."""
@@ -130,9 +134,12 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
         coef_grads[layer] = safe_sparse_dot(activations[layer].T,
                                             deltas[layer])
         #L2 regularization
-        coef_grads[layer] += (self.alpha * self.coefs_[layer])
+        if self.regularization == 'L2':
+            coef_grads[layer] += (self.alpha * self.coefs_[layer])
         #L1 regularization
-        #coef_grads[layer] += self.alpha * np.sign(self.coefs_[layer])
+        elif self.regularization == 'L1':
+            coef_grads[layer] += self.alpha * np.sign(self.coefs_[layer])
+        
         coef_grads[layer] /= n_samples
 
         intercept_grads[layer] = np.mean(deltas[layer], 0)
@@ -908,7 +915,8 @@ class MLPRegressor(BaseMultilayerPerceptron, RegressorMixin):
                  verbose=False, warm_start=False, momentum=0.9,
                  nesterovs_momentum=True, early_stopping=False,
                  validation_fraction=0.1, beta_1=0.9, beta_2=0.999,
-                 epsilon=1e-8,loss='squared_loss',out_activation='identity'):
+                 epsilon=1e-8,loss='squared_loss',out_activation='identity',
+                 regularization='L2'):
 
         sup = super(MLPRegressor, self)
         sup.__init__(hidden_layer_sizes=hidden_layer_sizes,
@@ -922,7 +930,7 @@ class MLPRegressor(BaseMultilayerPerceptron, RegressorMixin):
                      early_stopping=early_stopping,
                      validation_fraction=validation_fraction,
                      beta_1=beta_1, beta_2=beta_2, epsilon=epsilon,
-                     out_activation=out_activation)
+                     out_activation=out_activation, regularization=regularization)
 
     def predict(self, X):
         """Predict using the multi-layer perceptron model.

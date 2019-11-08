@@ -46,7 +46,7 @@ def get_default_data_paths(adsorbate):
 
 class IR_GEN:
     def __init__(self, ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1,2,3,4], TARGET='binding_type', NUM_TARGETS=None\
-                 , nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None):
+                 , nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None,VERBOSE=False):
         assert TARGET in ['binding_type','GCN','combine_hollow_sites'], "incorrect TARGET given"
         assert type(INCLUDED_BINDING_TYPES) in [list,tuple,np.ndarray], "Included Binding Types should be a list"
         #number of target variables.
@@ -84,7 +84,8 @@ class IR_GEN:
         if TARGET == 'combine_hollow_sites':
             nanoparticle_data['CN_ADSORBATE'][nanoparticle_data['CN_ADSORBATE'] == 4] = 3
             NUM_TARGETS -= 1
-            print('grouping hollow sites')
+            if VERBOSE == True:
+                print('grouping hollow sites')
         self.BINDING_TYPES_with_4fold = BINDING_TYPES_with_4fold
         self.TARGET = TARGET
         self.NUM_TARGETS = NUM_TARGETS
@@ -99,9 +100,12 @@ class IR_GEN:
         self.ADSORBATE = ADSORBATE
         self.INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES
         self.COVERAGE = None
+        self.VERBOSE = VERBOSE
 
     def get_GCNlabels(self, Minimum=0, showfigures=False, figure_directory='show', BINDING_TYPE_FOR_GCN=[1]):
-        print('Initial number of targets: '+str(self.NUM_TARGETS))
+        VERBOSE = self.VERBOSE
+        if VERBOSE == True:
+            print('Initial number of targets: '+str(self.NUM_TARGETS))
         ADSORBATE = self.ADSORBATE
         NUM_TARGETS = self.NUM_TARGETS
         GCNList = self.GCNList
@@ -190,7 +194,8 @@ class IR_GEN:
 
         self.GCNlabels = GCNlabels
         self.NUM_TARGETS = NUM_TARGETS
-        print('Final number of targets: '+str(self.NUM_TARGETS))
+        if VERBOSE == True:
+            print('Final number of targets: '+str(self.NUM_TARGETS))
 
     def _get_probabilities(self, num_samples, NUM_TARGETS):
         #define np_shuffle to be locally in loop
@@ -402,7 +407,7 @@ class IR_GEN:
                     shift_vector[Y_sample == ii_MIN_Y] /= shift_vector_sum
                     parray[Y_sample == ii_MIN_Y] = probabilities[i, ii] * shift_vector[Y_sample==ii_MIN_Y]       
                 else:
-                    parray[Y_sample == ii_MIN_Y] = probabilities[i, ii]
+                    parray[Y_sample == ii+MIN_Y] = probabilities[i, ii]
             parray /= np.sum(parray)
             indices_primary = np.random.choice(sample_indices, size=num_simple_spectra[i], replace=True, p=parray)
             if TARGET == 'GCN' or COVERAGE == 'low' or type(COVERAGE) in [float,int]:
@@ -451,8 +456,8 @@ class IR_GEN:
             if TARGET == 'combine_hollow_sites':
                 for count, max_coverage in enumerate(MAX_COVERAGES[0:len(MAX_COVERAGES)-1]):
                     yconv[:,count] *= max_coverage
-        #10**-4 accounts for noise in experimental spectra
-        Xconv += 10**-4*np.max(Xconv, axis=1).reshape((-1, 1))*np.random.random_sample(Xconv.shape)
+        #10**-3 accounts for noise in experimental spectra
+        Xconv += 10**-3*np.max(Xconv, axis=1).reshape((-1, 1))*np.random.random_sample(Xconv.shape)
         #normalize so max X is 1 and make y a set of fractions that sum to 1
         Xconv /= np.max(Xconv, axis=1).reshape((-1, 1))
         yconv /= np.sum(yconv, axis=1).reshape((-1, 1))
@@ -466,10 +471,11 @@ class IR_GEN:
         for i in range(len(Xconv_main)):
             X_noisey[i] = Xconv_main[i] + Xconv_noise[noise_sample[i]]*noise_value[i]
         X_noisey = X_noisey/np.max(X_noisey, axis=1).reshape(-1, 1)
+        X_noisey[abs(X_noisey[...])<2**-500] = 0                                        
         return X_noisey
 
     def get_synthetic_spectra(self, NUM_SAMPLES, indices, COVERAGE=None, MAX_COVERAGES = [1,1,1,1]\
-                              , LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
+                              , LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501,IS_TRAINING_SET=False):
         assert self.COVERAGE is None, "get_synthetic_spectra is intended \
         to be run only once. Please run get_more_spectra."
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
@@ -477,6 +483,7 @@ class IR_GEN:
         _coverage_shift = self._coverage_shift
         _get_probabilities = self._get_probabilities
         _perturb_spectra = self._perturb_spectra
+        scaling_factor_shift = self.scaling_factor_shift
         _perturb_and_shift = self._perturb_and_shift
         _xyconv = self. _xyconv
         high_coverage_path = self.HIGH_COV_PATH
@@ -486,6 +493,7 @@ class IR_GEN:
         BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
         X0cov = self.X0cov
         GCNlabels = self.GCNlabels
+        VERBOSE = self.VERBOSE
         #Assign the target variable Y to either GCN group or binding site
         if TARGET == 'GCN':
             assert GCNlabels is not None, "get_GCNlabels must be executed before spectra can be generated"
@@ -494,8 +502,9 @@ class IR_GEN:
             Y = BINDING_TYPES
         #Adding Data for Extended Surfaces
         if COVERAGE == 'high' and TARGET == 'GCN':
-            print('Adding high-coverage low index planes')
-            print('Initial number of targets: '+str(NUM_TARGETS))
+            if VERBOSE == True:
+                print('Adding high-coverage low index planes')
+                print('Initial number of targets: '+str(NUM_TARGETS))
             with open(high_coverage_path, 'r') as infile:
                 HC_Ext = json.load(infile)
             HC_CNPt = np.sort(np.array(list(set([np.min(i) for i in HC_Ext['CN_METAL']]))))
@@ -527,12 +536,15 @@ class IR_GEN:
                              for i in range(len(HC_frequencies))])
             offset = max_freqs-len(X0cov[0][0])
             X = np.pad(X0cov, ((0, 0), (0, 0), (0, offset)), 'constant', constant_values=0)
-            print('Final number of targets: '+str(NUM_TARGETS))
+            if VERBOSE == True:
+                print('Final number of targets: '+str(NUM_TARGETS))
         elif COVERAGE == 'high' and TARGET in ['binding_type', 'combine_hollow_sites']:
-            print('testing all coverages')
+            if VERBOSE == True:
+                print('testing all coverages')
             X = X0cov
         elif type(COVERAGE) == int or type(COVERAGE) == float:
-            print('Relative coverage is ' + str(COVERAGE))
+            if VERBOSE == True:
+                print('Relative coverage is ' + str(COVERAGE))
             X = _coverage_shift(X0cov, BINDING_TYPES_with_4fold, COVERAGE,COVERAGE)
         elif COVERAGE == 'low':
             X = X0cov
@@ -542,7 +554,7 @@ class IR_GEN:
             num_single = Y_new.size
             #b = 2105/2095 #a = 1854/1865 - difference between experiments and DFT
             HC_X_expanded, HC_classes_expanded, _ = _perturb_spectra(5, HC_X, HC_classes
-                                                                       , a=0.997, b=1.007)
+                                                                       , a=0.999, b=1.001)
             X_new = np.concatenate((X_new, HC_X_expanded), axis=0)
             Y_new = np.concatenate((Y_new, HC_classes_expanded), axis=0)
             indices = list(indices) + np.arange(Y_new.size)[num_single:].tolist()
@@ -558,7 +570,12 @@ class IR_GEN:
         else:
             BINDING_TYPES_balanced = None
         #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
-        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_and_shift(5, X_balanced, Y_balanced, BINDING_TYPES_balanced)
+        if IS_TRAINING_SET == True:
+            X_balanced = scaling_factor_shift(X_balanced)
+            X_sample, Y_sample, BINDING_TYPES_sample = _perturb_spectra(\
+            5, X_balanced, Y_balanced, a=0.997, b=1.003, BINDING_TYPES=BINDING_TYPES_balanced)
+        else:
+            X_sample, Y_sample, BINDING_TYPES_sample = _perturb_and_shift(5, X_balanced, Y_balanced, BINDING_TYPES_balanced)
         probabilities = _get_probabilities(NUM_SAMPLES, NUM_TARGETS)
         if COVERAGE == 'high' and TARGET == 'GCN':
             self.HC_X = HC_X
@@ -578,11 +595,12 @@ class IR_GEN:
         yconv[yconv[...]<2**-500] = 0
         return (Xconv, yconv)
 
-    def get_more_spectra(self, NUM_SAMPLES, indices):
+    def get_more_spectra(self, NUM_SAMPLES, indices, IS_TRAINING_SET):
         _perturb_spectra = self._perturb_spectra
         _perturb_and_shift = self._perturb_and_shift
         _get_probabilities = self._get_probabilities
         _xyconv = self. _xyconv
+        scaling_factor_shift = self.scaling_factor_shift
         NUM_TARGETS = self.NUM_TARGETS
         X_new = self.X.copy()
         Y_new = self.Y.copy()
@@ -595,7 +613,7 @@ class IR_GEN:
             num_single = Y_new.size
             #b = 2105/2095 #a = 1854/1865 difference between experiments and DFT
             HC_X_expanded, HC_classes_expanded, _ = _perturb_spectra(5, HC_X, HC_classes
-                                                                       , a=0.997, b=1.07)
+                                                                       , a=0.999, b=1.001)
             X_new = np.concatenate((X_new, HC_X_expanded), axis=0)
             Y_new = np.concatenate((Y_new, HC_classes_expanded), axis=0)
             indices = list(indices) + np.arange(Y_new.size)[num_single:].tolist() 
@@ -611,8 +629,13 @@ class IR_GEN:
             BINDING_TYPES_balanced = BINDING_TYPES_with_4fold[indices_balanced.flatten()]
         else:
             BINDING_TYPES_balanced = None
+        if IS_TRAINING_SET == True:
+            X_balanced = scaling_factor_shift(X_balanced)
+            X_sample, Y_sample, BINDING_TYPES_sample = _perturb_spectra(\
+            5, X_balanced, Y_balanced, a=0.997, b=1.003, BINDING_TYPES=BINDING_TYPES_balanced)
+        else:
+            X_sample, Y_sample, BINDING_TYPES_sample = _perturb_and_shift(5, X_balanced, Y_balanced, BINDING_TYPES_balanced)
         #adding perturbations for improved fitting by account for frequency and intensity errors from DFT
-        X_sample, Y_sample, BINDING_TYPES_sample = _perturb_and_shift(5, X_balanced, Y_balanced, BINDING_TYPES_balanced)
         probabilities = _get_probabilities(NUM_SAMPLES, NUM_TARGETS)
         Xconv, yconv = _xyconv(X_sample, Y_sample, probabilities, BINDING_TYPES_sample)
         #set numbers that may form denormals to zero to improve numerics
