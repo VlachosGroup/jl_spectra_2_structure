@@ -4,6 +4,20 @@ from matplotlib import rcParams
 from matplotlib import rcParamsDefault
 
 def set_figure_settings(Figure_Type,**kwargs):
+    """
+    Sets the figure settings for matplotlib to be either those suitable
+    for a presentation or a paper. Updates rcParams
+    
+    Parameters
+    ----------
+    Figure_Type : str
+        Either 'paper' or 'presentation' to indicate figure types.
+    
+    **kwargs : dict
+        Takes dictionary attributes given by \
+        https://matplotlib.org/3.1.1/tutorials/introductory/customizing.html#a-sample-matplotlibrc-file.
+        
+    """
     rcParams.update(rcParamsDefault)
     params = {}
     if Figure_Type == 'paper':

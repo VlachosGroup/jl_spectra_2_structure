@@ -4,15 +4,60 @@ import numpy as np
 from copy import deepcopy
 
 def get_r2(y_true, y_pred):
+    """R2 or the error.
+
+    Parameters
+    ----------
+    y_true : numpy.ndarray or list
+        Ground truth (correct) values
+
+    y_pred : numpy.ndarray or list
+        Predicted values, as returned by a regression estimator.
+
+    Returns
+    -------
+    loss : float
+        R2 value.
+    """
     SStot = np.sum((y_true-y_true.mean())**2)
     SSres = np.sum((y_true-y_pred)**2)
     return 1 - SSres/SStot
 
 def get_rmse(y_true, y_pred):
+    """Compute maximum absolute error.
+
+    Parameters
+    ----------
+    y_true : numpy.ndarray or list
+        Ground truth (correct) values.
+
+    y_pred : numpy.ndarray or list
+        Predicted values, as returned by a regression estimator.
+
+    Returns
+    -------
+    loss : float
+        The maximum absolute error times the sign of the error.
+    """
     SSres = np.mean((y_true-y_pred)**2)
     return SSres**0.5
 
 def get_max_error(y_true, y_pred):
+    """Compute maximum absolute error.
+
+    Parameters
+    ----------
+    y_true : numpy.ndarray or list
+        Ground truth (correct) values.
+
+    y_pred : numpy.ndarray or list
+        Predicted values, as returned by a regression estimator.
+
+    Returns
+    -------
+    loss : float
+        The maximum absolute error.
+    """
     return np.array(y_pred-y_true)[np.argmax(np.abs(y_pred-y_true))]
 
 def get_wasserstein_loss(y_true, y_pred,individual=False):
@@ -20,15 +65,19 @@ def get_wasserstein_loss(y_true, y_pred,individual=False):
 
     Parameters
     ----------
-    y_true : array-like or label indicator matrix
-    Ground truth (correct) values.
+    y_true : numpy.ndarray or list
+        Ground truth (correct) values.
 
-    y_pred : array-like or label indicator matrix
-    Predicted values, as returned by a regression estimator.
+    y_pred : numpy.ndarray or list
+        Predicted values, as returned by a regression estimator.
+        
+    individual : bool
+        If True, returns Wasserstein loss along first dimension.
+        If False, returns average Wasserstein loss.
 
     Returns
     -------
-    loss : float
+    loss : float or numpy.ndarray
         The degree to which the samples are correctly predicted.
     """
     y_true = np.array(deepcopy(y_true))

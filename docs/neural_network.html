@@ -25,7 +25,6 @@
         <script type="text/javascript" src="_static/underscore.js"></script>
         <script type="text/javascript" src="_static/doctools.js"></script>
         <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -88,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cross_validation.html">cross_validation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">neural_network</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-backprop-function">The <code class="docutils literal notranslate"><span class="pre">_backprop</span></code> function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-compute-loss-grad-function">The <code class="docutils literal notranslate"><span class="pre">_compute_loss_grad</span></code> function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-softmax-function">The <code class="docutils literal notranslate"><span class="pre">softmax</span></code> function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-kl-div-loss-function">The <code class="docutils literal notranslate"><span class="pre">kl_div_loss</span></code> function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-wasserstein-loss-function">The <code class="docutils literal notranslate"><span class="pre">wasserstein_loss</span></code> function</a></li>
@@ -199,6 +199,17 @@ intercept parameters of the ith layer in an iteration.</p></li>
 </p>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="the-compute-loss-grad-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">_compute_loss_grad</span></code> function<a class="headerlink" href="#the-compute-loss-grad-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._compute_loss_grad">
+<code class="sig-name descname">_compute_loss_grad</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">layer</em>, <em class="sig-param">n_samples</em>, <em class="sig-param">activations</em>, <em class="sig-param">deltas</em>, <em class="sig-param">coef_grads</em>, <em class="sig-param">intercept_grads</em><span class="sig-paren">)</span><a class="headerlink" href="#jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._compute_loss_grad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the gradient of loss with respect to coefs and intercept for
+specified layer.</p>
+<p>This function does backpropagation for the specified one layer.</p>
 </dd></dl>
 
 </div>

@@ -14,6 +14,7 @@ The ``LOAD_CROSS_VALIDATION`` class
    :members:
    :undoc-members:
    :private-members:
+   :show-inheritance:
 
 The ``NESTED_DICT`` class
 *************************

@@ -5,6 +5,10 @@ The ``_backprop`` function
 **************************
 .. autofunction:: jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._backprop
 
+The ``_compute_loss_grad`` function
+***********************************
+.. autofunction:: jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._compute_loss_grad
+
 The ``softmax`` function
 ************************
 .. autofunction:: jl_spectra_2_structure.neural_network._base.softmax

@@ -176,7 +176,6 @@ paths for locations of the pure and mixture spectroscopic data.</p>
 <li><p><strong>nanoparticle_path</strong> (<em>str</em>) – File path where nanoparticle or single adsorbate data will be saved.</p></li>
 <li><p><strong>isotope_path</strong> (<em>str</em>) – File path where isotope data for CO and NO will be saved.</p></li>
 <li><p><strong>high_coverage_path</strong> (<em>str</em>) – File path where high coverage data for CO will be saved.</p></li>
-<li><p><strong>cross_validation_path</strong> (<em>str</em>) – Directory location cross validation data will be stored.</p></li>
 <li><p><strong>coverage_scaling_path</strong> (<em>str</em>) – File path where coverage scaling coefficients will be saved.</p></li>
 </ul>
 </p>
@@ -189,7 +188,7 @@ paths for locations of the pure and mixture spectroscopic data.</p>
 <h2>The <code class="docutils literal notranslate"><span class="pre">IR_GEN</span></code> class<a class="headerlink" href="#the-ir-gen-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN">
-<em class="property">class </em><code class="sig-name descname">IR_GEN</code><span class="sig-paren">(</span><em class="sig-param">ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1, 2, 3, 4], TARGET='binding_type', NUM_TARGETS=None, nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-name descname">IR_GEN</code><span class="sig-paren">(</span><em class="sig-param">ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1, 2, 3, 4], TARGET='binding_type', NUM_TARGETS=None, nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None, VERBOSE=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._coverage_shift">
 <code class="sig-name descname">_coverage_shift</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">BINDING_TYPES</em>, <em class="sig-param">SELF_COVERAGE</em>, <em class="sig-param">TOTAL_COVERAGE</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._coverage_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._coverage_shift" title="Permalink to this definition">¶</a></dt>
@@ -205,14 +204,62 @@ TOTAL_COVERAGE: relative combined coverages of non-island</p>
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._get_probabilities">
 <code class="sig-name descname">_get_probabilities</code><span class="sig-paren">(</span><em class="sig-param">num_samples</em>, <em class="sig-param">NUM_TARGETS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._get_probabilities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._get_probabilities" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the a 2-D numpy.ndarray that is of length num_samples along the
+first dimension and NUM_TARGETS alongt the second dimesion. Elements
+correspond to the probability of selecting primary data point from a
+a specific class/group such that the array sums to 1 along the 2nd dimention.
+The probability assigned to the first index of the along the 2nd dimenstion
+is comes from a uniform distribution between 0 and 1 while the probability
+assigned to each following index <span class="math notranslate nohighlight">\(i = n\)</span> comes from the uniform distribution
+<span class="math notranslate nohighlight">\(1/\sum{p_{i}}\)</span> where <span class="math notranslate nohighlight">\(i\)</span> in <span class="math notranslate nohighlight">\(p_{i}\)</span> comes from all previous index values <span class="math notranslate nohighlight">\(i &lt; n\)</span>.
+The probabilities are then shuffled along the second dimension. This probability
+distribution results in contribution to spectra from any given class/label
+is most likely zero and the likelihood of the contribution monotonically
+decreases as the the contribution goes to 1. This distribution
+ensures that all fractional contributions are as equally sampled as possible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of complex spectra to generate</p></li>
+<li><p><strong>NUM_TARGETS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of class/labes that are desired. Usually the number of
+binding-types or the number of GCN labels &gt; 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>probabilities</strong> – The probabilities to select each binding-type or GCN fgroup.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray of size (num_samples, NUM_TARGETS)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._mixed_lineshape">
 <code class="sig-name descname">_mixed_lineshape</code><span class="sig-paren">(</span><em class="sig-param">FWHM</em>, <em class="sig-param">fL</em>, <em class="sig-param">ENERGY_POINTS</em>, <em class="sig-param">energy_spacing</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._mixed_lineshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._mixed_lineshape" title="Permalink to this definition">¶</a></dt>
-<dd><p>accepts numpy array of frequencies and intensities and FWHM
-returns spectrum
-Wertheim 1974</p>
+<dd><p>Accepts a full-width-half-maximum, a fraction of Lorentian, energy spacing
+and number of points and produces the transform with wich the spectra is
+convolved through fourier convolution in order to produce realistic
+experimental spectra.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>FWHM</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Full-width-half-maximum of the desired spectra</p></li>
+<li><p><strong>fL</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fraction of spectra to be convoluted by a Lorentzian transform. The
+remaining portion of the transoform to make up the FWHM comes sourced
+from a Gaussian convoluting function.</p></li>
+<li><p><strong>ENERGY_POINTS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of energy points in the desired spectra</p></li>
+<li><p><strong>energy_spacing</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – spacing of the energy points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>transform</strong> –     transform that is convolved with a spectra that has a narrow line
+width in order to produce spectra with greater line widths.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -223,7 +270,35 @@ Wertheim 1974</p>
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra">
 <code class="sig-name descname">_perturb_spectra</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">a=0.999</em>, <em class="sig-param">b=1.001</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a tuple of perturbed primary datapoints. The goal is to improve the
+predictive range of the regressed model by expanding the datapoints and
+accounting for error in the primary data (DFT). Spectra is pertubed according
+to a uniform distribution between <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>perturbations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of perturbed primary datapoints per original datapoint.</p></li>
+<li><p><strong>X</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 3-D numpy array of frequencies and intensities. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – The array of target variables to be regressed (binding types or GCN-labels)</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The lower boudn of the uniform distribution.</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The upper bound of the uniform distribution.</p></li>
+<li><p><strong>BINDING_TYPES</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Binding types of the primary datapoints.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Xperturbed</strong> (<em>numpy.ndarray</em>) – Perturbed intensities and frequencies. Has dimensions
+<span class="math notranslate nohighlight">\(m_{new} x n x p\)</span> where <span class="math notranslate nohighlight">\(m_{new} = m x perturbations\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities.</p></li>
+<li><p><strong>yperturbed</strong> (<em>numpy.ndarray</em>) – Some y-variable to be regreesed such as binding-type or GCN group.</p></li>
+<li><p><strong>BINDING_TYPES_perturbed</strong> (<em>numpy.ndarray</em>) – Binding-types of the perturbed primary datapoints.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._xyconv">
@@ -238,16 +313,49 @@ Wertheim 1974</p>
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_GCNlabels">
 <code class="sig-name descname">get_GCNlabels</code><span class="sig-paren">(</span><em class="sig-param">Minimum=0, showfigures=False, figure_directory='show', BINDING_TYPE_FOR_GCN=[1]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_GCNlabels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_GCNlabels" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Assigns each primary datapoint a GCN label based on the GCN value using
+k-means clustering where the number of target clusters is equal to the
+number of targets instantiated with the class. This is required to be
+run if one wishes to learn a distribution of GCN sites as GCN is
+continuous. K-means clustering is an partially - supervised learning
+technique that generates clusters/groups that are relatively evenly
+spaced with roughly the same number of datapoints in each cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Minimum</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Minimum number of datapoints in each cluster. If a generated cluster
+has fewer than this number of datapoints it is merged with the next
+cluster. If the last cluster has fewer than the minimum number of
+datapoints it is merged with the previous cluster.</p></li>
+<li><p><strong>showfigures</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether or not to generate figures visualizing the clusters and
+their location in GCN-space.</p></li>
+<li><p><strong>figure_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Either a directory where figures are to be saved or the string ‘show’
+which indicates that the figure is supposed to be sent to gui output.</p></li>
+<li><p><strong>BINDING_TYPE_FOR_GCN</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – List of binding types whose GCN values are to be included in clustering.
+Binding-types included will have a GCN label of 1 through the number
+of clusters. Binding-types not included will be assigned a GCN label
+of zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>GCNlabels</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – GCN label assigned to each primary datapoint.</p></li>
+<li><p><strong>NUM_TARGET</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Updated number of targets. If n clusters (after merging) generated by the
+K-means algorithm had less than the minimum number of clusters than
+NUM_TARGET originally instantiated by the class is reduced by n.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_more_spectra">
-<code class="sig-name descname">get_more_spectra</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES</em>, <em class="sig-param">indices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_more_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_more_spectra" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_more_spectra</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES</em>, <em class="sig-param">indices</em>, <em class="sig-param">IS_TRAINING_SET</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_more_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_more_spectra" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_synthetic_spectra">
-<code class="sig-name descname">get_synthetic_spectra</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES, indices, COVERAGE=None, MAX_COVERAGES=[1, 1, 1, 1], LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_synthetic_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_synthetic_spectra" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_synthetic_spectra</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES, indices, COVERAGE=None, MAX_COVERAGES=[1, 1, 1, 1], LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501, IS_TRAINING_SET=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_synthetic_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_synthetic_spectra" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -262,7 +370,7 @@ Wertheim 1974</p>
 <h2>The <code class="docutils literal notranslate"><span class="pre">fold</span></code> function<a class="headerlink" href="#the-fold-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.fold">
-<code class="sig-name descname">fold</code><span class="sig-paren">(</span><em class="sig-param">frequencies</em>, <em class="sig-param">intensities</em>, <em class="sig-param">LOW_FREQUENCY</em>, <em class="sig-param">HIGH_FREQUENCY</em>, <em class="sig-param">ENERGY_POINTS</em>, <em class="sig-param">FWHM</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.fold" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fold</code><span class="sig-paren">(</span><em class="sig-param">frequencies</em>, <em class="sig-param">intensities</em>, <em class="sig-param">LOW_FREQUENCY</em>, <em class="sig-param">HIGH_FREQUENCY</em>, <em class="sig-param">ENERGY_POINTS</em>, <em class="sig-param">FWHM</em>, <em class="sig-param">fL</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#fold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.fold" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

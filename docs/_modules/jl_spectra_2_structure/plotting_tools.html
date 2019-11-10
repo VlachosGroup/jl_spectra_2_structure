@@ -158,6 +158,20 @@
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">rcParamsDefault</span>
 
 <div class="viewcode-block" id="set_figure_settings"><a class="viewcode-back" href="../../plotting_tools.html#jl_spectra_2_structure.plotting_tools.set_figure_settings">[docs]</a><span class="k">def</span> <span class="nf">set_figure_settings</span><span class="p">(</span><span class="n">Figure_Type</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets the figure settings for matplotlib to be either those suitable</span>
+<span class="sd">    for a presentation or a paper. Updates rcParams</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Figure_Type : str</span>
+<span class="sd">        Either &#39;paper&#39; or &#39;presentation&#39; to indicate figure types.</span>
+<span class="sd">    </span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Takes dictionary attributes given by \</span>
+<span class="sd">        https://matplotlib.org/3.1.1/tutorials/introductory/customizing.html#a-sample-matplotlibrc-file.</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rcParamsDefault</span><span class="p">)</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">Figure_Type</span> <span class="o">==</span> <span class="s1">&#39;paper&#39;</span><span class="p">:</span>
