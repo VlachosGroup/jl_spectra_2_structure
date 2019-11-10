@@ -168,8 +168,7 @@
 <dl class="function">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.get_default_data_paths">
 <code class="sig-name descname">get_default_data_paths</code><span class="sig-paren">(</span><em class="sig-param">adsorbate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#get_default_data_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.get_default_data_paths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns default frequencies to project intensities onto as well as default
-paths for locations of the pure and mixture spectroscopic data.</p>
+<dd><p>Get default paths to primary data of frequencies and intensities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><ul class="simple">
@@ -181,6 +180,9 @@ paths for locations of the pure and mixture spectroscopic data.</p>
 </p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>Returns default frequencies to project intensities onto as well as default
+paths for locations of the pure and mixture spectroscopic data.</p>
 </dd></dl>
 
 </div>
@@ -192,19 +194,88 @@ paths for locations of the pure and mixture spectroscopic data.</p>
 <dd><dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._coverage_shift">
 <code class="sig-name descname">_coverage_shift</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">BINDING_TYPES</em>, <em class="sig-param">SELF_COVERAGE</em>, <em class="sig-param">TOTAL_COVERAGE</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._coverage_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._coverage_shift" title="Permalink to this definition">¶</a></dt>
-<dd><p>COVERAGE: Relative spatial coverage of each binding-type
-TOTAL_COVERAGE: relative combined coverages of non-island</p>
+<dd><p>Shift frqequencies and intensities to account for coverages effects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 3-D numpy array of frequencies and intensities. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities for each datapoint.</p></li>
+<li><p><strong>BINDING_TYPES</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Binding types of the primary datapoints.</p></li>
+<li><p><strong>SELF_COVERAGE</strong> (<em>numpy.ndarray of floats</em>) – Relative spatial coverage of each binding-type</p></li>
+<li><p><strong>TOTAL_COVERAGE</strong> (<em>numpy.ndarray of floats</em>) – Relative combined coverage fo which the primary data point “sits”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Xcov</strong> –     3-D numpy array of frequencies and intensities that have been shifted
+to account for coverage effects. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities for each datapoint.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._generate_spectra">
 <code class="sig-name descname">_generate_spectra</code><span class="sig-paren">(</span><em class="sig-param">Xfrequencies</em>, <em class="sig-param">Xintensities</em>, <em class="sig-param">energies2D</em>, <em class="sig-param">prefactor</em>, <em class="sig-param">sigma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._generate_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._generate_spectra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Convert set of frequencies and intensities to spectra with minimal
+line width by Gaussian convolution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>perturbations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of perturbed primary datapoints per original datapoint.</p></li>
+<li><p><strong>Xfrequencies</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 2-D numpy array of frequencies. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n\)</span>
+is the number of frequencies/intensities for each datapoint.</p></li>
+<li><p><strong>Xintensities</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 2-D numpy array of intensities. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n\)</span>
+is the number of frequencies/intensities for each datapoint.</p></li>
+<li><p><strong>energies2D</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – numpy ndarray with dimensions <span class="math notranslate nohighlight">\(m x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of
+primary datapoints and <span class="math notranslate nohighlight">\(p\)</span> is the number of energy points onto which
+the frequencies and intensities will be projected with Fourier convolution.</p></li>
+<li><p><strong>prefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Gaussian normalization prefactor.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Standard deviation of Gaussian convoluting function that determines
+broadening.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>intmesh</strong> – numpy ndarray with dimensions <span class="math notranslate nohighlight">\(m x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of
+primary datapoints and <span class="math notranslate nohighlight">\(p\)</span> is the number of energy points onto which
+the frequencies and intensities aree projected with Fourier convolution.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This preconvolution is necessary for numerical reasons before data is
+convoluted to induce greater spectral broadening.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._get_probabilities">
 <code class="sig-name descname">_get_probabilities</code><span class="sig-paren">(</span><em class="sig-param">num_samples</em>, <em class="sig-param">NUM_TARGETS</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._get_probabilities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._get_probabilities" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the a 2-D numpy.ndarray that is of length num_samples along the
+<dd><p>Get probablilities for sampling data from different classes/groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of complex spectra to generate</p></li>
+<li><p><strong>NUM_TARGETS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of class/labes that are desired. Usually the number of
+binding-types or the number of GCN labels &gt; 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>probabilities</strong> – The probabilities to select each binding-type or GCN group.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray of size (num_samples, NUM_TARGETS)</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Returns the a 2-D numpy.ndarray that is of length num_samples along the
 first dimension and NUM_TARGETS alongt the second dimesion. Elements
 correspond to the probability of selecting primary data point from a
 a specific class/group such that the array sums to 1 along the 2nd dimention.
@@ -217,30 +288,12 @@ distribution results in contribution to spectra from any given class/label
 is most likely zero and the likelihood of the contribution monotonically
 decreases as the the contribution goes to 1. This distribution
 ensures that all fractional contributions are as equally sampled as possible.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>num_samples</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of complex spectra to generate</p></li>
-<li><p><strong>NUM_TARGETS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of class/labes that are desired. Usually the number of
-binding-types or the number of GCN labels &gt; 0</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>probabilities</strong> – The probabilities to select each binding-type or GCN fgroup.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>numpy.ndarray of size (num_samples, NUM_TARGETS)</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._mixed_lineshape">
 <code class="sig-name descname">_mixed_lineshape</code><span class="sig-paren">(</span><em class="sig-param">FWHM</em>, <em class="sig-param">fL</em>, <em class="sig-param">ENERGY_POINTS</em>, <em class="sig-param">energy_spacing</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._mixed_lineshape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._mixed_lineshape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Accepts a full-width-half-maximum, a fraction of Lorentian, energy spacing
-and number of points and produces the transform with wich the spectra is
-convolved through fourier convolution in order to produce realistic
-experimental spectra.</p>
+<dd><p>Convolute spectra with Lorentzian or Gaussian induce broadening.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -260,20 +313,17 @@ width in order to produce spectra with greater line widths.</p>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>Accepts a full-width-half-maximum, a fraction of Lorentzian, energy spacing
+and number of points and produces the transform with which the spectra is
+convolved through fourier convolution in order to produce realistic
+experimental spectra.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_and_shift">
 <code class="sig-name descname">_perturb_and_shift</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_and_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_and_shift" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra">
-<code class="sig-name descname">_perturb_spectra</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">a=0.999</em>, <em class="sig-param">b=1.001</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a tuple of perturbed primary datapoints. The goal is to improve the
-predictive range of the regressed model by expanding the datapoints and
-accounting for error in the primary data (DFT). Spectra is pertubed according
-to a uniform distribution between <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span>.</p>
+<dd><p>Shift spectra with scaling factor with gaussian error.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -281,6 +331,38 @@ to a uniform distribution between <span class="math notranslate nohighlight">\(a
 <li><p><strong>X</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 3-D numpy array of frequencies and intensities. The ndarray has dimensions
 <span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
 <span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities.</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – The array of target variables to be regressed (binding types or GCN-labels)</p></li>
+<li><p><strong>BINDING_TYPES</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Binding types of the primary datapoints.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Xperturbed</strong> (<em>numpy.ndarray</em>) – Perturbed intensities and frequencies. Has dimensions
+<span class="math notranslate nohighlight">\(m_{new} x n x p\)</span> where <span class="math notranslate nohighlight">\(m_{new} = m x perturbations\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities for each datapoint.</p></li>
+<li><p><strong>yperturbed</strong> (<em>numpy.ndarray</em>) – Some y-variable to be regreesed such as binding-type or GCN group.</p></li>
+<li><p><strong>BINDING_TYPES_perturbed</strong> (<em>numpy.ndarray</em>) – Binding-types of the perturbed primary datapoints.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Returns a tuple of perturbed primary datapoints. The goal is to improve the
+incorporate error in the scaling factor into the validation and test set.
+Scaling factor is perturbed according to its calculated standard error.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra">
+<code class="sig-name descname">_perturb_spectra</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">a=0.999</em>, <em class="sig-param">b=1.001</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_spectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate pertubations of the frequencies and intensities uniformly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>perturbations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of perturbed primary datapoints per original datapoint.</p></li>
+<li><p><strong>X</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 3-D numpy array of frequencies and intensities. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities for each datapoint.</p></li>
 <li><p><strong>y</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – The array of target variables to be regressed (binding types or GCN-labels)</p></li>
 <li><p><strong>a</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The lower boudn of the uniform distribution.</p></li>
 <li><p><strong>b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The upper bound of the uniform distribution.</p></li>
@@ -291,19 +373,48 @@ to a uniform distribution between <span class="math notranslate nohighlight">\(a
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>Xperturbed</strong> (<em>numpy.ndarray</em>) – Perturbed intensities and frequencies. Has dimensions
 <span class="math notranslate nohighlight">\(m_{new} x n x p\)</span> where <span class="math notranslate nohighlight">\(m_{new} = m x perturbations\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
-<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities.</p></li>
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities for each datapoint.</p></li>
 <li><p><strong>yperturbed</strong> (<em>numpy.ndarray</em>) – Some y-variable to be regreesed such as binding-type or GCN group.</p></li>
 <li><p><strong>BINDING_TYPES_perturbed</strong> (<em>numpy.ndarray</em>) – Binding-types of the perturbed primary datapoints.</p></li>
 </ul>
 </p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>Returns a tuple of perturbed primary datapoints. The goal is to improve the
+predictive range of the regressed model by expanding the datapoints and
+accounting for error in the primary data (DFT). Spectra is pertubed according
+to a uniform distribution between <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._xyconv">
 <code class="sig-name descname">_xyconv</code><span class="sig-paren">(</span><em class="sig-param">X_sample</em>, <em class="sig-param">Y_sample</em>, <em class="sig-param">probabilities</em>, <em class="sig-param">BINDING_TYPES_sample</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._xyconv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._xyconv" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Shift spectra with scaling factor with gaussian error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>perturbations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of perturbed primary datapoints per original datapoint.</p></li>
+<li><p><strong>X_sample</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 3-D numpy array of frequencies and intensities. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints after data class balancing
+, <span class="math notranslate nohighlight">\(n = 2\)</span> and <span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities.</p></li>
+<li><p><strong>Y_sample</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – The array of target variables to be regressed (binding types or GCN-labels)</p></li>
+<li><p><strong>probabilities</strong> (<em>numpy.ndarray of size</em><em> (</em><em>num_samples</em><em>, </em><em>NUM_TARGETS</em><em>)</em>) – The probabilities to select each binding-type or GCN group.</p></li>
+<li><p><strong>BINDING_TYPES_sample</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Binding types of the primary datapoints after data class balancing.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Xconv</strong> (<em>numpy.ndarray</em>) – Convoluted complex spectra of dimensions <span class="math notranslate nohighlight">\(m x n\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the
+desired number of samples and <span class="math notranslate nohighlight">\(n\)</span> is the number of energy points.</p></li>
+<li><p><strong>yconv</strong> (<em>numpy.ndarray</em>) – Fraction of occupied binding-types or GCN groups that contribute to
+the total spectra. yconv has dimensions <span class="math notranslate nohighlight">\(m x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the
+desired number of samples and <span class="math notranslate nohighlight">\(p\)</span> is the the number of targets.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.add_noise">
@@ -313,13 +424,7 @@ to a uniform distribution between <span class="math notranslate nohighlight">\(a
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_GCNlabels">
 <code class="sig-name descname">get_GCNlabels</code><span class="sig-paren">(</span><em class="sig-param">Minimum=0, showfigures=False, figure_directory='show', BINDING_TYPE_FOR_GCN=[1]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.get_GCNlabels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.get_GCNlabels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assigns each primary datapoint a GCN label based on the GCN value using
-k-means clustering where the number of target clusters is equal to the
-number of targets instantiated with the class. This is required to be
-run if one wishes to learn a distribution of GCN sites as GCN is
-continuous. K-means clustering is an partially - supervised learning
-technique that generates clusters/groups that are relatively evenly
-spaced with roughly the same number of datapoints in each cluster.</p>
+<dd><p>Cluster GCN values into groups/classes using k-means clustering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -346,6 +451,14 @@ NUM_TARGET originally instantiated by the class is reduced by n.</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>Assigns each primary datapoint a GCN label based on the GCN value using
+k-means clustering where the number of target clusters is equal to the
+number of targets instantiated with the class. This is required to be
+run if one wishes to learn a distribution of GCN sites as GCN is
+continuous. K-means clustering is an partially - supervised learning
+technique that generates clusters/groups that are relatively evenly
+spaced with roughly the same number of datapoints in each cluster.</p>
 </dd></dl>
 
 <dl class="method">
@@ -361,7 +474,28 @@ NUM_TARGET originally instantiated by the class is reduced by n.</p></li>
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.scaling_factor_shift">
 <code class="sig-name descname">scaling_factor_shift</code><span class="sig-paren">(</span><em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.scaling_factor_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.scaling_factor_shift" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Shift frqequencies by a scaling factor to match experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 3-D numpy array of frequencies and intensities. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities for each datapoint.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>X</strong> –     3-D numpy array of frequencies and intensities. The ndarray has dimensions
+<span class="math notranslate nohighlight">\(m x n x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n = 2\)</span> and
+<span class="math notranslate nohighlight">\(p\)</span> is the number of frequencies/intensities for each datapoint.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>A scaling factor shift accounts for systematic errors in the functional
+to over- or under-bind as well as systematic erros in the harmonic
+approximation. Computed according to
+<a class="reference external" href="https://cccbdb.nist.gov/vibnotes.asp">https://cccbdb.nist.gov/vibnotes.asp</a></p>
+</dd></dl>
 
 </dd></dl>
 
