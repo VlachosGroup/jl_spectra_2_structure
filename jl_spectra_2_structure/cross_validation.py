@@ -74,7 +74,7 @@ class CROSS_VALIDATION:
                 , 'INDICES_VAL': self.INDICES_VAL, 'INDICES_TRAIN': self.INDICES_TRAIN\
                 , 'INDICES_TEST': self.INDICES_TEST, 'INDICES_CV_ALL': self.INDICES_CV_ALL\
                 , 'TARGET': self.TARGET, 'COVERAGE': self.COVERAGE, 'MAX_COVERAGES': self.MAX_COVERAGES\
-                , 'NN_PROPERTIES': self.NN_PROPERTIES\
+                , 'NN_PROPERTIES': self.NN_PROPERTIES, 'TRAINING_ERROR': self.TRAINING_ERROR\
                 , 'NUM_TRAIN': self.NUM_TRAIN, 'NUM_VAL': self.NUM_VAL, 'NUM_TEST': self.NUM_TEST\
                 , 'LOW_FREQUENCY': self.LOW_FREQUENCY, 'HIGH_FREQUENCY': self.HIGH_FREQUENCY\
                 , 'ENERGY_POINTS': self.ENERGY_POINTS}
@@ -107,23 +107,16 @@ class CROSS_VALIDATION:
                              ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                              , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
                 try:
-                    GCNconv.get_GCNlabels(Minimum=2*(CV_SPLITS+1),showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
+                    GCNconv.set_GCNlabels(2*(CV_SPLITS+1), BINDING_TYPE_FOR_GCN,showfigures=False)
                 except:
                     print('Attempting k-means clustering with fewer labels')
                     if NUM_GCN_LABELS >1:
                         GCNconv = get_gcn_conv(NUM_GCN_LABELS-1, BINDING_TYPE_FOR_GCN)
                     else:
-                        GCNconv.get_GCNlabels(Minimum=0,showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
+                        GCNconv.set_GCNlabels(0, BINDING_TYPE_FOR_GCN, showfigures=False)
                 return GCNconv
             
-            #GCNconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
-            #                 ,TARGET='GCN',NUM_TARGETS=10)
-            #GCNconv.get_GCNlabels(Minimum=0,showfigures=False,BINDING_TYPE_FOR_GCN=[1])
-            #BINDING_TYPES = GCNconv.BINDING_TYPES
-            #combined_class = 100*BINDING_TYPES+GCNconv.GCNlabels
-            #classes_with_counts = np.unique(combined_class,return_counts=True)
-            
-            GCNconv = get_gcn_conv(11, BINDING_TYPE_FOR_GCN=INCLUDED_BINDING_TYPES)
+            GCNconv = get_gcn_conv(11, INCLUDED_BINDING_TYPES)
             BINDING_TYPES = GCNconv.BINDING_TYPES
             if BINDING_TYPE_FOR_GCN == 'ALL':
                 BINDING_TYPE_FOR_GCN = list(set(BINDING_TYPES))
@@ -188,7 +181,7 @@ class CROSS_VALIDATION:
         self.BINDING_TYPE_FOR_GCN = BINDING_TYPE_FOR_GCN
     
     def set_model_parameters(self, TARGET, COVERAGE, MAX_COVERAGES, NN_PROPERTIES, NUM_TRAIN, NUM_VAL, NUM_TEST\
-                             , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=11, GCN_ALL = False\
+                             , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=11, GCN_ALL = False, TRAINING_ERROR = None\
                              ,LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
         try:
             INDICES_DICTIONARY = self.INDICES_DICTIONARY
@@ -198,10 +191,9 @@ class CROSS_VALIDATION:
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
         assert TARGET in ['combine_hollow_sites','binding_type','GCN'], "incorrect TARGET variable given"
-        _get_ir_gen_class = self._get_ir_gen_class
+        _set_ir_gen_class = self._set_ir_gen_class
         CV_SPLITS = self.CV_SPLITS
 
-        _get_ir_gen_class(TARGET, NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL)
         
         if TARGET == 'GCN' and GCN_ALL == False:
             INDICES_VAL = [(INDICES_DICTIONARY['GCN']['val_indices'][CV_VAL]\
@@ -237,8 +229,10 @@ class CROSS_VALIDATION:
         self.LOW_FREQUENCY = LOW_FREQUENCY
         self.HIGH_FREQUENCY = HIGH_FREQUENCY
         self.ENERGY_POINTS = ENERGY_POINTS
+        self.TRAINING_ERROR = TRAINING_ERROR
+        _set_ir_gen_class()
         
-    def _get_ir_gen_class(self, TARGET, NUM_GCN_LABELS, MIN_GCN_PER_LABEL, GCN_ALL):
+    def _set_ir_gen_class(self):
         ADSORBATE = self.ADSORBATE
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
@@ -246,31 +240,43 @@ class CROSS_VALIDATION:
         INCLUDED_BINDING_TYPES = self.INCLUDED_BINDING_TYPES
         BINDING_TYPE_FOR_GCN = self.BINDING_TYPE_FOR_GCN
         VERBOSE = self.VERBOSE
+        TARGET = self.TARGET
+        NUM_GCN_LABELS = self.NUM_GCN_LABELS
+        MIN_GCN_PER_LABEL = self.MIN_GCN_PER_LABEL
+        GCN_ALL = self.GCN_ALL
+        LOW_FREQUENCY = self.LOW_FREQUENCY
+        HIGH_FREQUENCY = self.HIGH_FREQUENCY
+        ENERGY_POINTS = self.ENERGY_POINTS
+        COVERAGE = self.COVERAGE
+        MAX_COVERAGES = self.MAX_COVERAGES
         if TARGET == 'combine_hollow_sites': 
-            MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='combine_hollow_sites'\
+            MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES, 'combine_hollow_sites'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
         elif TARGET == 'binding_type':
-            MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='binding_type'\
+            MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES, 'binding_type'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
         elif TARGET == 'GCN':
             if GCN_ALL == True:
-                MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = INCLUDED_BINDING_TYPES, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
+                MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES, 'GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
             else:
-                MAINconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = BINDING_TYPE_FOR_GCN, TARGET='GCN', NUM_TARGETS=NUM_GCN_LABELS\
+                MAINconv = IR_GEN(ADSORBATE, BINDING_TYPE_FOR_GCN, 'GCN', NUM_TARGETS=NUM_GCN_LABELS\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
                 OTHER_BINDING_TYPES = np.array(INCLUDED_BINDING_TYPES)[np.isin(INCLUDED_BINDING_TYPES,BINDING_TYPE_FOR_GCN,invert=True)]
                 if VERBOSE == True:
                     print('OTHER_BINDING_TYPES: ' + str(OTHER_BINDING_TYPES))
-                OTHER_SITESconv = IR_GEN(ADSORBATE, INCLUDED_BINDING_TYPES = OTHER_BINDING_TYPES, TARGET='binding_type'\
+                OTHER_SITESconv = IR_GEN(ADSORBATE, OTHER_BINDING_TYPES, 'binding_type'\
                          ,nanoparticle_path=NANO_PATH, high_coverage_path=HIGH_COV_PATH\
                          , coverage_scaling_path=COV_SCALE_PATH, VERBOSE=VERBOSE)
-            MAINconv.get_GCNlabels(Minimum=MIN_GCN_PER_LABEL, showfigures=False, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN)
-        
+                OTHER_SITESconv.set_spectra_properties('low', [1,1,1,1]\
+                , LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS)
+            MAINconv.set_GCNlabels(MIN_GCN_PER_LABEL, BINDING_TYPE_FOR_GCN, showfigures=False)
+        MAINconv.set_spectra_properties(COVERAGE, MAX_COVERAGES\
+        , LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS)
         if TARGET == 'GCN' and GCN_ALL == False:
             self.OTHER_SITESconv = OTHER_SITESconv
         self.MAINconv = MAINconv
@@ -470,37 +476,30 @@ class CROSS_VALIDATION:
             print("set_model_parameters must be run first")
             raise
         GCN_ALL = self.GCN_ALL
-        COVERAGE = self.COVERAGE
         MAINconv = deepcopy(self.MAINconv)
-        LOW_FREQUENCY = self.LOW_FREQUENCY
-        HIGH_FREQUENCY = self.HIGH_FREQUENCY
-        ENERGY_POINTS = self.ENERGY_POINTS
-        MAX_COVERAGES = self.MAX_COVERAGES
+        TRAINING_ERROR = self.TRAINING_ERROR
         num_samples_original = NUM_SAMPLES
         NUM_SAMPLES = int(NUM_SAMPLES/iterations)
         ADDITIONAL_POINT = int(num_samples_original-NUM_SAMPLES*iterations)
         if TARGET == 'GCN' and GCN_ALL == False:
             OTHER_SITESconv = deepcopy(self.OTHER_SITESconv)
-            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], COVERAGE=COVERAGE, MAX_COVERAGES = [1,1,1,1]\
-            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS, IS_TRAINING_SET=IS_TRAINING_SET)
-            X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], COVERAGE='low', MAX_COVERAGES= [1,1,1,1]\
-            , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS, IS_TRAINING_SET=IS_TRAINING_SET)
+            X1, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES[0], IS_TRAINING_SET, TRAINING_ERROR=TRAINING_ERROR)
+            X2, y2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], IS_TRAINING_SET, TRAINING_ERROR=TRAINING_ERROR)
             X = MAINconv.add_noise(X1,X2)
             del X1; del X2; del y2
         else:
-            X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, COVERAGE=COVERAGE, MAX_COVERAGES = MAX_COVERAGES\
-                , LOW_FREQUENCY=LOW_FREQUENCY, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS, IS_TRAINING_SET=IS_TRAINING_SET)
+            X, y = MAINconv.get_synthetic_spectra(NUM_SAMPLES+ADDITIONAL_POINT, INDICES, IS_TRAINING_SET, TRAINING_ERROR=TRAINING_ERROR)
         #Add to the validation and test sets to get more coverage options
         #(each iteration has 10 different coverage combinations
         #when TARGET in ['binding_type','combine_hollow_sites'] and COVERAGE is not 'low')
         for _ in range(iterations-1):
             if TARGET == 'GCN' and GCN_ALL == False:
-                X1_2, y_2 = MAINconv.get_more_spectra(NUM_SAMPLES, INDICES[0], IS_TRAINING_SET=IS_TRAINING_SET)
-                X2_2, y2_2 = OTHER_SITESconv.get_more_spectra(int(NUM_SAMPLES/5), INDICES[1], IS_TRAINING_SET=IS_TRAINING_SET)
+                X1_2, y_2 = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES[0], IS_TRAINING_SET, TRAINING_ERROR=TRAINING_ERROR)
+                X2_2, y2_2 = OTHER_SITESconv.get_synthetic_spectra(int(NUM_SAMPLES/5), INDICES[1], IS_TRAINING_SET, TRAINING_ERROR=TRAINING_ERROR)
                 X_2 = MAINconv.add_noise(X1_2, X2_2)
                 del X1_2; del X2_2; del y2_2
             else:
-                X_2, y_2 = MAINconv.get_more_spectra(NUM_SAMPLES, INDICES, IS_TRAINING_SET=IS_TRAINING_SET)
+                X_2, y_2 = MAINconv.get_synthetic_spectra(NUM_SAMPLES, INDICES, IS_TRAINING_SET, TRAINING_ERROR=TRAINING_ERROR)
             X = np.append(X,X_2,axis=0)
             y = np.append(y,y_2,axis=0)
             del X_2; del y_2
@@ -667,7 +666,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         self.CV_DICT_LIST = CV_DICT_LIST
         super().__init__(ADSORBATE=self.ADSORBATE, INCLUDED_BINDING_TYPES=self.INCLUDED_BINDING_TYPES\
              , cv_indices_path=new_cv_indices_path, cross_validation_path=new_cross_validation_path)
-        super()._get_ir_gen_class(self.TARGET, self.NUM_GCN_LABELS, self.MIN_GCN_PER_LABEL, self.GCN_ALL)
+        super()._set_ir_gen_class()
         
     def load_all_CV_data(self):
         CV_FILES = self.CV_FILES
