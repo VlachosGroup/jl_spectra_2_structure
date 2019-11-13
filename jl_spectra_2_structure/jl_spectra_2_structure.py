@@ -1164,12 +1164,6 @@ class IR_GEN:
             Indicates the kind of perturbations to induce in the primary training data.
             If an integer the perturbations are uniform, if 'gaussian', the perturbations
             are a gaussian with the same variance as that used ot pertub the validation data.
-                		  
-        Notes
-        -----
-        PC_loadings : numpy.ndarray
-        	The first loadings of the first $N$ principal components where $N$
-        	is equal to NUM_PCs. $PC_loadings = V$ 
                 
         """
         _get_probabilities = self._get_probabilities
