@@ -809,6 +809,25 @@ class IR_GEN:
         return X_noisey
 
     def _get_coverage_shifted_X(self, X0cov, Y, COVERAGE):
+        """Get frequencies and intensities shifted with coveage.
+
+        Parameters
+        ----------
+        X0cov : numpy.ndarray
+        	Numpy array of size (n,2) where $n$ is the number of frequency
+            and intensity pairs.
+            
+        Y : numpy.ndarray
+            Target classes/groups (binding-types or GCN labels)
+        	
+        Returns
+        -------
+        X : numpy.ndarray
+        	Frequencies and intensities shifted to account for coverage
+            
+        NUM_TARGETS : int
+            Number of target classes/groups. Updated if TARGET is GCN an dcoverage is 'high'
+        """
         _coverage_shift = self._coverage_shift
         high_coverage_path = self.HIGH_COV_PATH
         VERBOSE = self.VERBOSE
@@ -871,6 +890,24 @@ class IR_GEN:
         return X, NUM_TARGETS
     
     def _add_high_coverage_data(self, X, Y):
+        """method for adding high coverage GCN data to set of spectra
+
+        Parameters
+        ----------
+        X : numpy.ndarray
+        	Zero coverage frequencies and intensities
+            
+        Y : numpy.ndarray
+            GCN labels
+        	
+        Returns
+        -------
+        X_new : numpy.ndarray
+        	Frequencies and intensities with high coveage data
+            
+        Y_new : numpy.ndarray
+            New taret vector with high covearge GCN data added
+        """
         _perturb_spectra = self._perturb_spectra
         HC_X = self.HC_X
         HC_classes = self.HC_classes
@@ -883,6 +920,31 @@ class IR_GEN:
         return (X_new, Y_new)
     
     def _get_balanced_data(self, X_new, Y_new, indices):
+        """Correct for imbalances in the data for improved learning
+
+        Parameters
+        ----------
+        X_new : numpy.ndarray
+        	Full set of frequencies and intensities
+            
+        Y_new : numpy.ndarray
+            class/groups that are imbalanced
+            
+        indices : list
+            Indices for which individual X_new and Y)new will be selected.
+        	
+        Returns
+        -------
+        X_balanced : numpy.ndarray
+        	Frequencies and intensities corresponding to balanced Y
+            
+        Y_balanced : numpy.ndarray
+            Balanced set of classes/groups.
+            
+        BINDING_TYPES_balanced : numpy.ndarray
+            Balanced set of binding-types that correspond to Y_balanced
+        
+        """
         TARGET = self.TARGET
         BINDING_TYPES_with_4fold = self.BINDING_TYPES_with_4fold
         COVERAGE = self.COVERAGE
@@ -901,6 +963,37 @@ class IR_GEN:
     
     def _scale_and_perturb(self, X_balanced, Y_balanced, BINDING_TYPES_balanced\
                            ,IS_TRAINING_SET, TRAINING_ERROR):
+        """Apply scaling factor and pertub by error associated with scaling factor.
+
+        Parameters
+        ----------
+        X_balanced: numpy.ndarray
+        	Full set of frequencies and intensities corresponding to balanced data
+            
+        Y_balanced : numpy.ndarray
+            Balanced class/groups
+            
+        BINDING_TYPES_balanced : list
+            Balaned bindig types that correspond to spectra and target data
+            
+        IS_TRAINING_SET : bool
+            Indicates whether synthetic spectra to be generated is for training or validating
+            
+        TRAINING_ERROR : float or str
+            Tag that indicates treatment of error in scaling factor for training data.
+        	
+        Returns
+        -------
+        X_sample : numpy.ndarray
+        	Sample of frequencies and intensities that will be mixed and then convoluted.
+            
+        Y_sample : numpy.ndarray
+            Targets classes that will be tabulated to generated fractional contributions to spectra
+            
+        BINDING_TYPES_sample : numpy.ndarray
+            Binding-types that will be used in coverage scaling if scaling is set to 'high'
+        
+        """
         _perturb_spectra = self._perturb_spectra
         scaling_factor_shift = self.scaling_factor_shift
         _perturb_and_shift = self._perturb_and_shift
@@ -919,6 +1012,37 @@ class IR_GEN:
         return X_sample, Y_sample, BINDING_TYPES_sample
     
     def _get_sample_data(self, X, Y, indices, IS_TRAINING_SET, TRAINING_ERROR):
+        """Apply scaling factor and pertub by error associated with scaling factor.
+
+        Parameters
+        ----------
+        X : numpy.ndarray
+        	Zero coverage frequencies and intensities
+            
+        Y : numpy.ndarray
+            GCN labels
+            
+        indices : list
+            Indices for which individual X_new and Y)new will be selected.
+            
+        IS_TRAINING_SET : bool
+            Indicates whether synthetic spectra to be generated is for training or validating
+            
+        TRAINING_ERROR : float or str
+            Tag that indicates treatment of error in scaling factor for training data.
+        	
+        Returns
+        -------
+        X_sample : numpy.ndarray
+        	Sample of frequencies and intensities that will be mixed and then convoluted.
+            
+        Y_sample : numpy.ndarray
+            Targets classes that will be tabulated to generated fractional contributions to spectra
+            
+        BINDING_TYPES_sample : numpy.ndarray
+            Binding-types that will be used in coverage scaling if scaling is set to 'high'
+        
+        """
         _scale_and_perturb = self._scale_and_perturb
         _add_high_coverage_data = self._add_high_coverage_data
         _get_balanced_data = self._get_balanced_data
@@ -941,28 +1065,60 @@ class IR_GEN:
     
     def set_spectra_properties(self, COVERAGE=None, MAX_COVERAGES = [1,1,1,1]\
         , LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
-        """Summary goes on one line here
-
-        Returns principal component loadings after performing SVD on the
-        matrix of pure spectra where $pure-single_spectra = USV^T$
+        """Set spectra specific properties
         
         Parameters
         ----------
-        NUM_PCs : int
-        	The number of principal components of the spectra to keep.
+        COVERAGE : str or float
+            The coverage at which the synthetic spectra is generated. If high,
+            spectra at various coverages is generated.
+            
+        MAX_COVERAGES : list
+            Maximum coverages allowed for each binding-type if COVERAGE
+            is set to 'high'
+            
+        LOW_FREQUENCY : float
+            The lowest frequency for which synthetic spectra is generated
+            
+        HIGH_FREQUENCY : float
+            The high frequency for which synthetic spectra is generated
+            
+        ENERGY_POINTS : int
+            The number of points the synthetic spectra is discretized into
         	
         Attributes
         ----------
-        TOTAL_EXPLAINED_VARIANCE : numpy.ndarray
-        	Total explained variance by the $n$ principal components where
-        	$n=NUM_PCs$
-        		  
-        Returns
-        -------
-        PC_loadings : numpy.ndarray
-        	The first loadings of the first $N$ principal components where $N$
-        	is equal to NUM_PCs. $PC_loadings = V$ 
-                
+        X : numpy.ndarray
+        	Coverage shifted frequencies and intensities
+            
+        Y : The target variables. Either binding-type or GCN label
+        
+        NUM_TARGETS : int
+            The number of binding-types or GCN labels. This is set by the user
+            and can be altered by set_gcn_labels() and _get_coverage_shifted_X
+        
+        X0cov : numpy.ndarray
+            The zero coverage frequency and intensity pairs
+            
+        COVERAGE : str or float
+            The COVERAGE set by the user.
+            
+        LOW_FREQUENCY : float
+            The low frequency set by the user.
+            
+        HIGH_FREQUENCY : float
+            The high frequency set by the user
+            
+        ENERGY_POINTS : int
+            The number of energy points set by the user.
+            
+        MAX_COVERAGES : list
+            List of maximum coverages set by the user.
+            
+        Notes
+        -----
+        This function calls _get_coverage_shifted_X in order to shift X frequencies
+        according to the specified coverage.
         """
         assert type(COVERAGE) == float or COVERAGE==1 or COVERAGE \
         in ['low', 'high'], "Coverage should be a float, 'low', or 'high'."
@@ -990,24 +1146,27 @@ class IR_GEN:
         self.MAX_COVERAGES = MAX_COVERAGES
 
     def get_synthetic_spectra(self, NUM_SAMPLES, indices, IS_TRAINING_SET, TRAINING_ERROR=None):
-        """Summary goes on one line here
-
-        Returns principal component loadings after performing SVD on the
-        matrix of pure spectra where $pure-single_spectra = USV^T$
+        """Obtain convoluted complex synthetic spectra
         
         Parameters
         ----------
-        NUM_PCs : int
-        	The number of principal components of the spectra to keep.
-        	
-        Attributes
-        ----------
-        TOTAL_EXPLAINED_VARIANCE : numpy.ndarray
-        	Total explained variance by the $n$ principal components where
-        	$n=NUM_PCs$
-        		  
-        Returns
-        -------
+        NUM_SAMPLES : int
+        	Number of spectra to generate.
+        
+        indices : list
+        	List of indices from primary datset from which to generate spectra
+            
+        IS_TRAINING_SET : bool
+            Indicates whether primary data should be used to compute trainign or
+            validation set.
+            
+        TRAINING_ERROR : int, str, or None
+            Indicates the kind of perturbations to induce in the primary training data.
+            If an integer the perturbations are uniform, if 'gaussian', the perturbations
+            are a gaussian with the same variance as that used ot pertub the validation data.
+                		  
+        Notes
+        -----
         PC_loadings : numpy.ndarray
         	The first loadings of the first $N$ principal components where $N$
         	is equal to NUM_PCs. $PC_loadings = V$ 
@@ -1029,6 +1188,38 @@ class IR_GEN:
         return (Xconv, yconv)
     
 def fold(frequencies, intensities, LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS,FWHM, fL):
+    """Generate spectra from set of frequencies and intensities
+
+    Parameters
+    ----------
+    frequencies : list or numpy.ndarry
+    	Set of molecular frequencies
+        
+    intensities : list or numpy.ndarray
+        Intensities that correspond to frequencies
+        
+    LOW_FREQUENCY : float
+            The lowest frequency for which synthetic spectra is generated
+            
+    HIGH_FREQUENCY : float
+        The high frequency for which synthetic spectra is generated
+        
+    ENERGY_POINTS : int
+        The number of points the synthetic spectra is discretized into
+        
+    FWHM : float
+        	Full-width-half-maximum of the desired spectra
+            
+    fL : float
+        Fraction of spectra to be convoluted by a Lorentzian transform. The
+        remaining portion of the transoform to make up the FWHM comes sourced
+        from a Gaussian convoluting function.
+    		  
+    Returns
+    -------
+    spectrum : numpy.ndarray
+    	The spectrum that is generated from the set of frequencies and intensities.
+    """
     energies = np.linspace(LOW_FREQUENCY, HIGH_FREQUENCY, num=ENERGY_POINTS, endpoint=True)
     energy_spacing = energies[1]-energies[0]
     if FWHM < 2*energy_spacing:
@@ -1050,6 +1241,23 @@ def fold(frequencies, intensities, LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS,
     return spectrum
 
 def HREEL_2_scaledIR(HREEL, frequency_range=None ):
+    """Summary goes on one line here
+
+    Parameters
+    ----------
+    HREEL : numpy.ndarray
+    	HREEL spectra that is of size (2,n) where n is the number of points the
+        into which the frequency and intensity are discretized.
+        
+    frequency_range : numpy.ndarray
+        Frequency range onto which HREEL will be interpolated after conversion to IR.
+    		  
+    IR_scaled
+    -------
+    numpy.ndarray : numpy.ndarray
+    	The IR spectra the HREELs is converted to.
+            
+    """
     if frequency_range is None:
         frequency_range = np.linspace(200,2200,num=501,endpoint=True)
     PEAK_CONV = 2.7
