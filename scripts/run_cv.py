@@ -17,12 +17,12 @@ if __name__ == "__main__":
     learning_rate = 0.001
     epsilon = 10**-12
     alpha = 10**-4
-    NUM_TRAIN = 5000 #50000 or 5000
+    NUM_TRAIN = 50000 #50000 or 5000
     epochs=5
     training_sets = 200 #200 or 2000
     hidden_layers = (100,100,100)
     ADSORBATE='CO'
-    TARGET='GCN'
+    TARGET='binding_type'
     COVERAGE='high'
     TRAINING_ERROR='gaussian'
     
@@ -73,4 +73,4 @@ if __name__ == "__main__":
     CV_RESULTS_FILE = ADSORBATE+'_'+TARGET+'_'+str(COVERAGE)+'_'+ run_number
     CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=CV_SPLITS+1)
     #CV_class.run_CV(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE)
-    C#V_class.get_test_results()
+    #CV_class.get_test_results()
