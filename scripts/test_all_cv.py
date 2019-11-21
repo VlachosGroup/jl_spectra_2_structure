@@ -13,12 +13,12 @@ import uuid
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 if __name__ == "__main__":
     run_number = str(uuid.uuid4())
-    batch_size = 50
+    batch_size = 250
     learning_rate = 0.001
     epsilon = 10**-12
     alpha = 10**-4
     NUM_TRAIN = 500 #50000
-    epochs=5
+    epochs=1
     training_sets = 2 #200
     hidden_layers = (100,100,100)
     

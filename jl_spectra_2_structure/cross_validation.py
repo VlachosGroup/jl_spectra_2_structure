@@ -721,7 +721,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 for COVERAGE in CV_RESULTS[ADSORBATE][TARGET].keys():
                     WL_VAL = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'])
                     WL_STD = np.array(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
-                    min_score = np.min(WL_VAL + standard_deviations * WL_STD, axis=1)
+                    min_score = np.array([np.min(WL_VAL[cv_run] + standard_deviations * WL_STD[cv_run]) for cv_run in range(WL_VAL.shape[0])])
                     best_models = np.argsort(min_score)[0:models_per_category]
                     SCORES = min_score[best_models]
                     BEST_MODELS[ADSORBATE][TARGET][COVERAGE]['SCORES'] = SCORES
@@ -774,17 +774,17 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         for ADSORBATE in dictionary.keys():
             for TARGET in dictionary[ADSORBATE].keys():
                 for COVERAGE in dictionary[ADSORBATE][TARGET].keys():
-                    WL_VAL = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'])
-                    WL_VAL = WL_VAL.reshape(-1,WL_VAL.shape[-1])
-                    WL_STD = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
-                    WL_STD = WL_STD.reshape(-1,WL_STD.shape[-1])
-                    WL_TRAIN = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_mean'])
-                    WL_TRAIN = WL_TRAIN.reshape(-1,WL_TRAIN.shape[-1])
-                    WL_TRAIN_STD = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_std'])
-                    WL_TRAIN_STD = WL_TRAIN_STD.reshape(-1,WL_TRAIN_STD.shape[-1])
-                    WL_TEST = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'])
-                    WL_TEST = WL_TEST.reshape(-1,WL_TEST.shape[-1])
-                    CV_FILES_INDEX = np.array(dictionary[ADSORBATE][TARGET][COVERAGE]['CV_FILES_INDEX'])
+                    WL_VAL = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'])
+                    #WL_VAL = WL_VAL.reshape(-1,WL_VAL.shape[-1])
+                    WL_STD = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
+                    #WL_STD = WL_STD.reshape(-1,WL_STD.shape[-1])
+                    WL_TRAIN = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_mean'])
+                    #WL_TRAIN = WL_TRAIN.reshape(-1,WL_TRAIN.shape[-1])
+                    WL_TRAIN_STD = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_std'])
+                    #WL_TRAIN_STD = WL_TRAIN_STD.reshape(-1,WL_TRAIN_STD.shape[-1])
+                    WL_TEST = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'])
+                    #WL_TEST = WL_TEST.reshape(-1,WL_TEST.shape[-1])
+                    CV_FILES_INDEX = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['CV_FILES_INDEX'])
                     for model_result in range(len(CV_FILES_INDEX)):
                         if model_list is None:
                             if figure_directory == 'show':

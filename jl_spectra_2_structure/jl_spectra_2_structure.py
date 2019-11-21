@@ -14,6 +14,11 @@ from imblearn.over_sampling import RandomOverSampler
 
 def get_default_data_paths(adsorbate):
     """ Get default paths to primary data of frequencies and intensities.
+    Parameters
+    ----------
+    adsorbate : str
+    	Name of the adsorbate for which to get the default primary DFT data.
+        Data is already provided for 'CO','NO', or 'C2H4'.
     
     Returns
     -------
@@ -42,6 +47,21 @@ def get_default_data_paths(adsorbate):
     coverage_scaling_path = os.path.join(data_path,'coverage_scaling_params_'+adsorbate+'.json') 
     return (nanoparticle_path, isotope_path, high_coverage_path\
            , coverage_scaling_path)
+        
+def get_exp_data_path():
+    """ Get default paths to experimental data.
+    
+    Returns
+    -------
+    experimental_data : list
+        list of paths to experimental data
+    
+    """
+    data_path = pkg_resources.resource_filename(__name__, 'data/')
+    experimental_path = os.path.join(data_path, 'experimental')
+    experimental_data =  [os.path.join(experimental_path,file) for file \
+        in os.listdir(experimental_path)]
+    return experimental_data
 
 class IR_GEN:
     def __init__(self, ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1,2,3,4], TARGET='binding_type', NUM_TARGETS=None\
@@ -379,10 +399,12 @@ class IR_GEN:
         #x is the x-axis of the transform whose values are spaced with energy_spacing,
         #and centered at zero wuch that the $total points =  2 * ENERGY_POINTS + 1$
         x = energy_spacing*(np.arange(numpoints, dtype='int')-int((numpoints-1)/2))
-        b = 0.5*np.sqrt(np.log(2))
+        b = 0.5/np.sqrt(np.log(2))
+        L_prefactor = 4*2/(FWHM*np.pi)
+        G_prefactor = 4*1/(b*FWHM*np.sqrt(np.pi))
         specL = 1.0/(1.0+4.0*(x/FWHM)**2)
         specG = np.exp(-(x/(b*FWHM))**2)
-        transform = fL*specL+(1-fL)*specG
+        transform = fL*L_prefactor*specL+(1-fL)*G_prefactor*specG
         return transform
 
     def _coverage_shift(self, X, BINDING_TYPES, SELF_COVERAGE, TOTAL_COVERAGE):
@@ -432,10 +454,12 @@ class IR_GEN:
         CO_frequencies = Xfrequencies.copy()[np.arange(len(Xfrequencies)), CO_STRETCH_IDX]
         CO_intensities = Xintensities.copy()[np.arange(len(Xintensities)), CO_STRETCH_IDX]
         for i in range(4):
-            CO_frequencies[BINDING_TYPES == i+1] = (CO_frequencies[BINDING_TYPES == i+1]\
-                                           *(Coverage_Scaling['CO_FREQ'][i]['SELF_CO_PER_A2']*ABS_COVERAGE[BINDING_TYPES == i+1]\
-                                             +Coverage_Scaling['CO_FREQ'][i]['CO_PER_A2']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]\
-                                             +1))
+            CO_frequencies[BINDING_TYPES == i+1] =\
+                (CO_frequencies[BINDING_TYPES == i+1]\
+                * (Coverage_Scaling['CO_FREQ'][i]['SELF_CO_PER_A2']\
+                * ABS_COVERAGE[BINDING_TYPES == i+1]\
+                + Coverage_Scaling['CO_FREQ'][i]['CO_PER_A2']\
+                * TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1] + 1))
             CO_intensities[BINDING_TYPES == i+1] = (CO_intensities[BINDING_TYPES == i+1]\
                                          *np.exp(Coverage_Scaling['CO_INT_EXP']*TOTAL_COVERAGE_ABS[BINDING_TYPES == i+1]))
             
@@ -568,15 +592,12 @@ class IR_GEN:
         Xperturbed_and_shifted[Xperturbed_and_shifted[...]<2**-500] = 0
         return (Xperturbed_and_shifted, yperturbed, BINDING_TYPES_perturbed)
 
-    def _generate_spectra(self, Xfrequencies, Xintensities, energies2D, prefactor, sigma):
+    def _generate_spectra(self, Xfrequencies, Xintensities, ENERGIES):
         """ Convert set of frequencies and intensities to spectra with minimal
         line width by Gaussian convolution.
         
         Parameters
         ----------
-        perturbations : int
-        	The number of perturbed primary datapoints per original datapoint.
-            
         Xfrequencies : numpy.ndarray
         	2-D numpy array of frequencies. The ndarray has dimensions
             $m x n$ where $m$ is the number of primary datapoints, $n$
@@ -587,17 +608,9 @@ class IR_GEN:
             $m x n$ where $m$ is the number of primary datapoints, $n$
             is the number of frequencies/intensities for each datapoint.
             
-        energies2D : numpy.ndarray
-            numpy ndarray with dimensions $m x p$ where $m$ is the number of
-            primary datapoints and $p$ is the number of energy points onto which
-            the frequencies and intensities will be projected with Fourier convolution.
-            
-        prefactor : float
-            Gaussian normalization prefactor.
-            
-        sigma : float
-            Standard deviation of Gaussian convoluting function that determines
-            broadening.
+        ENERGIES : numpy.ndarray
+            Numpy array of energies onto which frequencies and itensities will
+            be convolved.
         		  
         Returns
         -------
@@ -611,7 +624,12 @@ class IR_GEN:
         This preconvolution is necessary for numerical reasons before data is 
         convoluted to induce greater spectral broadening.
         """
-        ENERGY_POINTS = self.ENERGY_POINTS
+        ENERGY_POINTS = len(ENERGIES)
+        energy_spacing = ENERGIES[1]-ENERGIES[0]
+        FWHM = 2*energy_spacing
+        sigma = FWHM/(2.0 * np.sqrt(2.0 * np.log(2.)))
+        prefactor = 1.0/(sigma * np.sqrt(2.0 * np.pi))
+        energies2D = ENERGIES.reshape((-1, 1))
         int_mesh = np.zeros((Xfrequencies.shape[0], ENERGY_POINTS))
         #mesh everything on energy grids with a FWHM of twice the energy spacing
         for i in range(Xfrequencies.shape[0]):
@@ -662,29 +680,21 @@ class IR_GEN:
         _coverage_shift = self._coverage_shift
         _generate_spectra = self._generate_spectra
         NUM_TARGETS = self.NUM_TARGETS
-        LOW_FREQUENCY = self.LOW_FREQUENCY
-        HIGH_FREQUENCY = self.HIGH_FREQUENCY
         ENERGY_POINTS = self.ENERGY_POINTS
         COVERAGE = self.COVERAGE
         TARGET = self.TARGET
         GCNlabels = self.GCNlabels
         INCLUDED_BINDING_TYPES = self.INCLUDED_BINDING_TYPES
         MAX_COVERAGES = self.MAX_COVERAGES
-        
-        energies = np.linspace(LOW_FREQUENCY, HIGH_FREQUENCY, num=ENERGY_POINTS\
-                               , endpoint=True)
-        energy_spacing = energies[1]-energies[0]
-        FWHM = 2*energy_spacing
-        sigma = FWHM/(2.0 * np.sqrt(2.0 * np.log(2.)))
-        prefactor = 1.0/(sigma * np.sqrt(2.0 * np.pi))
-        energies2D = energies.reshape((-1, 1))
+        ENERGIES = self.ENERGIES
+        energy_spacing = ENERGIES[1]-ENERGIES[0]
         Xfrequencies = X_sample[:, 0].copy()
         Xintensities = X_sample[:, 1].copy()
         np.random.shuffle(probabilities)
         num_samples = len(probabilities)
         num_simple_spectra = np.random.randint(1, high=201, size=num_samples)
         fLs = np.random.sample(num_samples)
-        FWHMs = np.random.uniform(low=2, high=75, size=num_samples)
+        FWHMs = np.random.uniform(low=2, high=100, size=num_samples)
         Xconv = np.zeros((num_samples, ENERGY_POINTS))
         yconv = np.zeros((num_samples, NUM_TARGETS))
         y_mesh = np.zeros((Y_sample.size, NUM_TARGETS))
@@ -699,8 +709,7 @@ class IR_GEN:
         parray = np.zeros(Y_sample.size)
         shift_vector = np.zeros(Y_sample.size)                
         if TARGET == 'GCN' or COVERAGE == 'low' or type(COVERAGE) in [float,int]:
-            int_mesh = _generate_spectra(Xfrequencies, Xintensities\
-                                        ,energies2D, prefactor, sigma)
+            int_mesh = _generate_spectra(Xfrequencies, Xintensities,ENERGIES)
         else:
             coverage_parray = get_probabilities(num_samples, 11)
             coverage_totals = np.random.random_sample(size=[num_samples,10])
@@ -752,8 +761,7 @@ class IR_GEN:
                 Xcov = _coverage_shift(X_sample[indices_primary], BINDING_TYPES_sample[indices_primary], SELF_COVERAGE, TOTAL_COVERAGE)
                 Xcovfrequencies = Xcov[:, 0].copy()
                 Xcovintensities = Xcov[:, 1].copy()
-                int_mesh = _generate_spectra(Xcovfrequencies,Xcovintensities\
-                                                  ,energies2D, prefactor, sigma)
+                int_mesh = _generate_spectra(Xcovfrequencies,Xcovintensities,ENERGIES)
                 for count, max_coverage in enumerate(MAX_COVERAGES):
                     int_mesh[BINDING_TYPES_sample[indices_primary] == INCLUDED_BINDING_TYPES[count]] *= max_coverage
                 combined_mesh = np.sum(int_mesh, axis=0)
@@ -1135,6 +1143,9 @@ class IR_GEN:
             Y = BINDING_TYPES
         #Get coverage shifted data if and update number of targets if applicable
         X, NUM_TARGETS = _get_coverage_shifted_X(X0cov, Y, COVERAGE)
+        ENERGIES = np.linspace(LOW_FREQUENCY, HIGH_FREQUENCY, num=ENERGY_POINTS\
+                               , endpoint=True)
+        self.ENERGIES = ENERGIES
         self.X = X
         self.Y = Y
         self.NUM_TARGETS = NUM_TARGETS

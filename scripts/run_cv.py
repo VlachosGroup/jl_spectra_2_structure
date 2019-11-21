@@ -13,19 +13,19 @@ import uuid
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 if __name__ == "__main__":
     run_number = str(uuid.uuid4())
-    batch_size = 50
-    learning_rate = 0.001
+    batch_size = 5
+    learning_rate = 0.0001 #0.001
     epsilon = 10**-12
     alpha = 10**-4
     NUM_TRAIN = 500 #50000 or 5000/500 for binding energy coverage
     epochs=5
-    training_sets = 1000 #200 or 2000 250 seconds for 500/5000 w/ binding energy
+    training_sets = 30 #200 or 2000 250 seconds for 500/5000 w/ binding energy
     hidden_layers = (100,100,100)
     ADSORBATE='CO'
     TARGET='binding_type'
     COVERAGE='high'
     TRAINING_ERROR='gaussian'
-    REG = 'L1'
+    REG = 'L2'
     
     if ADSORBATE == 'CO':
         INCLUDED_BINDING_TYPES=[1,2,3,4]
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
     print(cross_validation_path) 
     CV_class = CROSS_VALIDATION(ADSORBATE,INCLUDED_BINDING_TYPES\
-                                ,cross_validation_path, VERBOSE=True)
+                                ,cross_validation_path=cross_validation_path, VERBOSE=True)
     CV_SPLITS = 3
     CV_class.generate_test_cv_indices(CV_SPLITS, BINDING_TYPE_FOR_GCN\
         , test_fraction=0.25, random_state=0, read_file=False, write_file=False)
@@ -68,9 +68,9 @@ if __name__ == "__main__":
     ,'alpha':alpha, 'epochs_per_training_set':epochs,'training_sets':training_sets,'loss': 'wasserstein_loss'}
     CV_class.set_model_parameters(TARGET=TARGET, COVERAGE=COVERAGE\
     , MAX_COVERAGES = MAX_COVERAGES, NN_PROPERTIES=properties_dictionary\
-    , NUM_TRAIN=NUM_TRAIN, NUM_VAL=10000, NUM_TEST=10000\
+    , NUM_TRAIN=NUM_TRAIN, NUM_VAL=100, NUM_TEST=100\
     , MIN_GCN_PER_LABEL=12, NUM_GCN_LABELS=10, GCN_ALL = GCN_ALL, TRAINING_ERROR = TRAINING_ERROR\
     , LOW_FREQUENCY=200, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
     CV_RESULTS_FILE = ADSORBATE+'_'+TARGET+'_'+str(COVERAGE)+'_'+ run_number
-    CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=CV_SPLITS+1)
-    #CV_class.get_test_results()
+    #CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=CV_SPLITS+1)
+    CV_class.get_test_results()
