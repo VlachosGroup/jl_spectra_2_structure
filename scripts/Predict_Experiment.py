@@ -43,21 +43,19 @@ CNCO_COPtnano = NN_CNCO.predict(COPtnano.reshape(1,-1))[0]
 #GCN_COPt111LowCov = NN_GCN.predict(COPt111LowCov.reshape(1,-1))[0]
 #GCN_COp1x2Pt110 = NN_GCN.predict(COp1x2Pt110.reshape(1,-1))[0]
 #GCN_COPtnano = NN_GCN.predict(COPtnano.reshape(1,-1))[0]
+
 Bridge_Pt111 = np.all((CV_class.MAINconv.BINDING_TYPES==2,np.round(CV_class.MAINconv.GCNList,5)==7.33333),axis=0)
 Atop_Pt111 = np.all((CV_class.MAINconv.BINDING_TYPES==1,np.round(CV_class.MAINconv.GCNList,1)==7.5),axis=0)
-X = CV_class.MAINconv.scaling_factor_shift(CV_class.MAINconv.X0cov)
-FWHM = 200
-spectra1 = fold(X[Bridge_Pt111][0][0],X[Bridge_Pt111][0][1],200,2200,500,FWHM,1)
-Gaussian2 = CV_class.MAINconv._generate_spectra(X[Bridge_Pt111][0][0].reshape(1,-1),X[Bridge_Pt111][0][1].reshape(1,-1),CV_class.MAINconv.ENERGIES)
-transform = CV_class.MAINconv._mixed_lineshape(FWHM, 1, CV_class.MAINconv.ENERGIES.shape[0], CV_class.MAINconv.ENERGIES[1]-CV_class.MAINconv.ENERGIES[0])
-spectra2 = np.convolve(Gaussian2[0], transform, mode='valid')
-plt.figure(0)
-plt.plot(spectra2)
-plt.plot(spectra1,'--')
-plt.show()
+Xnew = CV_class.MAINconv.scaling_factor_shift(CV_class.MAINconv.X0cov)
 
-
-
+FWHM = 20
+fL = .5
+Gaussian2 = CV_class.MAINconv._generate_spectra(Xnew[:,0],Xnew[:,1],CV_class.MAINconv.ENERGIES)
+transform = CV_class.MAINconv._mixed_lineshape(FWHM, fL, CV_class.MAINconv.ENERGIES.shape[0], CV_class.MAINconv.ENERGIES[1]-CV_class.MAINconv.ENERGIES[0])
+spectra = np.array([np.convolve(i, transform, mode='valid') for i in Gaussian2])
+spectra_50 = spectra[Atop_Pt111] + spectra[Bridge_Pt111][0]
+spectra_norm = spectra_50/np.max(spectra_50,axis=1).reshape(-1,1)
+NN_CNCO.predict(spectra_norm)
 
 
 print(CNCO_COc4x2Pt111)
@@ -101,7 +99,7 @@ ax1.text(0.01,0.92,'(a)', transform=ax1.transAxes)
 #ax2.set_xticks(range(1,len(x)+1))
 #ax2.text(0.01,0.92,'(b)', transform=ax2.transAxes)
 #plt.savefig('../Figures/High_vs_LowCov_Hist_paper.png', format='png')
-#plt.close()
+plt.close()
 
 linestyle = ['-',':','-.','--']
 G = gridspec.GridSpec(2, 2)
@@ -190,4 +188,4 @@ ax1.text(0.004,0.93,'(b)', transform=ax1.transAxes)
 #ax2.text(0.004,0.93,'(c)', transform=ax2.transAxes)
 #plt.gcf().subplots_adjust(bottom=0.09,top=0.98,right=0.98,left=0.06)
 #plt.savefig('../Figures/Experimental_Hist_with_data.png', format='png')
-#plt.close()
+plt.close()

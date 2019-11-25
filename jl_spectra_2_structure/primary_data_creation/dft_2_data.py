@@ -57,6 +57,7 @@ class Primary_DATA:
                 ,'CN_ADSORBATE':[],'GCN':[],'CN_METAL':[],'NUM_METAL':[],'COVERAGE':[]}
         #countlist is used only for testing purposes
         count_list = []
+        molecule_list = []
         #iterate over each force file and charge file simultaneously
         for count, (freq_file, charge_file) in enumerate(zip(freq_files, charge_files)):
             print(count)
@@ -212,6 +213,7 @@ class Primary_DATA:
                         VIB_DICT['FREQUENCIES'].append(FREQUENCIES.real.tolist())
                         VIB_DICT['IMAGINARY'].append(FREQUENCIES.imag.tolist())
                         VIB_DICT['NUM_METAL'].append(NumPt)
+                        VIB_DICT['POTENTIAL_ENERGY'].append(molecule_images[0].get_potential_energy())
                         VIB_DICT['COVERAGE'].append(NUM_CO/surface_atoms)
                         VIB_DICT['MAX_FORCE'].append(max_force)
                         if num_adsorbates == 'single' and poc==1:
@@ -227,12 +229,15 @@ class Primary_DATA:
                             VIB_DICT['GCN'][-1] = np.mean(GCN)
                             VIB_DICT['CN_METAL'][-1] = np.mean(TotalNN)
                         count_list.append(count)
+                        molecule_list.append(molecule_images[0])
         
         with open(output_path, 'w') as outfile:
             json.dump(VIB_DICT, outfile, sort_keys=True, indent=1)
         self.OUTPUT_DICTIONARY = VIB_DICT
         self.FREQ_FILES = freq_files
         self.CHARGE_FILES = charge_files
+        self.INDICES_USED = np.array(count_list)
+        self.MOLECULES = molecule_list
             
     def generate_isotope_data(self, vasp_directory, output_file\
                                        ,masses1=[12,16], masses2=[24,32]):
@@ -653,6 +658,7 @@ class Primary_DATA:
         self.OUTPUT_DICTIONARY = VIB_DICT
         self.FREQ_FILES = freq_files
         self.CHARGE_FILES = charge_files
+        self.INDICES_USED = np.array(count_list)
         
 class COVERAGE_SCALING:
     def __init__(self,primary_data_path):

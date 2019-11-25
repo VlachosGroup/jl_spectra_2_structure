@@ -694,7 +694,7 @@ class IR_GEN:
         num_samples = len(probabilities)
         num_simple_spectra = np.random.randint(1, high=201, size=num_samples)
         fLs = np.random.sample(num_samples)
-        FWHMs = np.random.uniform(low=2, high=100, size=num_samples)
+        FWHMs = np.random.uniform(low=2, high=75, size=num_samples)
         Xconv = np.zeros((num_samples, ENERGY_POINTS))
         yconv = np.zeros((num_samples, NUM_TARGETS))
         y_mesh = np.zeros((Y_sample.size, NUM_TARGETS))
