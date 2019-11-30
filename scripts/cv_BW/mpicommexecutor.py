@@ -28,6 +28,8 @@ def fun(x):
     #    "requires an input argument"
     #    raise
     
+    L1orL2 = np.random.RandomState().choice(['L1','L2'])
+    TRAINING_ERROR = np.random.RandomState().choice(['gaussian',0.003,None])
     hidden_layer1 = np.random.RandomState().randint(50,151)
     hidden_layer2 = np.random.RandomState().randint(50,151)
     hidden_layer_3 = np.random.RandomState().randint(50,151)
@@ -50,15 +52,17 @@ def fun(x):
     which_setup = setup_list[np.random.RandomState().choice(np.arange(len(setup_list)))]
     
 
-    batch_size = int(10**(3*random_numbers[0]+1))
-    learning_rate = 10**(random_numbers[1]-3)
+    batch_size = int(5*10**(2*random_numbers[0]+1))
+    learning_rate = 10**(random_numbers[1]-4)
     epsilon = 10**(4*random_numbers[2]-14)
-    alpha = 10**(8*random_numbers[3]-9)
-    NUM_TRAIN = int(10**(random_numbers[4]+4))
-    training_sets = int(10**(random_numbers[5]+1))
-    epochs = int(2*10**(random_numbers[6]))
+    alpha = 10**(5*random_numbers[3]-6)
+    NUM_TRAIN = 50000
+    training_sets = 2*int(10**(random_numbers[5]+2))
+    epochs = 5
     if which_setup[1] == 'high' and which_setup[2] in ['binding_type','combine_hollow_sites']:
-        NUM_TRAIN = 10000
+        NUM_TRAIN = 500
+        batch_size=50
+        training_sets = 5*int(10**(random_numbers[5]+2))
     print('batch_size: '+str(batch_size))
     print('learning_rate: '+str(learning_rate))
     print('epsilon: '+str(epsilon))
@@ -110,20 +114,18 @@ def fun(x):
     cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
     print(cross_validation_path) 
     CV_class = CROSS_VALIDATION(ADSORBATE=ADSORBATE,INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
-                                ,cross_validation_path=cross_validation_path)
+                                ,cross_validation_path=cross_validation_path, VERBOSE=False)
     CV_SPLITS = 3
     CV_class.generate_test_cv_indices(CV_SPLITS=CV_SPLITS, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN\
         , test_fraction=0.25, random_state=0, read_file=True, write_file=False)
     properties_dictionary = {'batch_size':batch_size, 'learning_rate_init':learning_rate\
-    , 'epsilon':epsilon,'hidden_layer_sizes':hidden_layers\
+    , 'epsilon':epsilon,'hidden_layer_sizes':hidden_layers,'regularization':L1orL2\
     ,'alpha':alpha, 'epochs_per_training_set':epochs,'training_sets':training_sets,'loss': 'wasserstein_loss'}
     CV_class.set_model_parameters(TARGET=TARGET, COVERAGE=COVERAGE\
     , MAX_COVERAGES = MAX_COVERAGES, NN_PROPERTIES=properties_dictionary\
     , NUM_TRAIN=NUM_TRAIN, NUM_VAL=10000, NUM_TEST=10000\
-    , MIN_GCN_PER_LABEL=12, NUM_GCN_LABELS=10, GCN_ALL = GCN_ALL\
+    , MIN_GCN_PER_LABEL=12, NUM_GCN_LABELS=10, GCN_ALL = GCN_ALL, TRAINING_ERROR = TRAINING_ERROR\
     , LOW_FREQUENCY=200, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
-    CV_class.set_pc_loadings(70,NUM_SAMPLES=10000)
-    print('Total Explained Variance: ' + str(CV_class.TOTAL_EXPLAINED_VARIANCE))
     CV_RESULTS_FILE = ADSORBATE+'_'+TARGET+'_'+str(COVERAGE)+'_'+ run_number
     CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=CV_SPLITS+1)
     #CV_class.run_CV(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE)

@@ -53,8 +53,10 @@ class Primary_DATA:
         charge_files = VASP_FILES.get_charge_files()
         
         #Initialize dictionary that will be saved as json
-        VIB_DICT = {'FREQUENCIES':[],'IMAGINARY':[],'INTENSITIES':[],'MAX_FORCE':[]\
-                ,'CN_ADSORBATE':[],'GCN':[],'CN_METAL':[],'NUM_METAL':[],'COVERAGE':[]}
+        VIB_DICT = {'FREQUENCIES' : [], 'IMAGINARY' : [], 'INTENSITIES' : []\
+                    ,'MAX_FORCE' : [], 'CN_ADSORBATE' : [], 'GCN' : []\
+                    ,'CN_METAL' : [], 'NUM_METAL' : [], 'COVERAGE':[]\
+                    , 'ENERGY' : []}
         #countlist is used only for testing purposes
         count_list = []
         molecule_list = []
@@ -213,7 +215,7 @@ class Primary_DATA:
                         VIB_DICT['FREQUENCIES'].append(FREQUENCIES.real.tolist())
                         VIB_DICT['IMAGINARY'].append(FREQUENCIES.imag.tolist())
                         VIB_DICT['NUM_METAL'].append(NumPt)
-                        VIB_DICT['POTENTIAL_ENERGY'].append(molecule_images[0].get_potential_energy())
+                        VIB_DICT['ENERGY'].append(molecule_images[0].get_potential_energy())
                         VIB_DICT['COVERAGE'].append(NUM_CO/surface_atoms)
                         VIB_DICT['MAX_FORCE'].append(max_force)
                         if num_adsorbates == 'single' and poc==1:
