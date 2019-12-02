@@ -22,8 +22,8 @@ if __name__ == "__main__":
     training_sets = 30 #200 or 2000 250 seconds for 500/5000 w/ binding energy
     hidden_layers = (100,100,100)
     ADSORBATE='CO'
-    TARGET='binding_type'
-    COVERAGE='high'
+    TARGET='GCN'
+    COVERAGE='low'
     TRAINING_ERROR='gaussian'
     REG = 'L2'
     
@@ -72,5 +72,5 @@ if __name__ == "__main__":
     , MIN_GCN_PER_LABEL=12, NUM_GCN_LABELS=10, GCN_ALL = GCN_ALL, TRAINING_ERROR = TRAINING_ERROR\
     , LOW_FREQUENCY=200, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
     CV_RESULTS_FILE = ADSORBATE+'_'+TARGET+'_'+str(COVERAGE)+'_'+ run_number
-    #CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=CV_SPLITS+1)
-    CV_class.get_test_results()
+    CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=CV_SPLITS+1)
+    #CV_class.get_test_results()

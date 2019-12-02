@@ -52,17 +52,17 @@ def fun(x):
     which_setup = setup_list[np.random.RandomState().choice(np.arange(len(setup_list)))]
     
 
-    batch_size = int(5*10**(2*random_numbers[0]+1))
+    batch_size = int(10**(2*random_numbers[0]+1))
     learning_rate = 10**(random_numbers[1]-4)
     epsilon = 10**(4*random_numbers[2]-14)
     alpha = 10**(5*random_numbers[3]-6)
-    NUM_TRAIN = 50000
-    training_sets = 2*int(10**(random_numbers[5]+2))
+    NUM_TRAIN = int(5*10**(random_numbers[4]+3))
+    training_sets = int(10**(random_numbers[5]+2))
     epochs = 5
     if which_setup[1] == 'high' and which_setup[2] in ['binding_type','combine_hollow_sites']:
         NUM_TRAIN = 500
-        batch_size=50
-        training_sets = 5*int(10**(random_numbers[5]+2))
+        batch_size=5
+        training_sets = 100
     print('batch_size: '+str(batch_size))
     print('learning_rate: '+str(learning_rate))
     print('epsilon: '+str(epsilon))
@@ -114,7 +114,7 @@ def fun(x):
     cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
     print(cross_validation_path) 
     CV_class = CROSS_VALIDATION(ADSORBATE=ADSORBATE,INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
-                                ,cross_validation_path=cross_validation_path, VERBOSE=False)
+                                ,cross_validation_path=cross_validation_path, VERBOSE=True)
     CV_SPLITS = 3
     CV_class.generate_test_cv_indices(CV_SPLITS=CV_SPLITS, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN\
         , test_fraction=0.25, random_state=0, read_file=True, write_file=False)
@@ -132,6 +132,6 @@ def fun(x):
 
 if __name__ == "__main__":
     with MPICommExecutor(MPI.COMM_WORLD, root=0) as executor:
-        jobs = range(1000)
+        jobs = range(10000)
         if executor is not None:
             executor.map(fun, jobs)

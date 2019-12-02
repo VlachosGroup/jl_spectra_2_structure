@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -j oe
-#PBS -q normal
-#PBS -l nodes=50:ppn=32:xe
-#PBS -l walltime=16:00:00
+#PBS -q low
+#PBS -l nodes=399:ppn=32:xe
+#PBS -l walltime=24:00:00
 
 cd $PBS_O_WORKDIR
 
@@ -12,4 +12,4 @@ module load bwpy-mpi
 NRANKS=$(wc -l <$PBS_NODEFILE)
 cpus=`expr $NRANKS / 4`
 echo $cpus
-aprun -n 400 -N 8 -b python ./mpicommexecutor.py 
+aprun -n 396 -N 1 -b python ./mpicommexecutor.py 
