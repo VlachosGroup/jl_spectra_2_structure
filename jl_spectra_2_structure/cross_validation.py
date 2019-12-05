@@ -21,14 +21,69 @@ from .jl_spectra_2_structure import get_default_data_paths
 from . import error_metrics
 
 class CROSS_VALIDATION:
-    """
+    """Class for running cross validation. Splits primary data into balanced
+       folds and generates sets of secondary data.    
     """
     def __init__(self, ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1,2,3,4]\
                  , cv_indices_path=None, cross_validation_path = None, nanoparticle_path=None\
                  ,high_coverage_path=None, coverage_scaling_path=None,VERBOSE=False):
+        """ 
+        Parameters
+        ----------
+        ADSORBATE : str
+            Adsorbate for which the spectra is to be generated.
+
+        INCLUDED_BINDING_TYPES : list
+            Binding types whose frequencies/intensiteis from the primary data
+            set will be included in generating the complex spectra.
+            
+        cv_indices_path : str
+            Folder path where indices for cross validation are saved or where
+            they are to be created if they have not yet been created. 
+            
+        cross_validation_path : str
+            Folder path where cross validation results are to be created.
+            
+        nanoparticle_path : str
+            File path where nanoparticle or single adsorbate json data is saved.
+
+        high_coverage_path : str
+            File path where high coverage data for CO is saved saved.
+
+        coverage_scaling_path : str
+            File path where coverage scaling coefficients are saved.
+            
+        VERBOSE : bool
+            Controls the printing of status statements.
+        
+        Attributes
+        ----------
+        CV_INDICES_PATH : str
+            Folder path for cross validation indices.
+            
+        CV_PATH : str
+            Folder path where cross validation results are to be created.
+            
+        NANO_PATH : str
+            File path where nanoparticle or single adsorbate json data is saved.
+
+        HIGH_COV_PATH : str
+            File path where high coverage data for CO is saved saved.
+
+        COV_SCALE_PATH : str
+            File path where coverage scaling coefficients are saved.
+            
+        VERBOSE : bool
+            Controls the printing of status statements.
+            
+        ADSORBATE : str
+            Adsorbate for which the spectra is to be generated.
+
+        INCLUDED_BINDING_TYPES : list
+            Binding types whose frequencies/intensiteis from the primary data
+            set will be included in generating the complex spectra.
         """
-        """
-        assert type(ADSORBATE) == str, "ADSORBATE must be a String"
+        assert type(ADSORBATE) == str, "ADSORBATE must be a string"
         nano_path, isotope_path, high_cov_path\
            , cov_scale_path = get_default_data_paths(ADSORBATE)
         
@@ -52,22 +107,46 @@ class CROSS_VALIDATION:
         
         
     def _get_default_cross_validation_path(self):
-         work_dir = os.getcwd()
-         cross_validation_path = os.path.join(work_dir,'cross_validation')
-         already_exists = os.path.isdir(cross_validation_path)
-         if already_exists == False:
-             os.mkdir(cross_validation_path)
-         return cross_validation_path
+        """Get cross validation path if not set by user.
+        		  
+        Returns
+        -------
+        cross_validation_path : str
+            Folder path where cross validation results are to be created.
+                
+        """
+        work_dir = os.getcwd()
+        cross_validation_path = os.path.join(work_dir,'cross_validation')
+        already_exists = os.path.isdir(cross_validation_path)
+        if already_exists == False:
+            os.mkdir(cross_validation_path)
+        return cross_validation_path
      
     def _get_default_cv_indices_path(self):
-         work_dir = os.getcwd()
-         cv_indices_path = os.path.join(work_dir,'cv_indices')
-         already_exists = os.path.isdir(cv_indices_path)
-         if already_exists == False:
-             os.mkdir(cv_indices_path)
-         return cv_indices_path
+        """Get cross validation indices path if not set by user.
+        		  
+        Returns
+        -------
+        cv_indices_path : str
+            Folder path where cross validation indices are to be created.
+                
+        """
+        work_dir = os.getcwd()
+        cv_indices_path = os.path.join(work_dir,'cv_indices')
+        already_exists = os.path.isdir(cv_indices_path)
+        if already_exists == False:
+            os.mkdir(cv_indices_path)
+        return cv_indices_path
      
     def _get_state(self):
+        """Get important state variables of the class
+        		  
+        Returns
+        -------
+        Dict : dict
+            State variables necessary to recreate the cross validation run.
+                
+        """
         Dict = { 'ADSORBATE': self.ADSORBATE,'INCLUDED_BINDING_TYPES': self.INCLUDED_BINDING_TYPES\
                 , 'NUM_GCN_LABELS': self.NUM_GCN_LABELS, 'MIN_GCN_PER_LABEL': self.MIN_GCN_PER_LABEL
                 , 'GCN_ALL': self.GCN_ALL, 'CV_SPLITS': self.CV_SPLITS, 'BINDING_TYPE_FOR_GCN': self.BINDING_TYPE_FOR_GCN\

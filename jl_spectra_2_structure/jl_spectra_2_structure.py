@@ -64,8 +64,79 @@ def get_exp_data_path():
     return experimental_data
 
 class IR_GEN:
+    """Class for generating complex synthetic IR spectra"""
     def __init__(self, ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1,2,3,4], TARGET='binding_type', NUM_TARGETS=None\
                  , nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None,VERBOSE=False):
+        """ 
+        Parameters
+        ----------
+        ADSORBATE : str
+            Adsorbate for which the spectra is to be generated.
+
+        INCLUDED_BINDING_TYPES : list
+            Binding types whose frequencies/intensiteis from the primary data
+            set will be included in generating the complex spectra.
+            
+        TARGET : str
+            Geometric descriptor for which the target histogram is to be gnerated.
+            Can be binding_type, GCN, or combine_hollow_sites. If it is
+            combine_hollow_sites then 3-fold and 4-fold sites are grouped together.
+            
+        NUM_TARGETS : int
+            Number of GCN groups to predict. Only used if TARGET='GCN' and GCN
+            must be discretized.
+            
+        nanoparticle_path : str
+        File path where nanoparticle or single adsorbate json data is saved.
+
+        high_coverage_path : str
+            File path where high coverage data for CO is saved saved.
+
+        coverage_scaling_path : str
+            File path where coverage scaling coefficients are saved.
+            
+        VERBOSE : bool
+            Controls the printing of status statements.
+        
+        Attributes
+        ----------
+        BINDING_TYPES_with_4fold : list
+            List of all binding types.
+            
+        TARGET : str
+            Set during initialization.
+            
+        NUM_TARGETS: int
+            Set during initialization.
+            
+        X0cov : numpy.ndarray
+            Set of frequencies and intensities at low coverage.
+            
+        BINDING_TYPES : list
+            Binding types to be predicted, accounts for both filtering and
+            merging of certain sites.
+            
+        GCNList : list
+            GCN values for the data points
+            
+        NANO_PATH : int
+            Set during initialization.
+            
+        HIGH_COV_PATH : int
+            Set during initialization.
+            
+        COV_SCALE_PATH : int
+            Set during initialization.
+            
+        ADSORBATE : float
+            Set during initialization.
+            
+        INCLUDED_BINDING_TYPES : int
+            Set during initialization.
+            
+        VERBOSE : int
+            Set during initialization.
+        """
         assert TARGET in ['binding_type','GCN','combine_hollow_sites'], "incorrect TARGET given"
         assert type(INCLUDED_BINDING_TYPES) in [list,tuple,np.ndarray], "Included Binding Types should be a list"
         #number of target variables.
@@ -108,7 +179,6 @@ class IR_GEN:
         self.BINDING_TYPES_with_4fold = BINDING_TYPES_with_4fold
         self.TARGET = TARGET
         self.NUM_TARGETS = NUM_TARGETS
-        self.GCNlabels = None
         self.X0cov = np.array([(nanoparticle_data['FREQUENCIES'][i], nanoparticle_data['INTENSITIES'][i])
                                for i in range(len(nanoparticle_data['FREQUENCIES']))])
         self.BINDING_TYPES = nanoparticle_data['CN_ADSORBATE']
@@ -477,7 +547,7 @@ class IR_GEN:
         return Xcov
 
     def scaling_factor_shift(self, X):
-        """ Shift frqequencies by a scaling factor to match experiment.
+        """ Shift frequencies by a scaling factor to match experiment.
 
         Parameters
         ----------
@@ -516,7 +586,7 @@ class IR_GEN:
         return X
     
     def _perturb_and_shift(self,perturbations, X, y, BINDING_TYPES=None):
-        """ Shift spectra with scaling factor with gaussian error.
+        """ Shift spectra with scaling factor that has gaussian error.
         
         Parameters
         ----------
@@ -683,10 +753,11 @@ class IR_GEN:
         ENERGY_POINTS = self.ENERGY_POINTS
         COVERAGE = self.COVERAGE
         TARGET = self.TARGET
-        GCNlabels = self.GCNlabels
         INCLUDED_BINDING_TYPES = self.INCLUDED_BINDING_TYPES
         MAX_COVERAGES = self.MAX_COVERAGES
         ENERGIES = self.ENERGIES
+        if TARGET == 'GCN':
+            GCNlabels = self.GCNlabels
         energy_spacing = ENERGIES[1]-ENERGIES[0]
         Xfrequencies = X_sample[:, 0].copy()
         Xintensities = X_sample[:, 1].copy()
@@ -827,6 +898,10 @@ class IR_GEN:
             
         Y : numpy.ndarray
             Target classes/groups (binding-types or GCN labels)
+            
+        COVERAGE : str or float
+            The coverage at which the synthetic spectra is generated. If high,
+            spectra at various coverages is generated.
         	
         Returns
         -------
@@ -834,7 +909,7 @@ class IR_GEN:
         	Frequencies and intensities shifted to account for coverage
             
         NUM_TARGETS : int
-            Number of target classes/groups. Updated if TARGET is GCN an dcoverage is 'high'
+            Number of target classes/groups. Updated if TARGET is GCN and coverage is 'high'
         """
         _coverage_shift = self._coverage_shift
         high_coverage_path = self.HIGH_COV_PATH
@@ -1134,11 +1209,13 @@ class IR_GEN:
         TARGET = self.TARGET
         BINDING_TYPES = self.BINDING_TYPES
         X0cov = self.X0cov
-        GCNlabels = self.GCNlabels
         #Assign the target variable Y to either GCN group or binding site
         if TARGET == 'GCN':
-            assert GCNlabels is not None, "set_GCNlabels must be executed before spectra can be generated"
-            Y = GCNlabels
+            try:
+                Y = self.GCNlabels
+            except:
+                print("set_GCNlabels must be executed before spectra can be generated")
+                raise
         else:
             Y = BINDING_TYPES
         #Get coverage shifted data if and update number of targets if applicable
