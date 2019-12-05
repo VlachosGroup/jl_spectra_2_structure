@@ -161,7 +161,49 @@ class CROSS_VALIDATION:
         
     def generate_test_cv_indices(self, CV_SPLITS=3, BINDING_TYPE_FOR_GCN=[1]\
                                  ,test_fraction=0.25,random_state=0, read_file=False, write_file=False):
-        """
+        """Function to generate the test and cross validation indices that
+        will be used to split the primary data.
+
+        Parameters
+        ----------
+        CV_SPLITS : int
+        	The number of cross validation splits
+            
+        BINDING_TYPE_FOR_GCN : list or 'ALL'
+        	The binding types to consider when tabulating the GCN values. 
+            Primary data with other binding types is considered noise. If
+            'ALL' is selected all binding types are used and no noise is added
+            from other binding types as there are no other binding types.
+            
+        test_fraction : float
+        	The percent of primary data to keep for testing.
+            
+        random_state : int
+        	Can be set to None. Allows reproducibility.
+            
+        write_file : bool
+        	Indicates whether the indices of the selected primary data for cross
+            validation is written to a json file.
+            
+        read_file : bool
+        	Indicates whether indices for selecting primary data during cross
+            validation and testing is read from a file or directly from this
+            function.
+        	
+        Attributes
+        ----------
+        CV_SPLITS : int
+        	The number of cross validation splits
+            
+        BINDING_TYPE_FOR_GCN : list or 'ALL'
+        	The binding types to consider when tabulating the GCN values. 
+            Primary data with other binding types is considered noise. If
+            'ALL' is selected all binding types are used and no noise is added
+            from other binding types as there are no other binding types.
+            
+        INDICES_DICTIONARY : dict
+        	Dictionary of indices used in cross validation for both the 
+            binding type model and the GCN model.
         """
         ADSORBATE = self.ADSORBATE
         INCLUDED_BINDING_TYPES = self.INCLUDED_BINDING_TYPES
@@ -262,6 +304,117 @@ class CROSS_VALIDATION:
     def set_model_parameters(self, TARGET, COVERAGE, MAX_COVERAGES, NN_PROPERTIES, NUM_TRAIN, NUM_VAL, NUM_TEST\
                              , MIN_GCN_PER_LABEL=0, NUM_GCN_LABELS=11, GCN_ALL = False, TRAINING_ERROR = None\
                              ,LOW_FREQUENCY=200, HIGH_FREQUENCY=2200, ENERGY_POINTS=501):
+        """Sets model parameters both for generating the secondary data
+        (complex spectra) and for running the neural network.
+
+        Parameters
+        ----------
+        TARGET : str
+            Geometric descriptor for which the target histogram is to be gnerated.
+            Can be binding_type, GCN, or combine_hollow_sites. If it is
+            combine_hollow_sites then 3-fold and 4-fold sites are grouped together.
+            
+        COVERAGE : str or float
+            The coverage at which the synthetic spectra is generated. If high,
+            spectra at various coverages is generated.
+            
+        MAX_COVERAGES : list
+            Maximum coverages allowed for each binding-type if COVERAGE
+            is set to 'high'
+            
+        NN_PROPERTIES : dict
+        	Dictionary of properties for the neural network.
+            
+        NUM_TRAIN : int
+        	Number of secondary data (complex spectra) in a single training set.
+            
+        NUM_VAL : int
+        	Number of secondary data (complex spectra) in each validation set.
+            
+        NUM_TEST : int
+        	Number of secondary data (complex spectra) in the test set.
+            
+        MIN_GCN_PER_LABEL : int
+        	Minimum number of primary data points in each GCN group
+            
+        NUM_GCN_LABELS : int
+        	The target number of GCN labels which to group the primary
+            data points (simple spectra).
+            
+        GCN_ALL : bool
+        	Whether or not to include all binding types in tabulating GCN values.
+            If False, then only the selected binding types determined during the
+            creation of the cross validation indices will be used.
+            
+        TRAINING_ERROR : str float or None
+            Indicates the type of error induced in the training set. Can be
+            'gaussian', a float, or None. If 'gaussian' then gaussian error
+            is added to the scaling factor. If a float then uniform error is
+            added after scaling of the primary DFT data.
+            
+        LOW_FREQUENCY : float
+            The lowest frequency for which synthetic spectra is generated
+            
+        HIGH_FREQUENCY : float
+            The high frequency for which synthetic spectra is generated
+            
+        ENERGY_POINTS : int
+            The number of points the synthetic spectra is discretized into
+        	
+        Attributes
+        ----------
+        TARGET : str
+            Geometric descriptor for which the target histogram is to be gnerated.
+            Can be binding_type, GCN, or combine_hollow_sites. If it is
+            combine_hollow_sites then 3-fold and 4-fold sites are grouped together.
+            
+        COVERAGE : str or float
+            The coverage at which the synthetic spectra is generated. If high,
+            spectra at various coverages is generated.
+            
+        MAX_COVERAGES : list
+            Maximum coverages allowed for each binding-type if COVERAGE
+            is set to 'high'
+            
+        NN_PROPERTIES : dict
+        	Dictionary of properties for the neural network.
+            
+        NUM_TRAIN : int
+        	Number of secondary data (complex spectra) in a single training set.
+            
+        NUM_VAL : int
+        	Number of secondary data (complex spectra) in each validation set.
+            
+        NUM_TEST : int
+        	Number of secondary data (complex spectra) in the test set.
+            
+        MIN_GCN_PER_LABEL : int
+        	Minimum number of primary data points in each GCN group
+            
+        NUM_GCN_LABELS : int
+        	The target number of GCN labels which to group the primary
+            data points (simple spectra).
+            
+        GCN_ALL : bool
+        	Whether or not to include all binding types in tabulating GCN values.
+            If False, then only the selected binding types determined during the
+            creation of the cross validation indices will be used.
+            
+        TRAINING_ERROR : str float or None
+            Indicates the type of error induced in the training set. Can be
+            'gaussian', a float, or None. If 'gaussian' then gaussian error
+            is added to the scaling factor. If a float then uniform error is
+            added after scaling of the primary DFT data.
+            
+        LOW_FREQUENCY : float
+            The lowest frequency for which synthetic spectra is generated
+            
+        HIGH_FREQUENCY : float
+            The high frequency for which synthetic spectra is generated
+            
+        ENERGY_POINTS : int
+            The number of points the synthetic spectra is discretized into
+        """
         try:
             INDICES_DICTIONARY = self.INDICES_DICTIONARY
         except:
@@ -312,6 +465,21 @@ class CROSS_VALIDATION:
         _set_ir_gen_class()
         
     def _set_ir_gen_class(self):
+        """Instantiates the class for generaitng complex spectra with
+        parameters set by set_model_parameters()
+        	
+        Attributes
+        ----------
+        MAINconv : IR_GEN
+        	An IR_GEN class that will generate spectra and histograms of
+            of binding types or GCN groups
+            
+        OTHER_SITESconv : IR_GEN
+        	An IR_GEN class that will generate spectra for binding types not
+            considered by MAINconv. Only instantiated if TARGET == 'GCN' and
+            GCN_ALL == False
+            
+        """
         ADSORBATE = self.ADSORBATE
         NANO_PATH = self.NANO_PATH
         HIGH_COV_PATH = self.HIGH_COV_PATH
