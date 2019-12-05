@@ -1223,7 +1223,7 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        NN : MLPRegressor</span>
-<span class="sd">        	Trained neural network. Only instantiated if IS_TEST == True </span>
+<span class="sd">        	Trained neural network.</span>
 <span class="sd">                </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">NN</span> <span class="o">=</span> <span class="n">MLPRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">dictionary</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">])</span>
@@ -1234,6 +1234,29 @@
         <span class="k">return</span> <span class="n">NN</span></div>
     
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION.load_CV_class"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_CV_class">[docs]</a>    <span class="k">def</span> <span class="nf">load_CV_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">index</span><span class="p">,</span> <span class="n">new_cv_indices_path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_cross_validation_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load all stored data from a single cross validation run.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        index : int</span>
+<span class="sd">        	Indicates which cross validation result to load</span>
+<span class="sd">            </span>
+<span class="sd">        new_cv_indices_path : str</span>
+<span class="sd">            Folder path where indices for new cross validation are to be saved. </span>
+<span class="sd">            </span>
+<span class="sd">        new_cross_validation_path : str</span>
+<span class="sd">            Folder path where new cross validation results are to be saved.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NN : neural_network</span>
+<span class="sd">        	Trained neural network.</span>
+<span class="sd">            </span>
+<span class="sd">        CV_DICT_LIST : list of dict</span>
+<span class="sd">        	List of dictionaries with cross validations results, statistics,</span>
+<span class="sd">            and the neural network traine on all cross validation data.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="vm">__dict__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
         <span class="n">get_NN</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_NN</span>
         <span class="n">CV_FILES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CV_FILES</span>
@@ -1258,6 +1281,14 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_set_ir_gen_class</span><span class="p">()</span></div>
         
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION.load_all_CV_data"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_all_CV_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_all_CV_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load results from all cross validation runs in order to identify the</span>
+<span class="sd">        best neural network for each category (CO, GCN, etc.)</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_RESULTS : dict</span>
+<span class="sd">        	Dictionary of all cross validation results</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">CV_FILES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CV_FILES</span>
         <span class="n">CV_RESULTS</span> <span class="o">=</span> <span class="n">NESTED_DICT</span><span class="p">()</span>
         <span class="k">def</span> <span class="nf">deep_update</span><span class="p">(</span><span class="n">ADSORBATE</span><span class="p">,</span><span class="n">TARGET</span><span class="p">,</span><span class="n">COVERAGE</span><span class="p">,</span><span class="n">KEY</span><span class="p">,</span><span class="n">VALUE</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">create_list</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1299,6 +1330,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">CV_RESULTS</span> <span class="o">=</span> <span class="n">CV_RESULTS_dict</span></div>
             
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION.get_best_models"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_best_models">[docs]</a>    <span class="k">def</span> <span class="nf">get_best_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models_per_category</span><span class="p">,</span> <span class="n">standard_deviations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Identify the best neural networks for each category (CO, GCN, etc.)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        models_per_category : int</span>
+<span class="sd">        	Number of models to include for each </span>
+<span class="sd">            </span>
+<span class="sd">        standard_deviations : float</span>
+<span class="sd">        	Number of standard deviations to add to the mean cross validation</span>
+<span class="sd">            loss in order select the best model. Optimizes but bias and</span>
+<span class="sd">            variance</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        BEST_MODELS : dict</span>
+<span class="sd">        	Dictionary of just the best model results and their corresponding</span>
+<span class="sd">            model index value</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        BEST_MODELS_dict : dict</span>
+<span class="sd">        	Dictionary of just the best model results and their corresponding</span>
+<span class="sd">            model index value</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">CV_RESULTS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CV_RESULTS</span>
         <span class="k">except</span><span class="p">:</span>
@@ -1322,6 +1378,19 @@
         <span class="k">return</span> <span class="n">BEST_MODELS_dict</span></div>
     
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION.get_keys"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_keys">[docs]</a>    <span class="k">def</span> <span class="nf">get_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dictionary</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get all keys in a dictionary of dictionaries for viewing</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dictionary : dict</span>
+<span class="sd">        	A dictionary of dictionaries.</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dictionary_of_keys : dict</span>
+<span class="sd">        	A dictionary of keys.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dictionary_of_keys</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">def</span> <span class="nf">recursive_items</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span><span class="n">dictionary_of_keys</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1340,6 +1409,34 @@
     
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION.plot_models"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_models">[docs]</a>    <span class="k">def</span> <span class="nf">plot_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dictionary</span><span class="p">,</span><span class="n">figure_directory</span><span class="o">=</span><span class="s1">&#39;show&#39;</span><span class="p">,</span><span class="n">model_list</span> <span class="o">=</span> <span class="kc">None</span>\
                     <span class="p">,</span><span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="n">ylim1</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="n">ylim2</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;plot model learning curves for all models in a given dictionary</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dictionary : dict</span>
+<span class="sd">        	A dictionary of dictionaries.</span>
+<span class="sd">            </span>
+<span class="sd">        figure_directory : str</span>
+<span class="sd">        	Folder location to save the learning curves</span>
+<span class="sd">            </span>
+<span class="sd">        model_list : None or list of int</span>
+<span class="sd">        	If None each learning curve is displayed independently. If list</span>
+<span class="sd">            then the curves are compiled into one figure of two or four panels.</span>
+<span class="sd">            </span>
+<span class="sd">        xlim : list</span>
+<span class="sd">        	The start and end number for the epochs to show</span>
+<span class="sd">            </span>
+<span class="sd">        ylim1 : list</span>
+<span class="sd">        	The range of loss to show in the first figure if model_list is of</span>
+<span class="sd">            length 2. If model_list is of length 4 it is the range on the first</span>
+<span class="sd">            and third figures.</span>
+<span class="sd">            </span>
+<span class="sd">        ylim2 : list</span>
+<span class="sd">        	The range of loss to show in the second figure if model_list is of</span>
+<span class="sd">            length 2. If model_list is of length 4 it is the range on the</span>
+<span class="sd">            second and fourth figures.</span>
+<span class="sd">    </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">model_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;figure.autolayout&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span><span class="s1">&#39;axes.labelpad&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}</span>
             <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
@@ -1433,6 +1530,17 @@
         <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;figure.autolayout&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span></div>
         
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION.plot_parity_plots"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_parity_plots">[docs]</a>    <span class="k">def</span> <span class="nf">plot_parity_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">figure_directory</span><span class="o">=</span><span class="s1">&#39;show&#39;</span><span class="p">,</span><span class="n">model_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot parity plots for models whose index is in model_list</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        figure_directory : str</span>
+<span class="sd">        	Folder location to save the the parity plots</span>
+<span class="sd">            </span>
+<span class="sd">        model_list : None or list of int</span>
+<span class="sd">        	Can be None only if load_CV_class(index) has already been run.</span>
+<span class="sd">            </span>
+<span class="sd">    &quot;&quot;&quot;</span>
         <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;lines.markersize&#39;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">})</span>
         <span class="k">if</span> <span class="n">model_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1483,12 +1591,34 @@
         <span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;lines.markersize&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span></div></div>
         
 <div class="viewcode-block" id="NESTED_DICT"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.NESTED_DICT">[docs]</a><span class="k">class</span> <span class="nc">NESTED_DICT</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Implementation of perl&#39;s autovivification feature.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Implementation of perl&#39;s autovivification feature.</span>
+<span class="sd">    		  </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict : NESTED_DICT</span>
+<span class="sd">    	Returns a dictionary that is value so that setting key, value pair at</span>
+<span class="sd">        any key, value level will create all necessary keys/values if they</span>
+<span class="sd">        don&#39;t exist up to that level</span>
+<span class="sd">            </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__missing__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)()</span>
         <span class="k">return</span> <span class="n">value</span></div>
 
 <div class="viewcode-block" id="NESTED_DICT_to_DICT"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.NESTED_DICT_to_DICT">[docs]</a><span class="k">def</span> <span class="nf">NESTED_DICT_to_DICT</span><span class="p">(</span><span class="n">nested_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Converts a nested dict to a traditional python dictionary.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    nested_dict : NESTED_DICT</span>
+<span class="sd">        A dictionary of type NESTED_DICT</span>
+<span class="sd">    		  </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dictionary : dict</span>
+<span class="sd">    	A python dictionary</span>
+<span class="sd">            </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dictionary</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">def</span> <span class="nf">recursive_items</span><span class="p">(</span><span class="n">nested_dict</span><span class="p">,</span><span class="n">dictionary</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

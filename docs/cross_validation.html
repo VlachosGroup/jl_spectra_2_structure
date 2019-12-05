@@ -562,7 +562,7 @@ their intercepts.</p>
 <dd class="field-odd"><p><strong>dictionary</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary containing neural network results and properties</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>NN</strong> – Trained neural network. Only instantiated if IS_TEST == True</p>
+<dd class="field-even"><p><strong>NN</strong> – Trained neural network.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>MLPRegressor</p>
@@ -573,32 +573,117 @@ their intercepts.</p>
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_best_models">
 <code class="sig-name descname">get_best_models</code><span class="sig-paren">(</span><em class="sig-param">models_per_category</em>, <em class="sig-param">standard_deviations</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.get_best_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_best_models" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Identify the best neural networks for each category (CO, GCN, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models_per_category</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of models to include for each</p></li>
+<li><p><strong>standard_deviations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Number of standard deviations to add to the mean cross validation
+loss in order select the best model. Optimizes but bias and
+variance</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>BEST_MODELS</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of just the best model results and their corresponding
+model index value</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>BEST_MODELS_dict</strong> –     Dictionary of just the best model results and their corresponding
+model index value</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_keys">
 <code class="sig-name descname">get_keys</code><span class="sig-paren">(</span><em class="sig-param">dictionary</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.get_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get all keys in a dictionary of dictionaries for viewing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dictionary</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A dictionary of dictionaries.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dictionary_of_keys</strong> – A dictionary of keys.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_CV_class">
 <code class="sig-name descname">load_CV_class</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">new_cv_indices_path=None</em>, <em class="sig-param">new_cross_validation_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.load_CV_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_CV_class" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Load all stored data from a single cross validation run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Indicates which cross validation result to load</p></li>
+<li><p><strong>new_cv_indices_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where indices for new cross validation are to be saved.</p></li>
+<li><p><strong>new_cross_validation_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where new cross validation results are to be saved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NN</strong> (<em>neural_network</em>) – Trained neural network.</p></li>
+<li><p><strong>CV_DICT_LIST</strong> (<em>list of dict</em>) – List of dictionaries with cross validations results, statistics,
+and the neural network traine on all cross validation data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_all_CV_data">
 <code class="sig-name descname">load_all_CV_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.load_all_CV_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.load_all_CV_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Load results from all cross validation runs in order to identify the
+best neural network for each category (CO, GCN, etc.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><strong>CV_RESULTS</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of all cross validation results</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_models">
 <code class="sig-name descname">plot_models</code><span class="sig-paren">(</span><em class="sig-param">dictionary, figure_directory='show', model_list=None, xlim=[0, 200], ylim1=[0, 0.3], ylim2=[0, 0.3]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.plot_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_models" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>plot model learning curves for all models in a given dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dictionary</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – A dictionary of dictionaries.</p></li>
+<li><p><strong>figure_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder location to save the learning curves</p></li>
+<li><p><strong>model_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em> or </em><em>list of int</em>) – If None each learning curve is displayed independently. If list
+then the curves are compiled into one figure of two or four panels.</p></li>
+<li><p><strong>xlim</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The start and end number for the epochs to show</p></li>
+<li><p><strong>ylim1</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The range of loss to show in the first figure if model_list is of
+length 2. If model_list is of length 4 it is the range on the first
+and third figures.</p></li>
+<li><p><strong>ylim2</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – The range of loss to show in the second figure if model_list is of
+length 2. If model_list is of length 4 it is the range on the
+second and fourth figures.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_parity_plots">
 <code class="sig-name descname">plot_parity_plots</code><span class="sig-paren">(</span><em class="sig-param">figure_directory='show'</em>, <em class="sig-param">model_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.plot_parity_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.plot_parity_plots" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Plot parity plots for models whose index is in model_list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figure_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder location to save the the parity plots</p></li>
+<li><p><strong>model_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a><em> or </em><em>list of int</em>) – Can be None only if load_CV_class(index) has already been run.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -609,6 +694,16 @@ their intercepts.</p>
 <dt id="jl_spectra_2_structure.cross_validation.NESTED_DICT">
 <em class="property">class </em><code class="sig-name descname">NESTED_DICT</code><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#NESTED_DICT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.NESTED_DICT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of perl’s autovivification feature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>dict</strong> – Returns a dictionary that is value so that setting key, value pair at
+any key, value level will create all necessary keys/values if they
+don’t exist up to that level</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#jl_spectra_2_structure.cross_validation.NESTED_DICT" title="jl_spectra_2_structure.cross_validation.NESTED_DICT">NESTED_DICT</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -617,7 +712,19 @@ their intercepts.</p>
 <dl class="function">
 <dt id="jl_spectra_2_structure.cross_validation.NESTED_DICT_to_DICT">
 <code class="sig-name descname">NESTED_DICT_to_DICT</code><span class="sig-paren">(</span><em class="sig-param">nested_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#NESTED_DICT_to_DICT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.NESTED_DICT_to_DICT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Converts a nested dict to a traditional python dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nested_dict</strong> (<a class="reference internal" href="#jl_spectra_2_structure.cross_validation.NESTED_DICT" title="jl_spectra_2_structure.cross_validation.NESTED_DICT"><em>NESTED_DICT</em></a>) – A dictionary of type NESTED_DICT</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dictionary</strong> – A python dictionary</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 </div>

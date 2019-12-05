@@ -1069,7 +1069,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         Returns
         -------
         NN : MLPRegressor
-        	Trained neural network. Only instantiated if IS_TEST == True 
+        	Trained neural network.
                 
         """
         NN = MLPRegressor(**dictionary['parameters'])
@@ -1080,6 +1080,29 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         return NN
     
     def load_CV_class(self,index, new_cv_indices_path = None, new_cross_validation_path=None):
+        """Load all stored data from a single cross validation run.
+
+        Parameters
+        ----------
+        index : int
+        	Indicates which cross validation result to load
+            
+        new_cv_indices_path : str
+            Folder path where indices for new cross validation are to be saved. 
+            
+        new_cross_validation_path : str
+            Folder path where new cross validation results are to be saved.
+        	
+        Attributes
+        ----------
+        NN : neural_network
+        	Trained neural network.
+            
+        CV_DICT_LIST : list of dict
+        	List of dictionaries with cross validations results, statistics,
+            and the neural network traine on all cross validation data.
+                
+        """
         __dict__ = self.__dict__
         get_NN = self.get_NN
         CV_FILES = self.CV_FILES
@@ -1104,6 +1127,14 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         super()._set_ir_gen_class()
         
     def load_all_CV_data(self):
+        """Load results from all cross validation runs in order to identify the
+        best neural network for each category (CO, GCN, etc.)
+        	
+        Attributes
+        ----------
+        CV_RESULTS : dict
+        	Dictionary of all cross validation results
+        """
         CV_FILES = self.CV_FILES
         CV_RESULTS = NESTED_DICT()
         def deep_update(ADSORBATE,TARGET,COVERAGE,KEY,VALUE=None,create_list=False):
@@ -1145,6 +1176,31 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         self.CV_RESULTS = CV_RESULTS_dict
             
     def get_best_models(self, models_per_category, standard_deviations):
+        """Identify the best neural networks for each category (CO, GCN, etc.)
+
+        Parameters
+        ----------
+        models_per_category : int
+        	Number of models to include for each 
+            
+        standard_deviations : float
+        	Number of standard deviations to add to the mean cross validation
+            loss in order select the best model. Optimizes but bias and
+            variance
+        	
+        Attributes
+        ----------
+        BEST_MODELS : dict
+        	Dictionary of just the best model results and their corresponding
+            model index value
+        		  
+        Returns
+        -------
+        BEST_MODELS_dict : dict
+        	Dictionary of just the best model results and their corresponding
+            model index value
+                
+        """
         try:
             CV_RESULTS = self.CV_RESULTS
         except:
@@ -1168,6 +1224,19 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         return BEST_MODELS_dict
     
     def get_keys(self,dictionary):
+        """Get all keys in a dictionary of dictionaries for viewing
+
+        Parameters
+        ----------
+        dictionary : dict
+        	A dictionary of dictionaries.
+        		  
+        Returns
+        -------
+        dictionary_of_keys : dict
+        	A dictionary of keys.
+                
+        """
         dictionary_of_keys = {}
         def recursive_items(dictionary,dictionary_of_keys):
             for key, value in dictionary.items():
@@ -1186,6 +1255,34 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
     
     def plot_models(self,dictionary,figure_directory='show',model_list = None\
                     ,xlim=[0, 200], ylim1=[0, 0.3], ylim2=[0, 0.3]):
+        """plot model learning curves for all models in a given dictionary
+
+        Parameters
+        ----------
+        dictionary : dict
+        	A dictionary of dictionaries.
+            
+        figure_directory : str
+        	Folder location to save the learning curves
+            
+        model_list : None or list of int
+        	If None each learning curve is displayed independently. If list
+            then the curves are compiled into one figure of two or four panels.
+            
+        xlim : list
+        	The start and end number for the epochs to show
+            
+        ylim1 : list
+        	The range of loss to show in the first figure if model_list is of
+            length 2. If model_list is of length 4 it is the range on the first
+            and third figures.
+            
+        ylim2 : list
+        	The range of loss to show in the second figure if model_list is of
+            length 2. If model_list is of length 4 it is the range on the
+            second and fourth figures.
+    
+        """
         if model_list is not None:
             params = {'figure.autolayout': False,'axes.labelpad':2}
             rcParams.update(params)
@@ -1279,6 +1376,17 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         rcParams.update({'figure.autolayout': True})
         
     def plot_parity_plots(self,figure_directory='show',model_list=None):
+        """Plot parity plots for models whose index is in model_list
+
+        Parameters
+        ----------
+        figure_directory : str
+        	Folder location to save the the parity plots
+            
+        model_list : None or list of int
+        	Can be None only if load_CV_class(index) has already been run.
+            
+    """
         rcParams.update({'lines.markersize': 2.5})
         if model_list is None:
             try:
@@ -1329,12 +1437,34 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         rcParams.update({'lines.markersize': 5})
         
 class NESTED_DICT(dict):
-    """Implementation of perl's autovivification feature."""
+    """Implementation of perl's autovivification feature.
+    		  
+    Returns
+    -------
+    dict : NESTED_DICT
+    	Returns a dictionary that is value so that setting key, value pair at
+        any key, value level will create all necessary keys/values if they
+        don't exist up to that level
+            
+    """
     def __missing__(self, key):
         value = self[key] = type(self)()
         return value
 
 def NESTED_DICT_to_DICT(nested_dict):
+    """Converts a nested dict to a traditional python dictionary.
+    
+    Parameters
+    ----------
+    nested_dict : NESTED_DICT
+        A dictionary of type NESTED_DICT
+    		  
+    Returns
+    -------
+    dictionary : dict
+    	A python dictionary
+            
+    """
     dictionary = {}
     def recursive_items(nested_dict,dictionary):
         for key, value in nested_dict.items():
