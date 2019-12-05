@@ -175,14 +175,69 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">error_metrics</span>
 
 <div class="viewcode-block" id="CROSS_VALIDATION"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION">[docs]</a><span class="k">class</span> <span class="nc">CROSS_VALIDATION</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Class for running cross validation. Splits primary data into balanced</span>
+<span class="sd">       folds and generates sets of secondary data.    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ADSORBATE</span><span class="o">=</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="n">INCLUDED_BINDING_TYPES</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>\
                  <span class="p">,</span> <span class="n">cv_indices_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cross_validation_path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nanoparticle_path</span><span class="o">=</span><span class="kc">None</span>\
                  <span class="p">,</span><span class="n">high_coverage_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coverage_scaling_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">VERBOSE</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ADSORBATE : str</span>
+<span class="sd">            Adsorbate for which the spectra is to be generated.</span>
+
+<span class="sd">        INCLUDED_BINDING_TYPES : list</span>
+<span class="sd">            Binding types whose frequencies/intensiteis from the primary data</span>
+<span class="sd">            set will be included in generating the complex spectra.</span>
+<span class="sd">            </span>
+<span class="sd">        cv_indices_path : str</span>
+<span class="sd">            Folder path where indices for cross validation are saved or where</span>
+<span class="sd">            they are to be created if they have not yet been created. </span>
+<span class="sd">            </span>
+<span class="sd">        cross_validation_path : str</span>
+<span class="sd">            Folder path where cross validation results are to be created.</span>
+<span class="sd">            </span>
+<span class="sd">        nanoparticle_path : str</span>
+<span class="sd">            File path where nanoparticle or single adsorbate json data is saved.</span>
+
+<span class="sd">        high_coverage_path : str</span>
+<span class="sd">            File path where high coverage data for CO is saved saved.</span>
+
+<span class="sd">        coverage_scaling_path : str</span>
+<span class="sd">            File path where coverage scaling coefficients are saved.</span>
+<span class="sd">            </span>
+<span class="sd">        VERBOSE : bool</span>
+<span class="sd">            Controls the printing of status statements.</span>
+<span class="sd">        </span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_INDICES_PATH : str</span>
+<span class="sd">            Folder path for cross validation indices.</span>
+<span class="sd">            </span>
+<span class="sd">        CV_PATH : str</span>
+<span class="sd">            Folder path where cross validation results are to be created.</span>
+<span class="sd">            </span>
+<span class="sd">        NANO_PATH : str</span>
+<span class="sd">            File path where nanoparticle or single adsorbate json data is saved.</span>
+
+<span class="sd">        HIGH_COV_PATH : str</span>
+<span class="sd">            File path where high coverage data for CO is saved saved.</span>
+
+<span class="sd">        COV_SCALE_PATH : str</span>
+<span class="sd">            File path where coverage scaling coefficients are saved.</span>
+<span class="sd">            </span>
+<span class="sd">        VERBOSE : bool</span>
+<span class="sd">            Controls the printing of status statements.</span>
+<span class="sd">            </span>
+<span class="sd">        ADSORBATE : str</span>
+<span class="sd">            Adsorbate for which the spectra is to be generated.</span>
+
+<span class="sd">        INCLUDED_BINDING_TYPES : list</span>
+<span class="sd">            Binding types whose frequencies/intensiteis from the primary data</span>
+<span class="sd">            set will be included in generating the complex spectra.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">ADSORBATE</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;ADSORBATE must be a String&quot;</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">ADSORBATE</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;ADSORBATE must be a string&quot;</span>
         <span class="n">nano_path</span><span class="p">,</span> <span class="n">isotope_path</span><span class="p">,</span> <span class="n">high_cov_path</span>\
            <span class="p">,</span> <span class="n">cov_scale_path</span> <span class="o">=</span> <span class="n">get_default_data_paths</span><span class="p">(</span><span class="n">ADSORBATE</span><span class="p">)</span>
         
@@ -206,22 +261,46 @@
         
         
 <div class="viewcode-block" id="CROSS_VALIDATION._get_default_cross_validation_path"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cross_validation_path">[docs]</a>    <span class="k">def</span> <span class="nf">_get_default_cross_validation_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-         <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-         <span class="n">cross_validation_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span><span class="s1">&#39;cross_validation&#39;</span><span class="p">)</span>
-         <span class="n">already_exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">cross_validation_path</span><span class="p">)</span>
-         <span class="k">if</span> <span class="n">already_exists</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cross_validation_path</span><span class="p">)</span>
-         <span class="k">return</span> <span class="n">cross_validation_path</span></div>
+        <span class="sd">&quot;&quot;&quot;Get cross validation path if not set by user.</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cross_validation_path : str</span>
+<span class="sd">            Folder path where cross validation results are to be created.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">cross_validation_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span><span class="s1">&#39;cross_validation&#39;</span><span class="p">)</span>
+        <span class="n">already_exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">cross_validation_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">already_exists</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cross_validation_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cross_validation_path</span></div>
      
 <div class="viewcode-block" id="CROSS_VALIDATION._get_default_cv_indices_path"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cv_indices_path">[docs]</a>    <span class="k">def</span> <span class="nf">_get_default_cv_indices_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-         <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-         <span class="n">cv_indices_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span><span class="s1">&#39;cv_indices&#39;</span><span class="p">)</span>
-         <span class="n">already_exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">cv_indices_path</span><span class="p">)</span>
-         <span class="k">if</span> <span class="n">already_exists</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cv_indices_path</span><span class="p">)</span>
-         <span class="k">return</span> <span class="n">cv_indices_path</span></div>
+        <span class="sd">&quot;&quot;&quot;Get cross validation indices path if not set by user.</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cv_indices_path : str</span>
+<span class="sd">            Folder path where cross validation indices are to be created.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">cv_indices_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span><span class="s1">&#39;cv_indices&#39;</span><span class="p">)</span>
+        <span class="n">already_exists</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">cv_indices_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">already_exists</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cv_indices_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cv_indices_path</span></div>
      
 <div class="viewcode-block" id="CROSS_VALIDATION._get_state"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_state">[docs]</a>    <span class="k">def</span> <span class="nf">_get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get important state variables of the class</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dict : dict</span>
+<span class="sd">            State variables necessary to recreate the cross validation run.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Dict</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;ADSORBATE&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADSORBATE</span><span class="p">,</span><span class="s1">&#39;INCLUDED_BINDING_TYPES&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">INCLUDED_BINDING_TYPES</span>\
                 <span class="p">,</span> <span class="s1">&#39;NUM_GCN_LABELS&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUM_GCN_LABELS</span><span class="p">,</span> <span class="s1">&#39;MIN_GCN_PER_LABEL&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">MIN_GCN_PER_LABEL</span>
                 <span class="p">,</span> <span class="s1">&#39;GCN_ALL&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">GCN_ALL</span><span class="p">,</span> <span class="s1">&#39;CV_SPLITS&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">CV_SPLITS</span><span class="p">,</span> <span class="s1">&#39;BINDING_TYPE_FOR_GCN&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">BINDING_TYPE_FOR_GCN</span>\
@@ -236,7 +315,49 @@
         
 <div class="viewcode-block" id="CROSS_VALIDATION.generate_test_cv_indices"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.generate_test_cv_indices">[docs]</a>    <span class="k">def</span> <span class="nf">generate_test_cv_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CV_SPLITS</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">BINDING_TYPE_FOR_GCN</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>\
                                  <span class="p">,</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">read_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">write_file</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Function to generate the test and cross validation indices that</span>
+<span class="sd">        will be used to split the primary data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_SPLITS : int</span>
+<span class="sd">        	The number of cross validation splits</span>
+<span class="sd">            </span>
+<span class="sd">        BINDING_TYPE_FOR_GCN : list or &#39;ALL&#39;</span>
+<span class="sd">        	The binding types to consider when tabulating the GCN values. </span>
+<span class="sd">            Primary data with other binding types is considered noise. If</span>
+<span class="sd">            &#39;ALL&#39; is selected all binding types are used and no noise is added</span>
+<span class="sd">            from other binding types as there are no other binding types.</span>
+<span class="sd">            </span>
+<span class="sd">        test_fraction : float</span>
+<span class="sd">        	The percent of primary data to keep for testing.</span>
+<span class="sd">            </span>
+<span class="sd">        random_state : int</span>
+<span class="sd">        	Can be set to None. Allows reproducibility.</span>
+<span class="sd">            </span>
+<span class="sd">        write_file : bool</span>
+<span class="sd">        	Indicates whether the indices of the selected primary data for cross</span>
+<span class="sd">            validation is written to a json file.</span>
+<span class="sd">            </span>
+<span class="sd">        read_file : bool</span>
+<span class="sd">        	Indicates whether indices for selecting primary data during cross</span>
+<span class="sd">            validation and testing is read from a file or directly from this</span>
+<span class="sd">            function.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_SPLITS : int</span>
+<span class="sd">        	The number of cross validation splits</span>
+<span class="sd">            </span>
+<span class="sd">        BINDING_TYPE_FOR_GCN : list or &#39;ALL&#39;</span>
+<span class="sd">        	The binding types to consider when tabulating the GCN values. </span>
+<span class="sd">            Primary data with other binding types is considered noise. If</span>
+<span class="sd">            &#39;ALL&#39; is selected all binding types are used and no noise is added</span>
+<span class="sd">            from other binding types as there are no other binding types.</span>
+<span class="sd">            </span>
+<span class="sd">        INDICES_DICTIONARY : dict</span>
+<span class="sd">        	Dictionary of indices used in cross validation for both the </span>
+<span class="sd">            binding type model and the GCN model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ADSORBATE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADSORBATE</span>
         <span class="n">INCLUDED_BINDING_TYPES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INCLUDED_BINDING_TYPES</span>
@@ -337,6 +458,117 @@
 <div class="viewcode-block" id="CROSS_VALIDATION.set_model_parameters"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_model_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TARGET</span><span class="p">,</span> <span class="n">COVERAGE</span><span class="p">,</span> <span class="n">MAX_COVERAGES</span><span class="p">,</span> <span class="n">NN_PROPERTIES</span><span class="p">,</span> <span class="n">NUM_TRAIN</span><span class="p">,</span> <span class="n">NUM_VAL</span><span class="p">,</span> <span class="n">NUM_TEST</span>\
                              <span class="p">,</span> <span class="n">MIN_GCN_PER_LABEL</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">NUM_GCN_LABELS</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span> <span class="n">GCN_ALL</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">TRAINING_ERROR</span> <span class="o">=</span> <span class="kc">None</span>\
                              <span class="p">,</span><span class="n">LOW_FREQUENCY</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">HIGH_FREQUENCY</span><span class="o">=</span><span class="mi">2200</span><span class="p">,</span> <span class="n">ENERGY_POINTS</span><span class="o">=</span><span class="mi">501</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets model parameters both for generating the secondary data</span>
+<span class="sd">        (complex spectra) and for running the neural network.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        TARGET : str</span>
+<span class="sd">            Geometric descriptor for which the target histogram is to be gnerated.</span>
+<span class="sd">            Can be binding_type, GCN, or combine_hollow_sites. If it is</span>
+<span class="sd">            combine_hollow_sites then 3-fold and 4-fold sites are grouped together.</span>
+<span class="sd">            </span>
+<span class="sd">        COVERAGE : str or float</span>
+<span class="sd">            The coverage at which the synthetic spectra is generated. If high,</span>
+<span class="sd">            spectra at various coverages is generated.</span>
+<span class="sd">            </span>
+<span class="sd">        MAX_COVERAGES : list</span>
+<span class="sd">            Maximum coverages allowed for each binding-type if COVERAGE</span>
+<span class="sd">            is set to &#39;high&#39;</span>
+<span class="sd">            </span>
+<span class="sd">        NN_PROPERTIES : dict</span>
+<span class="sd">        	Dictionary of properties for the neural network.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_TRAIN : int</span>
+<span class="sd">        	Number of secondary data (complex spectra) in a single training set.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_VAL : int</span>
+<span class="sd">        	Number of secondary data (complex spectra) in each validation set.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_TEST : int</span>
+<span class="sd">        	Number of secondary data (complex spectra) in the test set.</span>
+<span class="sd">            </span>
+<span class="sd">        MIN_GCN_PER_LABEL : int</span>
+<span class="sd">        	Minimum number of primary data points in each GCN group</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_GCN_LABELS : int</span>
+<span class="sd">        	The target number of GCN labels which to group the primary</span>
+<span class="sd">            data points (simple spectra).</span>
+<span class="sd">            </span>
+<span class="sd">        GCN_ALL : bool</span>
+<span class="sd">        	Whether or not to include all binding types in tabulating GCN values.</span>
+<span class="sd">            If False, then only the selected binding types determined during the</span>
+<span class="sd">            creation of the cross validation indices will be used.</span>
+<span class="sd">            </span>
+<span class="sd">        TRAINING_ERROR : str float or None</span>
+<span class="sd">            Indicates the type of error induced in the training set. Can be</span>
+<span class="sd">            &#39;gaussian&#39;, a float, or None. If &#39;gaussian&#39; then gaussian error</span>
+<span class="sd">            is added to the scaling factor. If a float then uniform error is</span>
+<span class="sd">            added after scaling of the primary DFT data.</span>
+<span class="sd">            </span>
+<span class="sd">        LOW_FREQUENCY : float</span>
+<span class="sd">            The lowest frequency for which synthetic spectra is generated</span>
+<span class="sd">            </span>
+<span class="sd">        HIGH_FREQUENCY : float</span>
+<span class="sd">            The high frequency for which synthetic spectra is generated</span>
+<span class="sd">            </span>
+<span class="sd">        ENERGY_POINTS : int</span>
+<span class="sd">            The number of points the synthetic spectra is discretized into</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        TARGET : str</span>
+<span class="sd">            Geometric descriptor for which the target histogram is to be gnerated.</span>
+<span class="sd">            Can be binding_type, GCN, or combine_hollow_sites. If it is</span>
+<span class="sd">            combine_hollow_sites then 3-fold and 4-fold sites are grouped together.</span>
+<span class="sd">            </span>
+<span class="sd">        COVERAGE : str or float</span>
+<span class="sd">            The coverage at which the synthetic spectra is generated. If high,</span>
+<span class="sd">            spectra at various coverages is generated.</span>
+<span class="sd">            </span>
+<span class="sd">        MAX_COVERAGES : list</span>
+<span class="sd">            Maximum coverages allowed for each binding-type if COVERAGE</span>
+<span class="sd">            is set to &#39;high&#39;</span>
+<span class="sd">            </span>
+<span class="sd">        NN_PROPERTIES : dict</span>
+<span class="sd">        	Dictionary of properties for the neural network.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_TRAIN : int</span>
+<span class="sd">        	Number of secondary data (complex spectra) in a single training set.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_VAL : int</span>
+<span class="sd">        	Number of secondary data (complex spectra) in each validation set.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_TEST : int</span>
+<span class="sd">        	Number of secondary data (complex spectra) in the test set.</span>
+<span class="sd">            </span>
+<span class="sd">        MIN_GCN_PER_LABEL : int</span>
+<span class="sd">        	Minimum number of primary data points in each GCN group</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_GCN_LABELS : int</span>
+<span class="sd">        	The target number of GCN labels which to group the primary</span>
+<span class="sd">            data points (simple spectra).</span>
+<span class="sd">            </span>
+<span class="sd">        GCN_ALL : bool</span>
+<span class="sd">        	Whether or not to include all binding types in tabulating GCN values.</span>
+<span class="sd">            If False, then only the selected binding types determined during the</span>
+<span class="sd">            creation of the cross validation indices will be used.</span>
+<span class="sd">            </span>
+<span class="sd">        TRAINING_ERROR : str float or None</span>
+<span class="sd">            Indicates the type of error induced in the training set. Can be</span>
+<span class="sd">            &#39;gaussian&#39;, a float, or None. If &#39;gaussian&#39; then gaussian error</span>
+<span class="sd">            is added to the scaling factor. If a float then uniform error is</span>
+<span class="sd">            added after scaling of the primary DFT data.</span>
+<span class="sd">            </span>
+<span class="sd">        LOW_FREQUENCY : float</span>
+<span class="sd">            The lowest frequency for which synthetic spectra is generated</span>
+<span class="sd">            </span>
+<span class="sd">        HIGH_FREQUENCY : float</span>
+<span class="sd">            The high frequency for which synthetic spectra is generated</span>
+<span class="sd">            </span>
+<span class="sd">        ENERGY_POINTS : int</span>
+<span class="sd">            The number of points the synthetic spectra is discretized into</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">INDICES_DICTIONARY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDICES_DICTIONARY</span>
         <span class="k">except</span><span class="p">:</span>
@@ -387,6 +619,21 @@
         <span class="n">_set_ir_gen_class</span><span class="p">()</span></div>
         
 <div class="viewcode-block" id="CROSS_VALIDATION._set_ir_gen_class"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_ir_gen_class">[docs]</a>    <span class="k">def</span> <span class="nf">_set_ir_gen_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Instantiates the class for generaitng complex spectra with</span>
+<span class="sd">        parameters set by set_model_parameters()</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        MAINconv : IR_GEN</span>
+<span class="sd">        	An IR_GEN class that will generate spectra and histograms of</span>
+<span class="sd">            of binding types or GCN groups</span>
+<span class="sd">            </span>
+<span class="sd">        OTHER_SITESconv : IR_GEN</span>
+<span class="sd">        	An IR_GEN class that will generate spectra for binding types not</span>
+<span class="sd">            considered by MAINconv. Only instantiated if TARGET == &#39;GCN&#39; and</span>
+<span class="sd">            GCN_ALL == False</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ADSORBATE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADSORBATE</span>
         <span class="n">NANO_PATH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NANO_PATH</span>
         <span class="n">HIGH_COV_PATH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HIGH_COV_PATH</span>
@@ -875,7 +1122,7 @@
                 <span class="k">for</span> <span class="n">COVERAGE</span> <span class="ow">in</span> <span class="n">CV_RESULTS</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="n">WL_VAL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">CV_RESULTS</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_VAL_mean&#39;</span><span class="p">])</span>
                     <span class="n">WL_STD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">CV_RESULTS</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_VAL_std&#39;</span><span class="p">])</span>
-                    <span class="n">min_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">WL_VAL</span> <span class="o">+</span> <span class="n">standard_deviations</span> <span class="o">*</span> <span class="n">WL_STD</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">min_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">WL_VAL</span><span class="p">[</span><span class="n">cv_run</span><span class="p">]</span> <span class="o">+</span> <span class="n">standard_deviations</span> <span class="o">*</span> <span class="n">WL_STD</span><span class="p">[</span><span class="n">cv_run</span><span class="p">])</span> <span class="k">for</span> <span class="n">cv_run</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">WL_VAL</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
                     <span class="n">best_models</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">min_score</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="n">models_per_category</span><span class="p">]</span>
                     <span class="n">SCORES</span> <span class="o">=</span> <span class="n">min_score</span><span class="p">[</span><span class="n">best_models</span><span class="p">]</span>
                     <span class="n">BEST_MODELS</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;SCORES&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SCORES</span>
@@ -928,17 +1175,17 @@
         <span class="k">for</span> <span class="n">ADSORBATE</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">TARGET</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">for</span> <span class="n">COVERAGE</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">WL_VAL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_VAL_mean&#39;</span><span class="p">])</span>
-                    <span class="n">WL_VAL</span> <span class="o">=</span> <span class="n">WL_VAL</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">WL_VAL</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="n">WL_STD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_VAL_std&#39;</span><span class="p">])</span>
-                    <span class="n">WL_STD</span> <span class="o">=</span> <span class="n">WL_STD</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">WL_STD</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="n">WL_TRAIN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_TRAIN_mean&#39;</span><span class="p">])</span>
-                    <span class="n">WL_TRAIN</span> <span class="o">=</span> <span class="n">WL_TRAIN</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">WL_TRAIN</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="n">WL_TRAIN_STD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_TRAIN_std&#39;</span><span class="p">])</span>
-                    <span class="n">WL_TRAIN_STD</span> <span class="o">=</span> <span class="n">WL_TRAIN_STD</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">WL_TRAIN_STD</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="n">WL_TEST</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_TEST_TEST&#39;</span><span class="p">])</span>
-                    <span class="n">WL_TEST</span> <span class="o">=</span> <span class="n">WL_TEST</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">WL_TEST</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-                    <span class="n">CV_FILES_INDEX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;CV_FILES_INDEX&#39;</span><span class="p">])</span>
+                    <span class="n">WL_VAL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_VAL_mean&#39;</span><span class="p">])</span>
+                    <span class="c1">#WL_VAL = WL_VAL.reshape(-1,WL_VAL.shape[-1])</span>
+                    <span class="n">WL_STD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_VAL_std&#39;</span><span class="p">])</span>
+                    <span class="c1">#WL_STD = WL_STD.reshape(-1,WL_STD.shape[-1])</span>
+                    <span class="n">WL_TRAIN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_TRAIN_mean&#39;</span><span class="p">])</span>
+                    <span class="c1">#WL_TRAIN = WL_TRAIN.reshape(-1,WL_TRAIN.shape[-1])</span>
+                    <span class="n">WL_TRAIN_STD</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_TRAIN_std&#39;</span><span class="p">])</span>
+                    <span class="c1">#WL_TRAIN_STD = WL_TRAIN_STD.reshape(-1,WL_TRAIN_STD.shape[-1])</span>
+                    <span class="n">WL_TEST</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;WL_TEST_TEST&#39;</span><span class="p">])</span>
+                    <span class="c1">#WL_TEST = WL_TEST.reshape(-1,WL_TEST.shape[-1])</span>
+                    <span class="n">CV_FILES_INDEX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dictionary</span><span class="p">[</span><span class="n">ADSORBATE</span><span class="p">][</span><span class="n">TARGET</span><span class="p">][</span><span class="n">COVERAGE</span><span class="p">][</span><span class="s1">&#39;CV_FILES_INDEX&#39;</span><span class="p">])</span>
                     <span class="k">for</span> <span class="n">model_result</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CV_FILES_INDEX</span><span class="p">)):</span>
                         <span class="k">if</span> <span class="n">model_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">figure_directory</span> <span class="o">==</span> <span class="s1">&#39;show&#39;</span><span class="p">:</span>

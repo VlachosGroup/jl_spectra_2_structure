@@ -168,7 +168,11 @@
 <dl class="function">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.get_default_data_paths">
 <code class="sig-name descname">get_default_data_paths</code><span class="sig-paren">(</span><em class="sig-param">adsorbate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#get_default_data_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.get_default_data_paths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get default paths to primary data of frequencies and intensities.</p>
+<dd><p>Get default paths to primary data of frequencies and intensities.
+:param adsorbate: Name of the adsorbate for which to get the default primary DFT data.</p>
+<blockquote>
+<div><p>Data is already provided for ‘CO’,’NO’, or ‘C2H4’.</p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><ul class="simple">
@@ -191,7 +195,44 @@ paths for locations of the pure and mixture spectroscopic data.</p>
 <dl class="class">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN">
 <em class="property">class </em><code class="sig-name descname">IR_GEN</code><span class="sig-paren">(</span><em class="sig-param">ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1, 2, 3, 4], TARGET='binding_type', NUM_TARGETS=None, nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None, VERBOSE=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Class for generating complex synthetic IR spectra</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ADSORBATE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Adsorbate for which the spectra is to be generated.</p></li>
+<li><p><strong>INCLUDED_BINDING_TYPES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Binding types whose frequencies/intensiteis from the primary data
+set will be included in generating the complex spectra.</p></li>
+<li><p><strong>TARGET</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Geometric descriptor for which the target histogram is to be gnerated.
+Can be binding_type, GCN, or combine_hollow_sites. If it is
+combine_hollow_sites then 3-fold and 4-fold sites are grouped together.</p></li>
+<li><p><strong>NUM_TARGETS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of GCN groups to predict. Only used if TARGET=’GCN’ and GCN
+must be discretized.</p></li>
+<li><p><strong>nanoparticle_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – </p></li>
+<li><p><strong>path where nanoparticle</strong><strong> or </strong><strong>single adsorbate json data is saved.</strong> (<em>File</em>) – </p></li>
+<li><p><strong>high_coverage_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where high coverage data for CO is saved saved.</p></li>
+<li><p><strong>coverage_scaling_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where coverage scaling coefficients are saved.</p></li>
+<li><p><strong>VERBOSE</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Controls the printing of status statements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>BINDING_TYPES_with_4fold</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – List of all binding types.</p></li>
+<li><p><strong>TARGET</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Set during initialization.</p></li>
+<li><p><strong>NUM_TARGETS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Set during initialization.</p></li>
+<li><p><strong>X0cov</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Set of frequencies and intensities at low coverage.</p></li>
+<li><p><strong>BINDING_TYPES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Binding types to be predicted, accounts for both filtering and
+merging of certain sites.</p></li>
+<li><p><strong>GCNList</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – GCN values for the data points</p></li>
+<li><p><strong>NANO_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Set during initialization.</p></li>
+<li><p><strong>HIGH_COV_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Set during initialization.</p></li>
+<li><p><strong>COV_SCALE_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Set during initialization.</p></li>
+<li><p><strong>ADSORBATE</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Set during initialization.</p></li>
+<li><p><strong>INCLUDED_BINDING_TYPES</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Set during initialization.</p></li>
+<li><p><strong>VERBOSE</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Set during initialization.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._add_high_coverage_data">
 <code class="sig-name descname">_add_high_coverage_data</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">Y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._add_high_coverage_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._add_high_coverage_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>method for adding high coverage GCN data to set of spectra</p>
@@ -241,25 +282,20 @@ to account for coverage effects. The ndarray has dimensions
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._generate_spectra">
-<code class="sig-name descname">_generate_spectra</code><span class="sig-paren">(</span><em class="sig-param">Xfrequencies</em>, <em class="sig-param">Xintensities</em>, <em class="sig-param">energies2D</em>, <em class="sig-param">prefactor</em>, <em class="sig-param">sigma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._generate_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._generate_spectra" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">_generate_spectra</code><span class="sig-paren">(</span><em class="sig-param">Xfrequencies</em>, <em class="sig-param">Xintensities</em>, <em class="sig-param">ENERGIES</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._generate_spectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._generate_spectra" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert set of frequencies and intensities to spectra with minimal
 line width by Gaussian convolution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>perturbations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of perturbed primary datapoints per original datapoint.</p></li>
 <li><p><strong>Xfrequencies</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 2-D numpy array of frequencies. The ndarray has dimensions
 <span class="math notranslate nohighlight">\(m x n\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n\)</span>
 is the number of frequencies/intensities for each datapoint.</p></li>
 <li><p><strong>Xintensities</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 2-D numpy array of intensities. The ndarray has dimensions
 <span class="math notranslate nohighlight">\(m x n\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of primary datapoints, <span class="math notranslate nohighlight">\(n\)</span>
 is the number of frequencies/intensities for each datapoint.</p></li>
-<li><p><strong>energies2D</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – numpy ndarray with dimensions <span class="math notranslate nohighlight">\(m x p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number of
-primary datapoints and <span class="math notranslate nohighlight">\(p\)</span> is the number of energy points onto which
-the frequencies and intensities will be projected with Fourier convolution.</p></li>
-<li><p><strong>prefactor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Gaussian normalization prefactor.</p></li>
-<li><p><strong>sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Standard deviation of Gaussian convoluting function that determines
-broadening.</p></li>
+<li><p><strong>ENERGIES</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Numpy array of energies onto which frequencies and itensities will
+be convolved.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -309,12 +345,14 @@ convoluted to induce greater spectral broadening.</p>
 <li><p><strong>X0cov</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Numpy array of size (n,2) where <span class="math notranslate nohighlight">\(n\)</span> is the number of frequency
 and intensity pairs.</p></li>
 <li><p><strong>Y</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Target classes/groups (binding-types or GCN labels)</p></li>
+<li><p><strong>COVERAGE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The coverage at which the synthetic spectra is generated. If high,
+spectra at various coverages is generated.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>X</strong> (<em>numpy.ndarray</em>) – Frequencies and intensities shifted to account for coverage</p></li>
-<li><p><strong>NUM_TARGETS</strong> (<em>int</em>) – Number of target classes/groups. Updated if TARGET is GCN an dcoverage is ‘high’</p></li>
+<li><p><strong>NUM_TARGETS</strong> (<em>int</em>) – Number of target classes/groups. Updated if TARGET is GCN and coverage is ‘high’</p></li>
 </ul>
 </p>
 </dd>
@@ -415,7 +453,7 @@ experimental spectra.</p>
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_and_shift">
 <code class="sig-name descname">_perturb_and_shift</code><span class="sig-paren">(</span><em class="sig-param">perturbations</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">BINDING_TYPES=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN._perturb_and_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_and_shift" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shift spectra with scaling factor with gaussian error.</p>
+<dd><p>Shift spectra with scaling factor that has gaussian error.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -585,7 +623,7 @@ are a gaussian with the same variance as that used ot pertub the validation data
 <dl class="method">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.scaling_factor_shift">
 <code class="sig-name descname">scaling_factor_shift</code><span class="sig-paren">(</span><em class="sig-param">X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#IR_GEN.scaling_factor_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.scaling_factor_shift" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shift frqequencies by a scaling factor to match experiment.</p>
+<dd><p>Shift frequencies by a scaling factor to match experiment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>X</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – 3-D numpy array of frequencies and intensities. The ndarray has dimensions

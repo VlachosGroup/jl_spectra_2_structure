@@ -168,20 +168,78 @@
 <dl class="class">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION">
 <em class="property">class </em><code class="sig-name descname">CROSS_VALIDATION</code><span class="sig-paren">(</span><em class="sig-param">ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1, 2, 3, 4], cv_indices_path=None, cross_validation_path=None, nanoparticle_path=None, high_coverage_path=None, coverage_scaling_path=None, VERBOSE=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Class for running cross validation. Splits primary data into balanced
+folds and generates sets of secondary data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ADSORBATE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Adsorbate for which the spectra is to be generated.</p></li>
+<li><p><strong>INCLUDED_BINDING_TYPES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Binding types whose frequencies/intensiteis from the primary data
+set will be included in generating the complex spectra.</p></li>
+<li><p><strong>cv_indices_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where indices for cross validation are saved or where
+they are to be created if they have not yet been created.</p></li>
+<li><p><strong>cross_validation_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where cross validation results are to be created.</p></li>
+<li><p><strong>nanoparticle_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where nanoparticle or single adsorbate json data is saved.</p></li>
+<li><p><strong>high_coverage_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where high coverage data for CO is saved saved.</p></li>
+<li><p><strong>coverage_scaling_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where coverage scaling coefficients are saved.</p></li>
+<li><p><strong>VERBOSE</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Controls the printing of status statements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>CV_INDICES_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path for cross validation indices.</p></li>
+<li><p><strong>CV_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where cross validation results are to be created.</p></li>
+<li><p><strong>NANO_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where nanoparticle or single adsorbate json data is saved.</p></li>
+<li><p><strong>HIGH_COV_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where high coverage data for CO is saved saved.</p></li>
+<li><p><strong>COV_SCALE_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – File path where coverage scaling coefficients are saved.</p></li>
+<li><p><strong>VERBOSE</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Controls the printing of status statements.</p></li>
+<li><p><strong>ADSORBATE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Adsorbate for which the spectra is to be generated.</p></li>
+<li><p><strong>INCLUDED_BINDING_TYPES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Binding types whose frequencies/intensiteis from the primary data
+set will be included in generating the complex spectra.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cross_validation_path">
 <code class="sig-name descname">_get_default_cross_validation_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_default_cross_validation_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cross_validation_path" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get cross validation path if not set by user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>cross_validation_path</strong> – Folder path where cross validation results are to be created.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cv_indices_path">
 <code class="sig-name descname">_get_default_cv_indices_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_default_cv_indices_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_default_cv_indices_path" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get cross validation indices path if not set by user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>cv_indices_path</strong> – Folder path where cross validation indices are to be created.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_state">
 <code class="sig-name descname">_get_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._get_state" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get important state variables of the class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>Dict</strong> – State variables necessary to recreate the cross validation run.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN">
@@ -191,12 +249,56 @@
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_ir_gen_class">
 <code class="sig-name descname">_set_ir_gen_class</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._set_ir_gen_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_ir_gen_class" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Instantiates the class for generaitng complex spectra with
+parameters set by set_model_parameters()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>MAINconv</strong> (<a class="reference internal" href="jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN" title="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN"><em>IR_GEN</em></a>) – An IR_GEN class that will generate spectra and histograms of
+of binding types or GCN groups</p></li>
+<li><p><strong>OTHER_SITESconv</strong> (<a class="reference internal" href="jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN" title="jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN"><em>IR_GEN</em></a>) – An IR_GEN class that will generate spectra for binding types not
+considered by MAINconv. Only instantiated if TARGET == ‘GCN’ and
+GCN_ALL == False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.generate_test_cv_indices">
 <code class="sig-name descname">generate_test_cv_indices</code><span class="sig-paren">(</span><em class="sig-param">CV_SPLITS=3, BINDING_TYPE_FOR_GCN=[1], test_fraction=0.25, random_state=0, read_file=False, write_file=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.generate_test_cv_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.generate_test_cv_indices" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to generate the test and cross validation indices that
+will be used to split the primary data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>CV_SPLITS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of cross validation splits</p></li>
+<li><p><strong>BINDING_TYPE_FOR_GCN</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em> or </em><em>'ALL'</em>) – The binding types to consider when tabulating the GCN values.
+Primary data with other binding types is considered noise. If
+‘ALL’ is selected all binding types are used and no noise is added
+from other binding types as there are no other binding types.</p></li>
+<li><p><strong>test_fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The percent of primary data to keep for testing.</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Can be set to None. Allows reproducibility.</p></li>
+<li><p><strong>write_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether the indices of the selected primary data for cross
+validation is written to a json file.</p></li>
+<li><p><strong>read_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether indices for selecting primary data during cross
+validation and testing is read from a file or directly from this
+function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>CV_SPLITS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of cross validation splits</p></li>
+<li><p><strong>BINDING_TYPE_FOR_GCN</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em> or </em><em>'ALL'</em>) – The binding types to consider when tabulating the GCN values.
+Primary data with other binding types is considered noise. If
+‘ALL’ is selected all binding types are used and no noise is added
+from other binding types as there are no other binding types.</p></li>
+<li><p><strong>INDICES_DICTIONARY</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of indices used in cross validation for both the
+binding type model and the GCN model.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_secondary_data">
@@ -231,7 +333,67 @@
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters">
 <code class="sig-name descname">set_model_parameters</code><span class="sig-paren">(</span><em class="sig-param">TARGET</em>, <em class="sig-param">COVERAGE</em>, <em class="sig-param">MAX_COVERAGES</em>, <em class="sig-param">NN_PROPERTIES</em>, <em class="sig-param">NUM_TRAIN</em>, <em class="sig-param">NUM_VAL</em>, <em class="sig-param">NUM_TEST</em>, <em class="sig-param">MIN_GCN_PER_LABEL=0</em>, <em class="sig-param">NUM_GCN_LABELS=11</em>, <em class="sig-param">GCN_ALL=False</em>, <em class="sig-param">TRAINING_ERROR=None</em>, <em class="sig-param">LOW_FREQUENCY=200</em>, <em class="sig-param">HIGH_FREQUENCY=2200</em>, <em class="sig-param">ENERGY_POINTS=501</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_model_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Sets model parameters both for generating the secondary data
+(complex spectra) and for running the neural network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TARGET</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Geometric descriptor for which the target histogram is to be gnerated.
+Can be binding_type, GCN, or combine_hollow_sites. If it is
+combine_hollow_sites then 3-fold and 4-fold sites are grouped together.</p></li>
+<li><p><strong>COVERAGE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The coverage at which the synthetic spectra is generated. If high,
+spectra at various coverages is generated.</p></li>
+<li><p><strong>MAX_COVERAGES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Maximum coverages allowed for each binding-type if COVERAGE
+is set to ‘high’</p></li>
+<li><p><strong>NN_PROPERTIES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of properties for the neural network.</p></li>
+<li><p><strong>NUM_TRAIN</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of secondary data (complex spectra) in a single training set.</p></li>
+<li><p><strong>NUM_VAL</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of secondary data (complex spectra) in each validation set.</p></li>
+<li><p><strong>NUM_TEST</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of secondary data (complex spectra) in the test set.</p></li>
+<li><p><strong>MIN_GCN_PER_LABEL</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Minimum number of primary data points in each GCN group</p></li>
+<li><p><strong>NUM_GCN_LABELS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The target number of GCN labels which to group the primary
+data points (simple spectra).</p></li>
+<li><p><strong>GCN_ALL</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether or not to include all binding types in tabulating GCN values.
+If False, then only the selected binding types determined during the
+creation of the cross validation indices will be used.</p></li>
+<li><p><strong>TRAINING_ERROR</strong> (<em>str float</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – Indicates the type of error induced in the training set. Can be
+‘gaussian’, a float, or None. If ‘gaussian’ then gaussian error
+is added to the scaling factor. If a float then uniform error is
+added after scaling of the primary DFT data.</p></li>
+<li><p><strong>LOW_FREQUENCY</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The lowest frequency for which synthetic spectra is generated</p></li>
+<li><p><strong>HIGH_FREQUENCY</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The high frequency for which synthetic spectra is generated</p></li>
+<li><p><strong>ENERGY_POINTS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of points the synthetic spectra is discretized into</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TARGET</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Geometric descriptor for which the target histogram is to be gnerated.
+Can be binding_type, GCN, or combine_hollow_sites. If it is
+combine_hollow_sites then 3-fold and 4-fold sites are grouped together.</p></li>
+<li><p><strong>COVERAGE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The coverage at which the synthetic spectra is generated. If high,
+spectra at various coverages is generated.</p></li>
+<li><p><strong>MAX_COVERAGES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – Maximum coverages allowed for each binding-type if COVERAGE
+is set to ‘high’</p></li>
+<li><p><strong>NN_PROPERTIES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of properties for the neural network.</p></li>
+<li><p><strong>NUM_TRAIN</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of secondary data (complex spectra) in a single training set.</p></li>
+<li><p><strong>NUM_VAL</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of secondary data (complex spectra) in each validation set.</p></li>
+<li><p><strong>NUM_TEST</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of secondary data (complex spectra) in the test set.</p></li>
+<li><p><strong>MIN_GCN_PER_LABEL</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Minimum number of primary data points in each GCN group</p></li>
+<li><p><strong>NUM_GCN_LABELS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The target number of GCN labels which to group the primary
+data points (simple spectra).</p></li>
+<li><p><strong>GCN_ALL</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Whether or not to include all binding types in tabulating GCN values.
+If False, then only the selected binding types determined during the
+creation of the cross validation indices will be used.</p></li>
+<li><p><strong>TRAINING_ERROR</strong> (<em>str float</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – Indicates the type of error induced in the training set. Can be
+‘gaussian’, a float, or None. If ‘gaussian’ then gaussian error
+is added to the scaling factor. If a float then uniform error is
+added after scaling of the primary DFT data.</p></li>
+<li><p><strong>LOW_FREQUENCY</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The lowest frequency for which synthetic spectra is generated</p></li>
+<li><p><strong>HIGH_FREQUENCY</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The high frequency for which synthetic spectra is generated</p></li>
+<li><p><strong>ENERGY_POINTS</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of points the synthetic spectra is discretized into</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters">

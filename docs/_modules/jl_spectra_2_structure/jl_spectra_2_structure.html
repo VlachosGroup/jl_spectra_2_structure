@@ -168,6 +168,11 @@
 
 <div class="viewcode-block" id="get_default_data_paths"><a class="viewcode-back" href="../../jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.get_default_data_paths">[docs]</a><span class="k">def</span> <span class="nf">get_default_data_paths</span><span class="p">(</span><span class="n">adsorbate</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Get default paths to primary data of frequencies and intensities.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    adsorbate : str</span>
+<span class="sd">    	Name of the adsorbate for which to get the default primary DFT data.</span>
+<span class="sd">        Data is already provided for &#39;CO&#39;,&#39;NO&#39;, or &#39;C2H4&#39;.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -196,10 +201,96 @@
     <span class="n">coverage_scaling_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="s1">&#39;coverage_scaling_params_&#39;</span><span class="o">+</span><span class="n">adsorbate</span><span class="o">+</span><span class="s1">&#39;.json&#39;</span><span class="p">)</span> 
     <span class="k">return</span> <span class="p">(</span><span class="n">nanoparticle_path</span><span class="p">,</span> <span class="n">isotope_path</span><span class="p">,</span> <span class="n">high_coverage_path</span>\
            <span class="p">,</span> <span class="n">coverage_scaling_path</span><span class="p">)</span></div>
+        
+<span class="k">def</span> <span class="nf">get_exp_data_path</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Get default paths to experimental data.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    experimental_data : list</span>
+<span class="sd">        list of paths to experimental data</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;data/&#39;</span><span class="p">)</span>
+    <span class="n">experimental_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="s1">&#39;experimental&#39;</span><span class="p">)</span>
+    <span class="n">experimental_data</span> <span class="o">=</span>  <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">experimental_path</span><span class="p">,</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> \
+        <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">experimental_path</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">experimental_data</span>
 
 <div class="viewcode-block" id="IR_GEN"><a class="viewcode-back" href="../../jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN">[docs]</a><span class="k">class</span> <span class="nc">IR_GEN</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for generating complex synthetic IR spectra&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ADSORBATE</span><span class="o">=</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="n">INCLUDED_BINDING_TYPES</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">TARGET</span><span class="o">=</span><span class="s1">&#39;binding_type&#39;</span><span class="p">,</span> <span class="n">NUM_TARGETS</span><span class="o">=</span><span class="kc">None</span>\
                  <span class="p">,</span> <span class="n">nanoparticle_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high_coverage_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coverage_scaling_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">VERBOSE</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ADSORBATE : str</span>
+<span class="sd">            Adsorbate for which the spectra is to be generated.</span>
+
+<span class="sd">        INCLUDED_BINDING_TYPES : list</span>
+<span class="sd">            Binding types whose frequencies/intensiteis from the primary data</span>
+<span class="sd">            set will be included in generating the complex spectra.</span>
+<span class="sd">            </span>
+<span class="sd">        TARGET : str</span>
+<span class="sd">            Geometric descriptor for which the target histogram is to be gnerated.</span>
+<span class="sd">            Can be binding_type, GCN, or combine_hollow_sites. If it is</span>
+<span class="sd">            combine_hollow_sites then 3-fold and 4-fold sites are grouped together.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_TARGETS : int</span>
+<span class="sd">            Number of GCN groups to predict. Only used if TARGET=&#39;GCN&#39; and GCN</span>
+<span class="sd">            must be discretized.</span>
+<span class="sd">            </span>
+<span class="sd">        nanoparticle_path : str</span>
+<span class="sd">        File path where nanoparticle or single adsorbate json data is saved.</span>
+
+<span class="sd">        high_coverage_path : str</span>
+<span class="sd">            File path where high coverage data for CO is saved saved.</span>
+
+<span class="sd">        coverage_scaling_path : str</span>
+<span class="sd">            File path where coverage scaling coefficients are saved.</span>
+<span class="sd">            </span>
+<span class="sd">        VERBOSE : bool</span>
+<span class="sd">            Controls the printing of status statements.</span>
+<span class="sd">        </span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        BINDING_TYPES_with_4fold : list</span>
+<span class="sd">            List of all binding types.</span>
+<span class="sd">            </span>
+<span class="sd">        TARGET : str</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        NUM_TARGETS: int</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        X0cov : numpy.ndarray</span>
+<span class="sd">            Set of frequencies and intensities at low coverage.</span>
+<span class="sd">            </span>
+<span class="sd">        BINDING_TYPES : list</span>
+<span class="sd">            Binding types to be predicted, accounts for both filtering and</span>
+<span class="sd">            merging of certain sites.</span>
+<span class="sd">            </span>
+<span class="sd">        GCNList : list</span>
+<span class="sd">            GCN values for the data points</span>
+<span class="sd">            </span>
+<span class="sd">        NANO_PATH : int</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        HIGH_COV_PATH : int</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        COV_SCALE_PATH : int</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        ADSORBATE : float</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        INCLUDED_BINDING_TYPES : int</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">            </span>
+<span class="sd">        VERBOSE : int</span>
+<span class="sd">            Set during initialization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">TARGET</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;binding_type&#39;</span><span class="p">,</span><span class="s1">&#39;GCN&#39;</span><span class="p">,</span><span class="s1">&#39;combine_hollow_sites&#39;</span><span class="p">],</span> <span class="s2">&quot;incorrect TARGET given&quot;</span>
         <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">INCLUDED_BINDING_TYPES</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="s2">&quot;Included Binding Types should be a list&quot;</span>
         <span class="c1">#number of target variables.</span>
@@ -242,7 +333,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">BINDING_TYPES_with_4fold</span> <span class="o">=</span> <span class="n">BINDING_TYPES_with_4fold</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">TARGET</span> <span class="o">=</span> <span class="n">TARGET</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">NUM_TARGETS</span> <span class="o">=</span> <span class="n">NUM_TARGETS</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">GCNlabels</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X0cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">nanoparticle_data</span><span class="p">[</span><span class="s1">&#39;FREQUENCIES&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">nanoparticle_data</span><span class="p">[</span><span class="s1">&#39;INTENSITIES&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nanoparticle_data</span><span class="p">[</span><span class="s1">&#39;FREQUENCIES&#39;</span><span class="p">]))])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">BINDING_TYPES</span> <span class="o">=</span> <span class="n">nanoparticle_data</span><span class="p">[</span><span class="s1">&#39;CN_ADSORBATE&#39;</span><span class="p">]</span>
@@ -533,10 +623,12 @@
         <span class="c1">#x is the x-axis of the transform whose values are spaced with energy_spacing,</span>
         <span class="c1">#and centered at zero wuch that the $total points =  2 * ENERGY_POINTS + 1$</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">energy_spacing</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">numpoints</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span><span class="o">-</span><span class="nb">int</span><span class="p">((</span><span class="n">numpoints</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
-        <span class="n">b</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">L_prefactor</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">FWHM</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="n">G_prefactor</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="n">FWHM</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
         <span class="n">specL</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="mf">4.0</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="n">FWHM</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">specG</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="n">FWHM</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">transform</span> <span class="o">=</span> <span class="n">fL</span><span class="o">*</span><span class="n">specL</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">fL</span><span class="p">)</span><span class="o">*</span><span class="n">specG</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">fL</span><span class="o">*</span><span class="n">L_prefactor</span><span class="o">*</span><span class="n">specL</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">fL</span><span class="p">)</span><span class="o">*</span><span class="n">G_prefactor</span><span class="o">*</span><span class="n">specG</span>
         <span class="k">return</span> <span class="n">transform</span></div>
 
 <div class="viewcode-block" id="IR_GEN._coverage_shift"><a class="viewcode-back" href="../../jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._coverage_shift">[docs]</a>    <span class="k">def</span> <span class="nf">_coverage_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">BINDING_TYPES</span><span class="p">,</span> <span class="n">SELF_COVERAGE</span><span class="p">,</span> <span class="n">TOTAL_COVERAGE</span><span class="p">):</span>
@@ -586,10 +678,12 @@
         <span class="n">CO_frequencies</span> <span class="o">=</span> <span class="n">Xfrequencies</span><span class="o">.</span><span class="n">copy</span><span class="p">()[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Xfrequencies</span><span class="p">)),</span> <span class="n">CO_STRETCH_IDX</span><span class="p">]</span>
         <span class="n">CO_intensities</span> <span class="o">=</span> <span class="n">Xintensities</span><span class="o">.</span><span class="n">copy</span><span class="p">()[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Xintensities</span><span class="p">)),</span> <span class="n">CO_STRETCH_IDX</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
-            <span class="n">CO_frequencies</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">CO_frequencies</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>\
-                                           <span class="o">*</span><span class="p">(</span><span class="n">Coverage_Scaling</span><span class="p">[</span><span class="s1">&#39;CO_FREQ&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;SELF_CO_PER_A2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">ABS_COVERAGE</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>\
-                                             <span class="o">+</span><span class="n">Coverage_Scaling</span><span class="p">[</span><span class="s1">&#39;CO_FREQ&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;CO_PER_A2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">TOTAL_COVERAGE_ABS</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>\
-                                             <span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">CO_frequencies</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>\
+                <span class="p">(</span><span class="n">CO_frequencies</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>\
+                <span class="o">*</span> <span class="p">(</span><span class="n">Coverage_Scaling</span><span class="p">[</span><span class="s1">&#39;CO_FREQ&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;SELF_CO_PER_A2&#39;</span><span class="p">]</span>\
+                <span class="o">*</span> <span class="n">ABS_COVERAGE</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>\
+                <span class="o">+</span> <span class="n">Coverage_Scaling</span><span class="p">[</span><span class="s1">&#39;CO_FREQ&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;CO_PER_A2&#39;</span><span class="p">]</span>\
+                <span class="o">*</span> <span class="n">TOTAL_COVERAGE_ABS</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
             <span class="n">CO_intensities</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">CO_intensities</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>\
                                          <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">Coverage_Scaling</span><span class="p">[</span><span class="s1">&#39;CO_INT_EXP&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">TOTAL_COVERAGE_ABS</span><span class="p">[</span><span class="n">BINDING_TYPES</span> <span class="o">==</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
             
@@ -607,7 +701,7 @@
         <span class="k">return</span> <span class="n">Xcov</span></div>
 
 <div class="viewcode-block" id="IR_GEN.scaling_factor_shift"><a class="viewcode-back" href="../../jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN.scaling_factor_shift">[docs]</a>    <span class="k">def</span> <span class="nf">scaling_factor_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Shift frqequencies by a scaling factor to match experiment.</span>
+        <span class="sd">&quot;&quot;&quot; Shift frequencies by a scaling factor to match experiment.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -646,7 +740,7 @@
         <span class="k">return</span> <span class="n">X</span></div>
     
 <div class="viewcode-block" id="IR_GEN._perturb_and_shift"><a class="viewcode-back" href="../../jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._perturb_and_shift">[docs]</a>    <span class="k">def</span> <span class="nf">_perturb_and_shift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">perturbations</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">BINDING_TYPES</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Shift spectra with scaling factor with gaussian error.</span>
+        <span class="sd">&quot;&quot;&quot; Shift spectra with scaling factor that has gaussian error.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -722,15 +816,12 @@
         <span class="n">Xperturbed_and_shifted</span><span class="p">[</span><span class="n">Xperturbed_and_shifted</span><span class="p">[</span><span class="o">...</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">**-</span><span class="mi">500</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">Xperturbed_and_shifted</span><span class="p">,</span> <span class="n">yperturbed</span><span class="p">,</span> <span class="n">BINDING_TYPES_perturbed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="IR_GEN._generate_spectra"><a class="viewcode-back" href="../../jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._generate_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">_generate_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Xfrequencies</span><span class="p">,</span> <span class="n">Xintensities</span><span class="p">,</span> <span class="n">energies2D</span><span class="p">,</span> <span class="n">prefactor</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+<div class="viewcode-block" id="IR_GEN._generate_spectra"><a class="viewcode-back" href="../../jl_spectra_2_structure.html#jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN._generate_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">_generate_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Xfrequencies</span><span class="p">,</span> <span class="n">Xintensities</span><span class="p">,</span> <span class="n">ENERGIES</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Convert set of frequencies and intensities to spectra with minimal</span>
 <span class="sd">        line width by Gaussian convolution.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        perturbations : int</span>
-<span class="sd">        	The number of perturbed primary datapoints per original datapoint.</span>
-<span class="sd">            </span>
 <span class="sd">        Xfrequencies : numpy.ndarray</span>
 <span class="sd">        	2-D numpy array of frequencies. The ndarray has dimensions</span>
 <span class="sd">            $m x n$ where $m$ is the number of primary datapoints, $n$</span>
@@ -741,17 +832,9 @@
 <span class="sd">            $m x n$ where $m$ is the number of primary datapoints, $n$</span>
 <span class="sd">            is the number of frequencies/intensities for each datapoint.</span>
 <span class="sd">            </span>
-<span class="sd">        energies2D : numpy.ndarray</span>
-<span class="sd">            numpy ndarray with dimensions $m x p$ where $m$ is the number of</span>
-<span class="sd">            primary datapoints and $p$ is the number of energy points onto which</span>
-<span class="sd">            the frequencies and intensities will be projected with Fourier convolution.</span>
-<span class="sd">            </span>
-<span class="sd">        prefactor : float</span>
-<span class="sd">            Gaussian normalization prefactor.</span>
-<span class="sd">            </span>
-<span class="sd">        sigma : float</span>
-<span class="sd">            Standard deviation of Gaussian convoluting function that determines</span>
-<span class="sd">            broadening.</span>
+<span class="sd">        ENERGIES : numpy.ndarray</span>
+<span class="sd">            Numpy array of energies onto which frequencies and itensities will</span>
+<span class="sd">            be convolved.</span>
 <span class="sd">        		  </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -765,7 +848,12 @@
 <span class="sd">        This preconvolution is necessary for numerical reasons before data is </span>
 <span class="sd">        convoluted to induce greater spectral broadening.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ENERGY_POINTS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ENERGY_POINTS</span>
+        <span class="n">ENERGY_POINTS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ENERGIES</span><span class="p">)</span>
+        <span class="n">energy_spacing</span> <span class="o">=</span> <span class="n">ENERGIES</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ENERGIES</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">FWHM</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">energy_spacing</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">FWHM</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.</span><span class="p">)))</span>
+        <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
+        <span class="n">energies2D</span> <span class="o">=</span> <span class="n">ENERGIES</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">int_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Xfrequencies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ENERGY_POINTS</span><span class="p">))</span>
         <span class="c1">#mesh everything on energy grids with a FWHM of twice the energy spacing</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Xfrequencies</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
@@ -816,22 +904,15 @@
         <span class="n">_coverage_shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverage_shift</span>
         <span class="n">_generate_spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_spectra</span>
         <span class="n">NUM_TARGETS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUM_TARGETS</span>
-        <span class="n">LOW_FREQUENCY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LOW_FREQUENCY</span>
-        <span class="n">HIGH_FREQUENCY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HIGH_FREQUENCY</span>
         <span class="n">ENERGY_POINTS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ENERGY_POINTS</span>
         <span class="n">COVERAGE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">COVERAGE</span>
         <span class="n">TARGET</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TARGET</span>
-        <span class="n">GCNlabels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GCNlabels</span>
         <span class="n">INCLUDED_BINDING_TYPES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INCLUDED_BINDING_TYPES</span>
         <span class="n">MAX_COVERAGES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_COVERAGES</span>
-        
-        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">LOW_FREQUENCY</span><span class="p">,</span> <span class="n">HIGH_FREQUENCY</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">ENERGY_POINTS</span>\
-                               <span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">energy_spacing</span> <span class="o">=</span> <span class="n">energies</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">energies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">FWHM</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">energy_spacing</span>
-        <span class="n">sigma</span> <span class="o">=</span> <span class="n">FWHM</span><span class="o">/</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.</span><span class="p">)))</span>
-        <span class="n">prefactor</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
-        <span class="n">energies2D</span> <span class="o">=</span> <span class="n">energies</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">ENERGIES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ENERGIES</span>
+        <span class="k">if</span> <span class="n">TARGET</span> <span class="o">==</span> <span class="s1">&#39;GCN&#39;</span><span class="p">:</span>
+            <span class="n">GCNlabels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GCNlabels</span>
+        <span class="n">energy_spacing</span> <span class="o">=</span> <span class="n">ENERGIES</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ENERGIES</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">Xfrequencies</span> <span class="o">=</span> <span class="n">X_sample</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">Xintensities</span> <span class="o">=</span> <span class="n">X_sample</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">probabilities</span><span class="p">)</span>
@@ -853,8 +934,7 @@
         <span class="n">parray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Y_sample</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
         <span class="n">shift_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Y_sample</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>                
         <span class="k">if</span> <span class="n">TARGET</span> <span class="o">==</span> <span class="s1">&#39;GCN&#39;</span> <span class="ow">or</span> <span class="n">COVERAGE</span> <span class="o">==</span> <span class="s1">&#39;low&#39;</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">COVERAGE</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">int</span><span class="p">]:</span>
-            <span class="n">int_mesh</span> <span class="o">=</span> <span class="n">_generate_spectra</span><span class="p">(</span><span class="n">Xfrequencies</span><span class="p">,</span> <span class="n">Xintensities</span>\
-                                        <span class="p">,</span><span class="n">energies2D</span><span class="p">,</span> <span class="n">prefactor</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+            <span class="n">int_mesh</span> <span class="o">=</span> <span class="n">_generate_spectra</span><span class="p">(</span><span class="n">Xfrequencies</span><span class="p">,</span> <span class="n">Xintensities</span><span class="p">,</span><span class="n">ENERGIES</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">coverage_parray</span> <span class="o">=</span> <span class="n">get_probabilities</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
             <span class="n">coverage_totals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="n">num_samples</span><span class="p">,</span><span class="mi">10</span><span class="p">])</span>
@@ -906,8 +986,7 @@
                 <span class="n">Xcov</span> <span class="o">=</span> <span class="n">_coverage_shift</span><span class="p">(</span><span class="n">X_sample</span><span class="p">[</span><span class="n">indices_primary</span><span class="p">],</span> <span class="n">BINDING_TYPES_sample</span><span class="p">[</span><span class="n">indices_primary</span><span class="p">],</span> <span class="n">SELF_COVERAGE</span><span class="p">,</span> <span class="n">TOTAL_COVERAGE</span><span class="p">)</span>
                 <span class="n">Xcovfrequencies</span> <span class="o">=</span> <span class="n">Xcov</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="n">Xcovintensities</span> <span class="o">=</span> <span class="n">Xcov</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                <span class="n">int_mesh</span> <span class="o">=</span> <span class="n">_generate_spectra</span><span class="p">(</span><span class="n">Xcovfrequencies</span><span class="p">,</span><span class="n">Xcovintensities</span>\
-                                                  <span class="p">,</span><span class="n">energies2D</span><span class="p">,</span> <span class="n">prefactor</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+                <span class="n">int_mesh</span> <span class="o">=</span> <span class="n">_generate_spectra</span><span class="p">(</span><span class="n">Xcovfrequencies</span><span class="p">,</span><span class="n">Xcovintensities</span><span class="p">,</span><span class="n">ENERGIES</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">max_coverage</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">MAX_COVERAGES</span><span class="p">):</span>
                     <span class="n">int_mesh</span><span class="p">[</span><span class="n">BINDING_TYPES_sample</span><span class="p">[</span><span class="n">indices_primary</span><span class="p">]</span> <span class="o">==</span> <span class="n">INCLUDED_BINDING_TYPES</span><span class="p">[</span><span class="n">count</span><span class="p">]]</span> <span class="o">*=</span> <span class="n">max_coverage</span>
                 <span class="n">combined_mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">int_mesh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -973,6 +1052,10 @@
 <span class="sd">            </span>
 <span class="sd">        Y : numpy.ndarray</span>
 <span class="sd">            Target classes/groups (binding-types or GCN labels)</span>
+<span class="sd">            </span>
+<span class="sd">        COVERAGE : str or float</span>
+<span class="sd">            The coverage at which the synthetic spectra is generated. If high,</span>
+<span class="sd">            spectra at various coverages is generated.</span>
 <span class="sd">        	</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -980,7 +1063,7 @@
 <span class="sd">        	Frequencies and intensities shifted to account for coverage</span>
 <span class="sd">            </span>
 <span class="sd">        NUM_TARGETS : int</span>
-<span class="sd">            Number of target classes/groups. Updated if TARGET is GCN an dcoverage is &#39;high&#39;</span>
+<span class="sd">            Number of target classes/groups. Updated if TARGET is GCN and coverage is &#39;high&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_coverage_shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverage_shift</span>
         <span class="n">high_coverage_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HIGH_COV_PATH</span>
@@ -1280,15 +1363,20 @@
         <span class="n">TARGET</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TARGET</span>
         <span class="n">BINDING_TYPES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BINDING_TYPES</span>
         <span class="n">X0cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X0cov</span>
-        <span class="n">GCNlabels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GCNlabels</span>
         <span class="c1">#Assign the target variable Y to either GCN group or binding site</span>
         <span class="k">if</span> <span class="n">TARGET</span> <span class="o">==</span> <span class="s1">&#39;GCN&#39;</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">GCNlabels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;set_GCNlabels must be executed before spectra can be generated&quot;</span>
-            <span class="n">Y</span> <span class="o">=</span> <span class="n">GCNlabels</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GCNlabels</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;set_GCNlabels must be executed before spectra can be generated&quot;</span><span class="p">)</span>
+                <span class="k">raise</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">Y</span> <span class="o">=</span> <span class="n">BINDING_TYPES</span>
         <span class="c1">#Get coverage shifted data if and update number of targets if applicable</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">NUM_TARGETS</span> <span class="o">=</span> <span class="n">_get_coverage_shifted_X</span><span class="p">(</span><span class="n">X0cov</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">COVERAGE</span><span class="p">)</span>
+        <span class="n">ENERGIES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">LOW_FREQUENCY</span><span class="p">,</span> <span class="n">HIGH_FREQUENCY</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">ENERGY_POINTS</span>\
+                               <span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ENERGIES</span> <span class="o">=</span> <span class="n">ENERGIES</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Y</span> <span class="o">=</span> <span class="n">Y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">NUM_TARGETS</span> <span class="o">=</span> <span class="n">NUM_TARGETS</span>
