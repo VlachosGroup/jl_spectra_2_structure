@@ -172,7 +172,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>adsorbate</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the adsorbate for which to get the default primary DFT data.
-Data is already provided for ‘CO’,’NO’, or ‘C2H4’.</p>
+Data is already provided for ‘CO’, ‘NO’, and ‘C2H4’.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
@@ -616,6 +616,13 @@ validation set.</p></li>
 If an integer the perturbations are uniform, if ‘gaussian’, the perturbations
 are a gaussian with the same variance as that used ot pertub the validation data.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>X</strong> (<em>numpy.ndarray</em>) – Coverage shifted frequencies and intensities</p></li>
+<li><p><strong>Y</strong> (<em>numpy.ndarray</em>) – The target variable histograms. Either binding-type or GCN label</p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>

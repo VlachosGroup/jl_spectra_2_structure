@@ -244,7 +244,28 @@ set will be included in generating the complex spectra.</p></li>
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN">
 <code class="sig-name descname">_run_NN</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES</em>, <em class="sig-param">INDICES</em>, <em class="sig-param">X_compare</em>, <em class="sig-param">y_compare</em>, <em class="sig-param">IS_TEST</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION._run_NN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>run the neural network and generated validation statistics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NUM_SAMPLES</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of complex spectra to generate</p></li>
+<li><p><strong>INDICES</strong> (<em>list of int</em>) – The indices of the primary data that will be selected.</p></li>
+<li><p><strong>X_compare</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Complex spectra on which to test the model.</p></li>
+<li><p><strong>Y_compare</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – The target variable histogramsof the test or validation data.</p></li>
+<li><p><strong>IS_TEST</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether comparison set is the test set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>NN</strong> (<em>MLPRegressor</em>) – Trained neural network. Only instantiated if IS_TEST == True</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>Dict</strong> – Dictionary of validation or test results and statistics</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._set_ir_gen_class">
@@ -303,32 +324,130 @@ binding type model and the GCN model.</p></li>
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_secondary_data">
 <code class="sig-name descname">get_secondary_data</code><span class="sig-paren">(</span><em class="sig-param">NUM_SAMPLES</em>, <em class="sig-param">INDICES</em>, <em class="sig-param">iterations=1</em>, <em class="sig-param">IS_TRAINING_SET=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_secondary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_secondary_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get secondary data (complex spectra)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>NUM_SAMPLES</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of complex spectra to generate</p></li>
+<li><p><strong>INDICES</strong> (<em>list of int</em>) – The indices of the primary data that will be selected.</p></li>
+<li><p><strong>iterations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of times secondary data will be generated and strung
+together. Allows for a more diverse set of complex spectra for
+testing.</p></li>
+<li><p><strong>IS_TRAINING_SET</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates if the secondary set will be used for training or testing</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>X</strong> (<em>numpy.ndarray</em>) – Coverage shifted frequencies and intensities</p></li>
+<li><p><strong>Y</strong> (<em>The target variable histograms. Either binding-type or GCN label</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_results">
-<code class="sig-name descname">get_test_results</code><span class="sig-paren">(</span><em class="sig-param">read_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_test_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_results" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">get_test_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_test_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of a trained neural network evaluated on the
+test results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X_Test</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Complex spectra on which to test the model.</p></li>
+<li><p><strong>Y_Test</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – The target variable histogramsof the test data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Dict</strong> – Dictionary of test results and statistics</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_secondary_data">
-<code class="sig-name descname">get_test_secondary_data</code><span class="sig-paren">(</span><em class="sig-param">read_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_test_secondary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_secondary_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">get_test_secondary_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.get_test_secondary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_secondary_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get one batch of secondary data (comlex spectra) for the test indices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>X_Test</strong> (<em>numpy.ndarray</em>) – Complex spectra on which to test the model.</p></li>
+<li><p><strong>Y_Test</strong> (<em>numpy.ndarray</em>) – The target variable histogramsof the test data.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV">
 <code class="sig-name descname">run_CV</code><span class="sig-paren">(</span><em class="sig-param">write_file=False</em>, <em class="sig-param">CV_RESULTS_FILE=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.run_CV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>run cross validation on one cross validation set at a time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>write_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicate whether cross validation results will be written out to
+a file.</p></li>
+<li><p><strong>CV_RESULTS_FILE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – File where cross validation results will be written as a json.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>CV_RESULTS_FILE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – File where cross validation results will be written as a json.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>DictList</strong> – Dictionary of cross validation and test results</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV_multiprocess">
 <code class="sig-name descname">run_CV_multiprocess</code><span class="sig-paren">(</span><em class="sig-param">write_file=False</em>, <em class="sig-param">CV_RESULTS_FILE=None</em>, <em class="sig-param">num_procs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.run_CV_multiprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV_multiprocess" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>run multiple cross valdation sets and the test set simultaneously</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>write_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicate whether cross validation results will be written out to
+a file.</p></li>
+<li><p><strong>CV_RESULTS_FILE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – File where cross validation results will be written as a json.</p></li>
+<li><p><strong>num_procs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Number of processes to run at any given time.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>CV_RESULTS_FILE</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – File where cross validation results will be written as a json.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>DictList</strong> – Dictionary of cross validation and test results</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_single_CV">
 <code class="sig-name descname">run_single_CV</code><span class="sig-paren">(</span><em class="sig-param">CV_INDEX_or_TEST</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.run_single_CV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_single_CV" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>run a single cross validation process or the test set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>CV_INDEX_or_TEST</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Indicates which cross validation set or if the test set is to be
+run.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Dict</strong> – Dictionary of a single cross validation or test result</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_model_parameters">
@@ -398,7 +517,14 @@ added after scaling of the primary DFT data.</p></li>
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters">
 <code class="sig-name descname">set_nn_parameters</code><span class="sig-paren">(</span><em class="sig-param">NN_PROPERTIES</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#CROSS_VALIDATION.set_nn_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set properties of the neural network so they can be changed after
+all other model properties have been set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><strong>NN_PROPERTIES</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of properties for the neural network.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -409,10 +535,40 @@ added after scaling of the primary DFT data.</p></li>
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION">
 <em class="property">class </em><code class="sig-name descname">LOAD_CROSS_VALIDATION</code><span class="sig-paren">(</span><em class="sig-param">cv_indices_path=None</em>, <em class="sig-param">cross_validation_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION" title="jl_spectra_2_structure.cross_validation.CROSS_VALIDATION"><code class="xref py py-class docutils literal notranslate"><span class="pre">jl_spectra_2_structure.cross_validation.CROSS_VALIDATION</span></code></a></p>
+<p>Child class for loading cross validation results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cv_indices_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where indices for cross validation are saved.</p></li>
+<li><p><strong>cross_validation_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where cross validation results are stored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>CV_FILES</strong> (<em>list of str</em>) – LIst of cross validation files.</p></li>
+<li><p><strong>CV_INDICES_PATH_OLD</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where indices for cross validation are saved.</p></li>
+<li><p><strong>CV_PATH_OLD</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Folder path where cross validation results are stored.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_NN">
 <code class="sig-name descname">get_NN</code><span class="sig-paren">(</span><em class="sig-param">dictionary</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#LOAD_CROSS_VALIDATION.get_NN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_NN" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Loads a neural network from a dictionary containing properties
+such as number of nodes, acitavtion functions, their coefficients and
+their intercepts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dictionary</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary containing neural network results and properties</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>NN</strong> – Trained neural network. Only instantiated if IS_TEST == True</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>MLPRegressor</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_best_models">

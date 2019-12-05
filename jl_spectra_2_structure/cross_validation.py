@@ -529,9 +529,39 @@ class CROSS_VALIDATION:
         self.MAINconv = MAINconv
     
     def set_nn_parameters(self, NN_PROPERTIES):
+        """Set properties of the neural network so they can be changed after
+        all other model properties have been set
+        	
+        Attributes
+        ----------
+        NN_PROPERTIES : dict
+        	Dictionary of properties for the neural network.
+        """
         self.NN_PROPERTIES = NN_PROPERTIES
     
     def run_CV(self, write_file=False, CV_RESULTS_FILE = None):
+        """run cross validation on one cross validation set at a time
+
+        Parameters
+        ----------
+        write_file : bool
+        	Indicate whether cross validation results will be written out to
+            a file.
+            
+        CV_RESULTS_FILE : str or None
+        	File where cross validation results will be written as a json.
+        	
+        Attributes
+        ----------
+        CV_RESULTS_FILE : str or None
+        	File where cross validation results will be written as a json.
+        		  
+        Returns
+        -------
+        DictList : list of dict
+        	Dictionary of cross validation and test results
+                
+        """
         try:
             TARGET = self.TARGET
         except:
@@ -606,6 +636,31 @@ class CROSS_VALIDATION:
         return DictList
     
     def run_CV_multiprocess(self,write_file=False, CV_RESULTS_FILE = None, num_procs=None):
+        """run multiple cross valdation sets and the test set simultaneously
+
+        Parameters
+        ----------
+        write_file : bool
+        	Indicate whether cross validation results will be written out to
+            a file.
+            
+        CV_RESULTS_FILE : str or None
+        	File where cross validation results will be written as a json.
+            
+        num_procs : int
+        	Number of processes to run at any given time.
+        	
+        Attributes
+        ----------
+        CV_RESULTS_FILE : str or None
+        	File where cross validation results will be written as a json.
+        		  
+        Returns
+        -------
+        DictList : list of dict
+        	Dictionary of cross validation and test results
+                
+        """
         try:
             TARGET = self.TARGET
         except:
@@ -674,6 +729,20 @@ class CROSS_VALIDATION:
         return DictList
     
     def run_single_CV(self, CV_INDEX_or_TEST):
+        """run a single cross validation process or the test set.
+
+        Parameters
+        ----------
+        CV_INDEX_or_TEST : str or int
+        	Indicates which cross validation set or if the test set is to be
+            run.
+        		  
+        Returns
+        -------
+        Dict : dict
+        	Dictionary of a single cross validation or test result
+               
+        """
         try:
             NUM_TRAIN = self.NUM_TRAIN
         except:
@@ -717,6 +786,32 @@ class CROSS_VALIDATION:
         return Dict
     
     def get_secondary_data(self,NUM_SAMPLES, INDICES, iterations=1, IS_TRAINING_SET=False):
+        """Get secondary data (complex spectra)
+
+        Parameters
+        ----------
+        NUM_SAMPLES : int
+        	Number of complex spectra to generate
+            
+        INDICES : list of int
+        	The indices of the primary data that will be selected.
+            
+        iterations : int
+        	Number of times secondary data will be generated and strung
+            together. Allows for a more diverse set of complex spectra for
+            testing.
+            
+        IS_TRAINING_SET : bool
+        	Indicates if the secondary set will be used for training or testing
+        	
+        Returns
+        -------
+        X : numpy.ndarray
+        	Coverage shifted frequencies and intensities
+            
+        Y : The target variable histograms. Either binding-type or GCN label
+                
+        """
         try:
             TARGET = self.TARGET
         except:
@@ -753,6 +848,36 @@ class CROSS_VALIDATION:
         return (X, y)
 
     def _run_NN(self, NUM_SAMPLES, INDICES, X_compare, y_compare, IS_TEST):
+        """run the neural network and generated validation statistics
+
+        Parameters
+        ----------
+        NUM_SAMPLES : int
+        	Number of complex spectra to generate
+            
+        INDICES : list of int
+        	The indices of the primary data that will be selected.
+            
+        X_compare : numpy.ndarray
+        	Complex spectra on which to test the model.
+            
+        Y_compare : numpy.ndarray
+            The target variable histogramsof the test or validation data.
+            
+        IS_TEST : bool
+        	Indicates whether comparison set is the test set.
+        	
+        Attributes
+        ----------
+        NN : MLPRegressor
+        	Trained neural network. Only instantiated if IS_TEST == True
+        		  
+        Returns
+        -------
+        Dict : dict
+        	Dictionary of validation or test results and statistics
+                
+        """
         get_secondary_data = self.get_secondary_data
         NN_PROPERTIES = self.NN_PROPERTIES
         VERBOSE = self.VERBOSE
@@ -826,7 +951,18 @@ class CROSS_VALIDATION:
             self.NN = NN
         return Dict
 
-    def get_test_secondary_data(self, read_file=True):
+    def get_test_secondary_data(self):
+        """Get one batch of secondary data (comlex spectra) for the test indices
+        		  
+        Returns
+        -------
+        X_Test : numpy.ndarray
+        	Complex spectra on which to test the model.
+            
+        Y_Test : numpy.ndarray
+            The target variable histogramsof the test data.
+             
+        """
         try:
             NUM_TEST = self.NUM_TEST
         except:
@@ -840,7 +976,24 @@ class CROSS_VALIDATION:
         print('Time to generate Test set is ' + str(stop-start))
         return (X_Test, y_Test)
             
-    def get_test_results(self, read_file=True):
+    def get_test_results(self):
+        """Returns a dictionary of a trained neural network evaluated on the
+        test results.
+        	
+        Attributes
+        ----------
+        X_Test : numpy.ndarray
+        	Complex spectra on which to test the model.
+            
+        Y_Test : numpy.ndarray
+            The target variable histogramsof the test data.
+        		  
+        Returns
+        -------
+        Dict : dict
+        	Dictionary of test results and statistics
+                
+        """
         try:
             NUM_TRAIN = self.NUM_TRAIN
         except:
@@ -856,10 +1009,30 @@ class CROSS_VALIDATION:
         return Dict
     
 class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
-    """
-    """
+    """Child class for loading cross validation results.
+    """  
+    
     def __init__(self, cv_indices_path=None, cross_validation_path=None):
         """
+        Parameters
+        ----------
+        cv_indices_path : str
+            Folder path where indices for cross validation are saved. 
+            
+        cross_validation_path : str
+            Folder path where cross validation results are stored.
+        	
+        Attributes
+        ----------
+        CV_FILES : list of str
+        	LIst of cross validation files.
+            
+        CV_INDICES_PATH_OLD : str
+            Folder path where indices for cross validation are saved. 
+            
+        CV_PATH_OLD : str
+            Folder path where cross validation results are stored.
+        		  
         """
         _get_default_cross_validation_path = super()._get_default_cross_validation_path
         _get_default_cv_indices_path = super()._get_default_cv_indices_path
@@ -884,6 +1057,21 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         self.CV_INDICES_PATH_OLD = cv_indices_path
         
     def get_NN(self,dictionary):
+        """Loads a neural network from a dictionary containing properties
+        such as number of nodes, acitavtion functions, their coefficients and
+        their intercepts.
+
+        Parameters
+        ----------
+        dictionary : dict
+        	Dictionary containing neural network results and properties
+        		  
+        Returns
+        -------
+        NN : MLPRegressor
+        	Trained neural network. Only instantiated if IS_TEST == True 
+                
+        """
         NN = MLPRegressor(**dictionary['parameters'])
         #catches instances where coefficients and intercepts are saved via standard json package as list of lists
         dictionary['__getstate__']['coefs_'] = [np.asarray(coef_list) for coef_list in dictionary['__getstate__']['coefs_'].copy()]

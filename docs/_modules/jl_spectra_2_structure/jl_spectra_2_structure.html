@@ -173,7 +173,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    adsorbate : str</span>
 <span class="sd">    	Name of the adsorbate for which to get the default primary DFT data.</span>
-<span class="sd">        Data is already provided for &#39;CO&#39;,&#39;NO&#39;, or &#39;C2H4&#39;.</span>
+<span class="sd">        Data is already provided for &#39;CO&#39;, &#39;NO&#39;, and &#39;C2H4&#39;.</span>
 <span class="sd">    </span>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1407,6 +1407,14 @@
 <span class="sd">            Indicates the kind of perturbations to induce in the primary training data.</span>
 <span class="sd">            If an integer the perturbations are uniform, if &#39;gaussian&#39;, the perturbations</span>
 <span class="sd">            are a gaussian with the same variance as that used ot pertub the validation data.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        X : numpy.ndarray</span>
+<span class="sd">            Coverage shifted frequencies and intensities</span>
+<span class="sd">            </span>
+<span class="sd">        Y : numpy.ndarray</span>
+<span class="sd">            The target variable histograms. Either binding-type or GCN label</span>
 <span class="sd">                </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_get_probabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_probabilities</span>

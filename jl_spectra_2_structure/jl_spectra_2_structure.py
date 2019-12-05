@@ -19,7 +19,7 @@ def get_default_data_paths(adsorbate):
     ----------
     adsorbate : str
     	Name of the adsorbate for which to get the default primary DFT data.
-        Data is already provided for 'CO','NO', or 'C2H4'.
+        Data is already provided for 'CO', 'NO', and 'C2H4'.
     
     Returns
     -------
@@ -1253,6 +1253,14 @@ class IR_GEN:
             Indicates the kind of perturbations to induce in the primary training data.
             If an integer the perturbations are uniform, if 'gaussian', the perturbations
             are a gaussian with the same variance as that used ot pertub the validation data.
+            
+        Returns
+        -------
+        X : numpy.ndarray
+            Coverage shifted frequencies and intensities
+            
+        Y : numpy.ndarray
+            The target variable histograms. Either binding-type or GCN label
                 
         """
         _get_probabilities = self._get_probabilities

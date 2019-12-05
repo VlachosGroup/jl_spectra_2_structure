@@ -683,9 +683,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">MAINconv</span> <span class="o">=</span> <span class="n">MAINconv</span></div>
     
 <div class="viewcode-block" id="CROSS_VALIDATION.set_nn_parameters"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.set_nn_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_nn_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NN_PROPERTIES</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set properties of the neural network so they can be changed after</span>
+<span class="sd">        all other model properties have been set</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NN_PROPERTIES : dict</span>
+<span class="sd">        	Dictionary of properties for the neural network.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">NN_PROPERTIES</span> <span class="o">=</span> <span class="n">NN_PROPERTIES</span></div>
     
 <div class="viewcode-block" id="CROSS_VALIDATION.run_CV"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV">[docs]</a>    <span class="k">def</span> <span class="nf">run_CV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">write_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">CV_RESULTS_FILE</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;run cross validation on one cross validation set at a time</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        write_file : bool</span>
+<span class="sd">        	Indicate whether cross validation results will be written out to</span>
+<span class="sd">            a file.</span>
+<span class="sd">            </span>
+<span class="sd">        CV_RESULTS_FILE : str or None</span>
+<span class="sd">        	File where cross validation results will be written as a json.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_RESULTS_FILE : str or None</span>
+<span class="sd">        	File where cross validation results will be written as a json.</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DictList : list of dict</span>
+<span class="sd">        	Dictionary of cross validation and test results</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TARGET</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TARGET</span>
         <span class="k">except</span><span class="p">:</span>
@@ -760,6 +790,31 @@
         <span class="k">return</span> <span class="n">DictList</span></div>
     
 <div class="viewcode-block" id="CROSS_VALIDATION.run_CV_multiprocess"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_CV_multiprocess">[docs]</a>    <span class="k">def</span> <span class="nf">run_CV_multiprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">write_file</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">CV_RESULTS_FILE</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">num_procs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;run multiple cross valdation sets and the test set simultaneously</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        write_file : bool</span>
+<span class="sd">        	Indicate whether cross validation results will be written out to</span>
+<span class="sd">            a file.</span>
+<span class="sd">            </span>
+<span class="sd">        CV_RESULTS_FILE : str or None</span>
+<span class="sd">        	File where cross validation results will be written as a json.</span>
+<span class="sd">            </span>
+<span class="sd">        num_procs : int</span>
+<span class="sd">        	Number of processes to run at any given time.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_RESULTS_FILE : str or None</span>
+<span class="sd">        	File where cross validation results will be written as a json.</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DictList : list of dict</span>
+<span class="sd">        	Dictionary of cross validation and test results</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TARGET</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TARGET</span>
         <span class="k">except</span><span class="p">:</span>
@@ -828,6 +883,20 @@
         <span class="k">return</span> <span class="n">DictList</span></div>
     
 <div class="viewcode-block" id="CROSS_VALIDATION.run_single_CV"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.run_single_CV">[docs]</a>    <span class="k">def</span> <span class="nf">run_single_CV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CV_INDEX_or_TEST</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;run a single cross validation process or the test set.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_INDEX_or_TEST : str or int</span>
+<span class="sd">        	Indicates which cross validation set or if the test set is to be</span>
+<span class="sd">            run.</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dict : dict</span>
+<span class="sd">        	Dictionary of a single cross validation or test result</span>
+<span class="sd">               </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">NUM_TRAIN</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUM_TRAIN</span>
         <span class="k">except</span><span class="p">:</span>
@@ -871,6 +940,32 @@
         <span class="k">return</span> <span class="n">Dict</span></div>
     
 <div class="viewcode-block" id="CROSS_VALIDATION.get_secondary_data"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_secondary_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_secondary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">NUM_SAMPLES</span><span class="p">,</span> <span class="n">INDICES</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">IS_TRAINING_SET</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get secondary data (complex spectra)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NUM_SAMPLES : int</span>
+<span class="sd">        	Number of complex spectra to generate</span>
+<span class="sd">            </span>
+<span class="sd">        INDICES : list of int</span>
+<span class="sd">        	The indices of the primary data that will be selected.</span>
+<span class="sd">            </span>
+<span class="sd">        iterations : int</span>
+<span class="sd">        	Number of times secondary data will be generated and strung</span>
+<span class="sd">            together. Allows for a more diverse set of complex spectra for</span>
+<span class="sd">            testing.</span>
+<span class="sd">            </span>
+<span class="sd">        IS_TRAINING_SET : bool</span>
+<span class="sd">        	Indicates if the secondary set will be used for training or testing</span>
+<span class="sd">        	</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        X : numpy.ndarray</span>
+<span class="sd">        	Coverage shifted frequencies and intensities</span>
+<span class="sd">            </span>
+<span class="sd">        Y : The target variable histograms. Either binding-type or GCN label</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">TARGET</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">TARGET</span>
         <span class="k">except</span><span class="p">:</span>
@@ -907,6 +1002,36 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="CROSS_VALIDATION._run_NN"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION._run_NN">[docs]</a>    <span class="k">def</span> <span class="nf">_run_NN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NUM_SAMPLES</span><span class="p">,</span> <span class="n">INDICES</span><span class="p">,</span> <span class="n">X_compare</span><span class="p">,</span> <span class="n">y_compare</span><span class="p">,</span> <span class="n">IS_TEST</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;run the neural network and generated validation statistics</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NUM_SAMPLES : int</span>
+<span class="sd">        	Number of complex spectra to generate</span>
+<span class="sd">            </span>
+<span class="sd">        INDICES : list of int</span>
+<span class="sd">        	The indices of the primary data that will be selected.</span>
+<span class="sd">            </span>
+<span class="sd">        X_compare : numpy.ndarray</span>
+<span class="sd">        	Complex spectra on which to test the model.</span>
+<span class="sd">            </span>
+<span class="sd">        Y_compare : numpy.ndarray</span>
+<span class="sd">            The target variable histogramsof the test or validation data.</span>
+<span class="sd">            </span>
+<span class="sd">        IS_TEST : bool</span>
+<span class="sd">        	Indicates whether comparison set is the test set.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        NN : MLPRegressor</span>
+<span class="sd">        	Trained neural network. Only instantiated if IS_TEST == True</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dict : dict</span>
+<span class="sd">        	Dictionary of validation or test results and statistics</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">get_secondary_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_secondary_data</span>
         <span class="n">NN_PROPERTIES</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NN_PROPERTIES</span>
         <span class="n">VERBOSE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">VERBOSE</span>
@@ -980,7 +1105,18 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">NN</span> <span class="o">=</span> <span class="n">NN</span>
         <span class="k">return</span> <span class="n">Dict</span></div>
 
-<div class="viewcode-block" id="CROSS_VALIDATION.get_test_secondary_data"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_secondary_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_secondary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="CROSS_VALIDATION.get_test_secondary_data"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_secondary_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_secondary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get one batch of secondary data (comlex spectra) for the test indices</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        X_Test : numpy.ndarray</span>
+<span class="sd">        	Complex spectra on which to test the model.</span>
+<span class="sd">            </span>
+<span class="sd">        Y_Test : numpy.ndarray</span>
+<span class="sd">            The target variable histogramsof the test data.</span>
+<span class="sd">             </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">NUM_TEST</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUM_TEST</span>
         <span class="k">except</span><span class="p">:</span>
@@ -994,7 +1130,24 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time to generate Test set is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">start</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">X_Test</span><span class="p">,</span> <span class="n">y_Test</span><span class="p">)</span></div>
             
-<div class="viewcode-block" id="CROSS_VALIDATION.get_test_results"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read_file</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="CROSS_VALIDATION.get_test_results"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.CROSS_VALIDATION.get_test_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_test_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a dictionary of a trained neural network evaluated on the</span>
+<span class="sd">        test results.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X_Test : numpy.ndarray</span>
+<span class="sd">        	Complex spectra on which to test the model.</span>
+<span class="sd">            </span>
+<span class="sd">        Y_Test : numpy.ndarray</span>
+<span class="sd">            The target variable histogramsof the test data.</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dict : dict</span>
+<span class="sd">        	Dictionary of test results and statistics</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">NUM_TRAIN</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NUM_TRAIN</span>
         <span class="k">except</span><span class="p">:</span>
@@ -1010,10 +1163,30 @@
         <span class="k">return</span> <span class="n">Dict</span></div></div>
     
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION">[docs]</a><span class="k">class</span> <span class="nc">LOAD_CROSS_VALIDATION</span><span class="p">(</span><span class="n">CROSS_VALIDATION</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Child class for loading cross validation results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cv_indices_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cross_validation_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cv_indices_path : str</span>
+<span class="sd">            Folder path where indices for cross validation are saved. </span>
+<span class="sd">            </span>
+<span class="sd">        cross_validation_path : str</span>
+<span class="sd">            Folder path where cross validation results are stored.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        CV_FILES : list of str</span>
+<span class="sd">        	LIst of cross validation files.</span>
+<span class="sd">            </span>
+<span class="sd">        CV_INDICES_PATH_OLD : str</span>
+<span class="sd">            Folder path where indices for cross validation are saved. </span>
+<span class="sd">            </span>
+<span class="sd">        CV_PATH_OLD : str</span>
+<span class="sd">            Folder path where cross validation results are stored.</span>
+<span class="sd">        		  </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_get_default_cross_validation_path</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_default_cross_validation_path</span>
         <span class="n">_get_default_cv_indices_path</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_default_cv_indices_path</span>
@@ -1038,6 +1211,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">CV_INDICES_PATH_OLD</span> <span class="o">=</span> <span class="n">cv_indices_path</span>
         
 <div class="viewcode-block" id="LOAD_CROSS_VALIDATION.get_NN"><a class="viewcode-back" href="../../cross_validation.html#jl_spectra_2_structure.cross_validation.LOAD_CROSS_VALIDATION.get_NN">[docs]</a>    <span class="k">def</span> <span class="nf">get_NN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dictionary</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads a neural network from a dictionary containing properties</span>
+<span class="sd">        such as number of nodes, acitavtion functions, their coefficients and</span>
+<span class="sd">        their intercepts.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dictionary : dict</span>
+<span class="sd">        	Dictionary containing neural network results and properties</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        NN : MLPRegressor</span>
+<span class="sd">        	Trained neural network. Only instantiated if IS_TEST == True </span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">NN</span> <span class="o">=</span> <span class="n">MLPRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">dictionary</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">])</span>
         <span class="c1">#catches instances where coefficients and intercepts are saved via standard json package as list of lists</span>
         <span class="n">dictionary</span><span class="p">[</span><span class="s1">&#39;__getstate__&#39;</span><span class="p">][</span><span class="s1">&#39;coefs_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coef_list</span><span class="p">)</span> <span class="k">for</span> <span class="n">coef_list</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">[</span><span class="s1">&#39;__getstate__&#39;</span><span class="p">][</span><span class="s1">&#39;coefs_&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()]</span>
