@@ -14,6 +14,7 @@ from imblearn.over_sampling import RandomOverSampler
 
 def get_default_data_paths(adsorbate):
     """ Get default paths to primary data of frequencies and intensities.
+    
     Parameters
     ----------
     adsorbate : str
