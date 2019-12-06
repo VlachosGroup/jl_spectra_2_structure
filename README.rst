@@ -3,15 +3,15 @@ jl_spectra_2_structure
 Methods for converting spectra to structure and solving the materials gap
 
 This is documentation for https://github.com/JLans/jl_spectra_2_structure.
- jl_spectra_2_structure trains neural network models to learn quantitative descriptions of surface coordination
- for either extended surfaces or nanoparticles. The model is trained on complex synthetic IR data (secondary data).
- A class is provided for generating complex (secondary) data from low coverage dft frequency and intensity data (primary data).
- Another class is provided for generating the primary data from forces on atoms and integrated charges computed by vasp and chargemol respectively.
+jl_spectra_2_structure trains neural network models to learn quantitative descriptions of surface coordination
+for either extended surfaces or nanoparticles. The model is trained on complex synthetic IR data (secondary data).
+A class is provided for generating complex (secondary) data from low coverage dft frequency and intensity data (primary data).
+Another class is provided for generating the primary data from forces on atoms and integrated charges computed by vasp and chargemol respectively.
 
 Documentation
 -------------
 
-See our [`documentation page`](https://jlans.github.io/jl_spectra_2_structure/) for examples, equations used, and docstrings.
+See our `documentation page`_ for examples, equations used, and docstrings.
 
 Developer
 ---------
