@@ -1,6 +1,10 @@
 neural_network
 ==============
 
+Most of the neural_network code is taken directly from `scikit-learn`_. Some modified and additional functions are provided here.
+
+.. _`scikit-learn`: https://scikit-learn.org/stable/modules/neural_networks_supervised.html#neural-networks-supervised
+
 The ``_backprop`` function
 **************************
 .. autofunction:: jl_spectra_2_structure.neural_network.multilayer_perceptron.BaseMultilayerPerceptron._backprop

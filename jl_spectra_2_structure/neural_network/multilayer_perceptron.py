@@ -128,6 +128,10 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
         specified layer.
 
         This function does backpropagation for the specified one layer.
+        
+        Notes
+        -----
+        This is code is modified to allow either L1 or L2 regularization.
         """
         activations[layer][abs(activations[layer][...])<2**-500] = 0
         deltas[layer][abs(deltas[layer][...])<2**-500] = 0
@@ -234,6 +238,11 @@ class BaseMultilayerPerceptron(six.with_metaclass(ABCMeta, BaseEstimator)):
         loss : float
         coef_grads : list, length = n_layers - 1
         intercept_grads : list, length = n_layers - 1
+
+        Notes
+        -----
+        The implementation of the Wassertein loss derivative with respect to the softmax
+        output activation is implemented here.
         """
         n_samples = X.shape[0]
 
