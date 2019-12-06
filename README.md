@@ -11,7 +11,7 @@ This is documentation for https://github.com/JLans/jl_spectra_2_structure.
 Documentation
 -------------
 
-See our `documentation page`_ for examples, equations used, and docstrings.
+See our [`documentation page`](https://jlans.github.io/jl_spectra_2_structure/) for examples, equations used, and docstrings.
 
 Developer
 ---------
