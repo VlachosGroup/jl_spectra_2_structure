@@ -5,10 +5,10 @@ Welcome to jl_spectra_2_structure's documentation!
 ==================================================
 
 .. toctree::
-	:maxdepth: 2
-	:caption: Getting Started:
+   :maxdepth: 4
+   :caption: Getting Started:
 	
-	includeme
+   includeme
 
 .. toctree::
    :maxdepth: 4
