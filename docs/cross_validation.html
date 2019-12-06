@@ -256,7 +256,7 @@ set will be included in generating the complex spectra.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Variables</dt>
-<dd class="field-even"><p><strong>NN</strong> (<em>MLPRegressor</em>) – Trained neural network. Only instantiated if IS_TEST == True</p>
+<dd class="field-even"><p><strong>NN</strong> (<em>neural_network.MLPRegressor</em>) – Trained neural network. Only instantiated if IS_TEST == True</p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><strong>Dict</strong> – Dictionary of validation or test results and statistics</p>
@@ -565,7 +565,7 @@ their intercepts.</p>
 <dd class="field-even"><p><strong>NN</strong> – Trained neural network.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>MLPRegressor</p>
+<dd class="field-odd"><p>neural_network.MLPRegressor</p>
 </dd>
 </dl>
 </dd></dl>
@@ -628,7 +628,7 @@ model index value</p>
 </dd>
 <dt class="field-even">Variables</dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>NN</strong> (<em>neural_network</em>) – Trained neural network.</p></li>
+<li><p><strong>NN</strong> (<em>neural_network.MLPRegressor</em>) – Trained neural network.</p></li>
 <li><p><strong>CV_DICT_LIST</strong> (<em>list of dict</em>) – List of dictionaries with cross validations results, statistics,
 and the neural network traine on all cross validation data.</p></li>
 </ul>

@@ -15,7 +15,6 @@ from ase import constraints
 from ase.io.trajectory import Trajectory
 from ase.parallel import rank, paropen
 from ase.utils import opencew, pickleload, basestring
-from copy import deepcopy
 
 
 class Vibrations:

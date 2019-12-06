@@ -27,10 +27,48 @@ from .file_parser import explode
 
 class Primary_DATA:
     """
+    Class that generates primary data (frequencies, intensities, GCN values)
     """
     def __init__(self,metal_atoms=['Pt'], adsorbate_atoms=['C','O']\
                  , create_new_vasp_files=False, delta=0.025):
         """
+        Parameters
+        ----------
+        metal_atoms : list of str
+        	List of atom types considered part of the surface, bulk
+            nanoparticle
+            
+        adsorbate_atoms : list of str
+        	List of atom types onsidered adsorbates. The first atom type
+            listed is considered in contact with the surface.
+            
+        create_new_vasp_files : bool
+        	If True, charg2.extxyzstripped and vasprun2.xmlstripped files
+            are generated which compile concatenated DDEC6 charge and
+            vasprun.xml files into a format readable by PANDAS or ASE
+            
+        delta : float
+        	Angstroms atoms were displaced in finite difference calculation
+            for parameterizing the Hessian
+        	
+        Attributes
+        ----------
+        METAL_ATOMS : list of str
+        	List of atom types considered part of the surface, bulk
+            nanoparticle
+            
+        ADSORBATE_ATOMS : list of str
+        	List of atom types onsidered adsorbates. The first atom type
+            listed is considered in contact with the surface.
+            
+        CREATE_NEW_VASP_FILES : bool
+        	If True, charg2.extxyzstripped and vasprun2.xmlstripped files
+            are generated which compile concatenated DDEC6 charge and
+            vasprun.xml files into a format readable by PANDAS or ASE
+            
+        DELTA : float
+        	Angstroms atoms were displaced in finite difference calculation
+            for parameterizing the Hessian
         """
         self.METAL_ATOMS = metal_atoms
         self.ADSORBATE_ATOMS = adsorbate_atoms
@@ -39,7 +77,46 @@ class Primary_DATA:
     def generate_primary_data(self, vasp_directory, output_path\
                                 ,data_type='nanoparticle'\
                                 , num_adsorbates='single', poc=1):
-        """
+        """Generate primary data
+
+        Parameters
+        ----------
+        vasp_directory : str
+        	Directory where vasp files are stored.
+            
+        output_path : str
+        	Output file location of json that will stroe primary data
+            
+        data_type : str
+        	Indicates the kind of DFT data that is being used. Can be
+            'nanoparticle' or 'surface'.
+            
+        num_adsorbates : str
+        	Indicates the number of adsorbates that were considered in the
+            simulation. Can be 'single' or 'multiple'
+            
+        poc : int
+        	The number of points of contact each adsorbate has with the surface.
+        	
+        Attributes
+        ----------
+        OUTPUT_DICTIONARY : dict
+        	Dictionary of primary data
+            
+        FREQ_FILES : list of str
+            List of processed concatenated vasprun.xml files
+            
+        CHARGE_FILES : list of str
+            list of processed concatenated DECC6 charge files
+        
+        INDICES_USED : numpy.ndarray
+            indices of CHARGE_FILES and FREQ_FILES whose data is used to generate primary
+            data written to the OUTPUT_DICTIONARY
+            
+        MOLECULES : list of Atoms
+            List of ASE atoms object that represent the local minima used as
+            the initial configuration for each normal mode analysis
+                
         """
         metal_atoms = self.METAL_ATOMS
         adsorbate_atoms = self.ADSORBATE_ATOMS
@@ -243,7 +320,47 @@ class Primary_DATA:
             
     def generate_isotope_data(self, vasp_directory, output_file\
                                        ,masses1=[12,16], masses2=[24,32]):
-        """
+        
+        """Generate isotope data used in frequency scaling
+
+        Parameters
+        ----------
+        vasp_directory : str
+        	Directory where vasp files are stored.
+            
+        output_path : str
+        	Output file location of json that will stroe isotope studies
+            
+        masses1 : list of int
+        	List of masses for 'adsorbate_atoms' for one isotope set
+            
+        masses2 : list of int
+        	List of masses for 'adsorbate_atoms' for the other isotope set
+        	
+        Attributes
+        ----------
+        OUTPUT_DICTIONARY : dict
+        	Dictionary of primary data
+            
+        FREQ_FILES : list of str
+            List of preprocessed concatenated vasprun.xml files
+            
+        CHARGE_FILES : list of str
+            list of preprocessed concatenated DECC6 charge files
+        
+        INDICES_USED : numpy.ndarray
+            indices of CHARGE_FILES and FREQ_FILES whose data is used to generate primary
+            data written to the OUTPUT_DICTIONARY
+            
+        MOLECULES : list of Atoms
+            List of ASE atoms object that represent the local minima used as
+            the initial configuration for each normal mode analysis
+                
+        Notes
+        -----
+        The following data is written for the isotopic analysis used in
+        determining coverage scaling.
+        
         FREQUENCIES: frequencies of normal modes
         INTENSITIES: intensities of normal modes
         CO_CN_CO: number of CO to which each CO is coordinated
@@ -663,10 +780,30 @@ class Primary_DATA:
         self.INDICES_USED = np.array(count_list)
         
 class COVERAGE_SCALING:
+    """Class that generates coverage scaling parameters"""
     def __init__(self,primary_data_path):
+        """
+        Parameters
+        ----------
+        primary_data_path : str
+            Primary isotopic data used in generate coverage scaling realtions
+            
+        Attributes
+        ----------
+        PRIMARY_DATA_PATH : str
+            Primary isotopic data used in generate coverage scaling realtions
+        """
         self.PRIMARY_DATA_PATH = primary_data_path
     
     def get_coverage_parameters(self, coverage_scaling_path):
+        """Function that generates coverage scaling relations
+
+        Parameters
+        ----------
+        coverage_scaling_path : str
+        	Location to write coverage scaling parameter dictionary as a json.
+                
+        """
         COVERAGE_SCALING_DICT = {'CO_INT_EXP':[],'CO_FREQ':[], 'PTCO_INT_EXP':[], 'PTCO_FREQ': []}
         PRIMARY_DATA_PATH = self.PRIMARY_DATA_PATH
         with open(PRIMARY_DATA_PATH, 'r') as infile:
@@ -734,8 +871,6 @@ class COVERAGE_SCALING:
                                         ,'OTHER_COVERAGE':ES_joined['COVERAGE']-ES_joined['SELF_COVERAGE']\
                                         ,'OTHER_CO_PER_A2':ES_joined['CO_PER_A2']-ES_joined['SELF_CO_PER_A2']})
         
-        
-        
         def INT_func(X,a):
             return np.exp(a*X)
         def reg_m(y, x):
@@ -783,6 +918,32 @@ class COVERAGE_SCALING:
     def save_coverage_figures(self, figure_directory, adsorbate='CO',metal='Pt'\
                               ,frequency_scale_axis1=[0.98,1.10], frequency_scale_axis2=[0.995,1.138]\
                               ,y_2_ticks=[1,1.02,1.04,1.06,1.08,1.10,1.12],presentation=False):
+        """Function generates and saves coverage scaling figures
+
+        Parameters
+        ----------
+        figure_directory : str
+        	Directory where coverage scaling figures are to be saved
+        
+        adsorbate : str
+        	Name of adsorbate
+            
+        metal : str
+        	Name of metal
+            
+        frequency_scale_axis1 : list of flaot
+        	Scale of y axis for first and third subgraphs
+            
+        frequency_scale_axis2 : list of float
+        	Scale of y axis for second and fourth subgraphs
+            
+        y_2_ticks : list of float
+        	Tick points for y-axis of second and fourth subgraphs
+            
+        presentation : bool
+        	Indicates whether presentation style graphs are to be created.
+                
+        """
         PRIMARY_DATA_PATH = self.PRIMARY_DATA_PATH
         with open(PRIMARY_DATA_PATH, 'r') as infile:
             ES_compressed = pd.io.json.read_json(infile)
@@ -848,8 +1009,6 @@ class COVERAGE_SCALING:
                                         ,'FREQUENCY_SHIFT':ES_joined['WEIGHTED_FREQUENCY']-ES_joined['LOW_COV_FREQUENCY']\
                                         ,'OTHER_COVERAGE':ES_joined['COVERAGE']-ES_joined['SELF_COVERAGE']\
                                         ,'OTHER_CO_PER_A2':ES_joined['CO_PER_A2']-ES_joined['SELF_CO_PER_A2']})
-        
-        
         
         def INT_func(X,a):
             return np.exp(a*X)

@@ -170,10 +170,50 @@
 <dt id="jl_spectra_2_structure.primary_data_creation.coordination.Coordination">
 <em class="property">class </em><code class="sig-name descname">Coordination</code><span class="sig-paren">(</span><em class="sig-param">atoms</em>, <em class="sig-param">exclude=[]</em>, <em class="sig-param">cutoff=1.25</em>, <em class="sig-param">cutoff_type='percent'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/coordination.html#Coordination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.coordination.Coordination" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for calculating coordination and generalized coordination number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>atoms</em>) – ASE atoms type.</p></li>
+<li><p><strong>exclude</strong> (<em>list of int</em>) – Indices of atoms to exclude in tabulating the coordination of
+each atom</p></li>
+<li><p><strong>cutoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fudge factor multiplied by Van der Waals radii used to determine
+connectivity. If distance between atoms is less than the summ of
+their radii times cutoff they are considered to be coordinated</p></li>
+<li><p><strong>cutoff_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Can be ‘percent’ or ‘absolute’. If Absolute then the cutoff is
+considered a distance and replaces the use of Van der Waals radii
+entirely. If multiple atom types are to be used then ‘perecent’
+is best.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>atoms</strong> (<em>atoms</em>) – ASE atoms type.</p></li>
+<li><p><strong>exclude</strong> (<em>list of int</em>) – Indices of atoms to exclude in tabulating the coordination of
+each atom</p></li>
+<li><p><strong>cutoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Fudge factor multiplied by Van der Waals radii used to determine
+connectivity. If distance between atoms is less than the summ of
+their radii times cutoff they are considered to be coordinated</p></li>
+<li><p><strong>cutoff_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Can be ‘percent’ or ‘absolute’. If Absolute then the cutoff is
+considered a distance and replaces the use of Van der Waals radii
+entirely. If multiple atom types are to be used then ‘perecent’
+is best.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.coordination.Coordination.get_coordination_numbers">
 <code class="sig-name descname">get_coordination_numbers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/coordination.html#Coordination.get_coordination_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.coordination.Coordination.get_coordination_numbers" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Implements the read function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>cn</strong> (<em>list of int</em>) – list of coordination numbers for each atom.</p></li>
+<li><p><strong>bonded</strong> (<em>list of list</em>) – List of indices of atoms bonded to each atom</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.coordination.Coordination.get_gcn">
@@ -182,6 +222,22 @@
 A site,  just give a list containing the indices of the atoms forming the site.
 The calculated coordination numbers and bonding needs to be supplied, and the
 surface type also needs to be changed if the surface is not represented by bulk fcc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site</strong> (<em>list of int</em>) – indices for which to calculate the GCN values</p></li>
+<li><p><strong>surface_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Indicates natural bulk of the material which influences
+the maximum coordination environment of a site</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gcn</strong> –     Listof generalized coordination values for the desired atoms in
+a system.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -195,6 +251,14 @@ If ‘exclude’ is set to an array,  these atomic numbers with be unable to for
 This only excludes them from being counted from other atoms,  the coordination
 numbers for these atoms will still be calculated,  but will be unable to form
 bonds to other excluded atomic numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cn</strong> (<em>list of int</em>) – list of coordination numbers for each atom.</p></li>
+<li><p><strong>bonded</strong> (<em>list of list</em>) – List of indices of atoms bonded to each atom</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

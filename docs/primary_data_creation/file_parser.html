@@ -173,15 +173,58 @@
 <dl class="class">
 <dt id="jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER">
 <em class="property">class </em><code class="sig-name descname">VASP_PARSER</code><span class="sig-paren">(</span><em class="sig-param">directory</em>, <em class="sig-param">create_files=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/file_parser.html#VASP_PARSER"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Class for parsing vasp and chargemol files</p>
+<p>Summary goes on one line here</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Location of vasp and chargemol files</p></li>
+<li><p><strong>create_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, charg2.extxyzstripped and vasprun2.xmlstripped files
+are generated which compile concatenated DDEC6 charge and
+vasprun.xml files into a format readable by PANDAS or ASE</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>freq_dirs</strong> (<em>list of str</em>) – List of directories where concatenated vasprun.xml and chargemol
+files are located.</p></li>
+<li><p><strong>create_files</strong> (<em>list of str</em>) – list of preprocessed concatenated DECC6 charge files</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER.get_charge_files">
 <code class="sig-name descname">get_charge_files</code><span class="sig-paren">(</span><em class="sig-param">directory=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/file_parser.html#VASP_PARSER.get_charge_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER.get_charge_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get list of porcessed concatenated DDEC6 charge files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – directory of concatenated unprocessed concated chargemol files</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>charge_files_clean</strong> – List of processed concatenated chargemol files</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER.get_freq_files">
 <code class="sig-name descname">get_freq_files</code><span class="sig-paren">(</span><em class="sig-param">directory=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/file_parser.html#VASP_PARSER.get_freq_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER.get_freq_files" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get list of porcessed concatenated vasprun.xml files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)"><em>None</em></a>) – directory of concatenated unprocessed concated vasprun.xml files</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>freq_files_clean</strong> – List of processed concatenated vasprun.xml files</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -191,7 +234,29 @@
 <dl class="function">
 <dt id="jl_spectra_2_structure.primary_data_creation.file_parser.explode">
 <code class="sig-name descname">explode</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">lst_cols</em>, <em class="sig-param">fill_value=''</em>, <em class="sig-param">preserve_index=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/file_parser.html#explode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.file_parser.explode" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Take a pandas data frame with list components and explode
+so there is a separate line for each value in the list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.dataframe</em>) – Dataframe to expand</p></li>
+<li><p><strong>lst_cols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of columns names whose cells are lists that are to be expanded
+into their own rows</p></li>
+<li><p><strong>fill_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – If a column does not does not have the same number of indices as
+in a specific row as the other cells with lists replace NA with
+fill_value</p></li>
+<li><p><strong>preserve_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether the indices of the dataframe should be preserved
+after expanding</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>res</strong> – Expanded dataframe</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.dataframe</p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 </div>

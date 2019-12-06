@@ -181,10 +181,48 @@
 
 <div class="viewcode-block" id="Primary_DATA"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA">[docs]</a><span class="k">class</span> <span class="nc">Primary_DATA</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that generates primary data (frequencies, intensities, GCN values)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metal_atoms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pt&#39;</span><span class="p">],</span> <span class="n">adsorbate_atoms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">]</span>\
                  <span class="p">,</span> <span class="n">create_new_vasp_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        metal_atoms : list of str</span>
+<span class="sd">        	List of atom types considered part of the surface, bulk</span>
+<span class="sd">            nanoparticle</span>
+<span class="sd">            </span>
+<span class="sd">        adsorbate_atoms : list of str</span>
+<span class="sd">        	List of atom types onsidered adsorbates. The first atom type</span>
+<span class="sd">            listed is considered in contact with the surface.</span>
+<span class="sd">            </span>
+<span class="sd">        create_new_vasp_files : bool</span>
+<span class="sd">        	If True, charg2.extxyzstripped and vasprun2.xmlstripped files</span>
+<span class="sd">            are generated which compile concatenated DDEC6 charge and</span>
+<span class="sd">            vasprun.xml files into a format readable by PANDAS or ASE</span>
+<span class="sd">            </span>
+<span class="sd">        delta : float</span>
+<span class="sd">        	Angstroms atoms were displaced in finite difference calculation</span>
+<span class="sd">            for parameterizing the Hessian</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        METAL_ATOMS : list of str</span>
+<span class="sd">        	List of atom types considered part of the surface, bulk</span>
+<span class="sd">            nanoparticle</span>
+<span class="sd">            </span>
+<span class="sd">        ADSORBATE_ATOMS : list of str</span>
+<span class="sd">        	List of atom types onsidered adsorbates. The first atom type</span>
+<span class="sd">            listed is considered in contact with the surface.</span>
+<span class="sd">            </span>
+<span class="sd">        CREATE_NEW_VASP_FILES : bool</span>
+<span class="sd">        	If True, charg2.extxyzstripped and vasprun2.xmlstripped files</span>
+<span class="sd">            are generated which compile concatenated DDEC6 charge and</span>
+<span class="sd">            vasprun.xml files into a format readable by PANDAS or ASE</span>
+<span class="sd">            </span>
+<span class="sd">        DELTA : float</span>
+<span class="sd">        	Angstroms atoms were displaced in finite difference calculation</span>
+<span class="sd">            for parameterizing the Hessian</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">METAL_ATOMS</span> <span class="o">=</span> <span class="n">metal_atoms</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ADSORBATE_ATOMS</span> <span class="o">=</span> <span class="n">adsorbate_atoms</span>
@@ -193,7 +231,46 @@
 <div class="viewcode-block" id="Primary_DATA.generate_primary_data"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data">[docs]</a>    <span class="k">def</span> <span class="nf">generate_primary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasp_directory</span><span class="p">,</span> <span class="n">output_path</span>\
                                 <span class="p">,</span><span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;nanoparticle&#39;</span>\
                                 <span class="p">,</span> <span class="n">num_adsorbates</span><span class="o">=</span><span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="n">poc</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Generate primary data</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vasp_directory : str</span>
+<span class="sd">        	Directory where vasp files are stored.</span>
+<span class="sd">            </span>
+<span class="sd">        output_path : str</span>
+<span class="sd">        	Output file location of json that will stroe primary data</span>
+<span class="sd">            </span>
+<span class="sd">        data_type : str</span>
+<span class="sd">        	Indicates the kind of DFT data that is being used. Can be</span>
+<span class="sd">            &#39;nanoparticle&#39; or &#39;surface&#39;.</span>
+<span class="sd">            </span>
+<span class="sd">        num_adsorbates : str</span>
+<span class="sd">        	Indicates the number of adsorbates that were considered in the</span>
+<span class="sd">            simulation. Can be &#39;single&#39; or &#39;multiple&#39;</span>
+<span class="sd">            </span>
+<span class="sd">        poc : int</span>
+<span class="sd">        	The number of points of contact each adsorbate has with the surface.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        OUTPUT_DICTIONARY : dict</span>
+<span class="sd">        	Dictionary of primary data</span>
+<span class="sd">            </span>
+<span class="sd">        FREQ_FILES : list of str</span>
+<span class="sd">            List of processed concatenated vasprun.xml files</span>
+<span class="sd">            </span>
+<span class="sd">        CHARGE_FILES : list of str</span>
+<span class="sd">            list of processed concatenated DECC6 charge files</span>
+<span class="sd">        </span>
+<span class="sd">        INDICES_USED : numpy.ndarray</span>
+<span class="sd">            indices of CHARGE_FILES and FREQ_FILES whose data is used to generate primary</span>
+<span class="sd">            data written to the OUTPUT_DICTIONARY</span>
+<span class="sd">            </span>
+<span class="sd">        MOLECULES : list of Atoms</span>
+<span class="sd">            List of ASE atoms object that represent the local minima used as</span>
+<span class="sd">            the initial configuration for each normal mode analysis</span>
+<span class="sd">                </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">metal_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">METAL_ATOMS</span>
         <span class="n">adsorbate_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADSORBATE_ATOMS</span>
@@ -397,7 +474,47 @@
             
 <div class="viewcode-block" id="Primary_DATA.generate_isotope_data"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_isotope_data">[docs]</a>    <span class="k">def</span> <span class="nf">generate_isotope_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vasp_directory</span><span class="p">,</span> <span class="n">output_file</span>\
                                        <span class="p">,</span><span class="n">masses1</span><span class="o">=</span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="mi">16</span><span class="p">],</span> <span class="n">masses2</span><span class="o">=</span><span class="p">[</span><span class="mi">24</span><span class="p">,</span><span class="mi">32</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+        
+        <span class="sd">&quot;&quot;&quot;Generate isotope data used in frequency scaling</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        vasp_directory : str</span>
+<span class="sd">        	Directory where vasp files are stored.</span>
+<span class="sd">            </span>
+<span class="sd">        output_path : str</span>
+<span class="sd">        	Output file location of json that will stroe isotope studies</span>
+<span class="sd">            </span>
+<span class="sd">        masses1 : list of int</span>
+<span class="sd">        	List of masses for &#39;adsorbate_atoms&#39; for one isotope set</span>
+<span class="sd">            </span>
+<span class="sd">        masses2 : list of int</span>
+<span class="sd">        	List of masses for &#39;adsorbate_atoms&#39; for the other isotope set</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        OUTPUT_DICTIONARY : dict</span>
+<span class="sd">        	Dictionary of primary data</span>
+<span class="sd">            </span>
+<span class="sd">        FREQ_FILES : list of str</span>
+<span class="sd">            List of preprocessed concatenated vasprun.xml files</span>
+<span class="sd">            </span>
+<span class="sd">        CHARGE_FILES : list of str</span>
+<span class="sd">            list of preprocessed concatenated DECC6 charge files</span>
+<span class="sd">        </span>
+<span class="sd">        INDICES_USED : numpy.ndarray</span>
+<span class="sd">            indices of CHARGE_FILES and FREQ_FILES whose data is used to generate primary</span>
+<span class="sd">            data written to the OUTPUT_DICTIONARY</span>
+<span class="sd">            </span>
+<span class="sd">        MOLECULES : list of Atoms</span>
+<span class="sd">            List of ASE atoms object that represent the local minima used as</span>
+<span class="sd">            the initial configuration for each normal mode analysis</span>
+<span class="sd">                </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The following data is written for the isotopic analysis used in</span>
+<span class="sd">        determining coverage scaling.</span>
+<span class="sd">        </span>
 <span class="sd">        FREQUENCIES: frequencies of normal modes</span>
 <span class="sd">        INTENSITIES: intensities of normal modes</span>
 <span class="sd">        CO_CN_CO: number of CO to which each CO is coordinated</span>
@@ -817,10 +934,30 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">INDICES_USED</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">count_list</span><span class="p">)</span></div></div>
         
 <div class="viewcode-block" id="COVERAGE_SCALING"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING">[docs]</a><span class="k">class</span> <span class="nc">COVERAGE_SCALING</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class that generates coverage scaling parameters&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">primary_data_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        primary_data_path : str</span>
+<span class="sd">            Primary isotopic data used in generate coverage scaling realtions</span>
+<span class="sd">            </span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        PRIMARY_DATA_PATH : str</span>
+<span class="sd">            Primary isotopic data used in generate coverage scaling realtions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">PRIMARY_DATA_PATH</span> <span class="o">=</span> <span class="n">primary_data_path</span>
     
 <div class="viewcode-block" id="COVERAGE_SCALING.get_coverage_parameters"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.get_coverage_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_coverage_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coverage_scaling_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function that generates coverage scaling relations</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coverage_scaling_path : str</span>
+<span class="sd">        	Location to write coverage scaling parameter dictionary as a json.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">COVERAGE_SCALING_DICT</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CO_INT_EXP&#39;</span><span class="p">:[],</span><span class="s1">&#39;CO_FREQ&#39;</span><span class="p">:[],</span> <span class="s1">&#39;PTCO_INT_EXP&#39;</span><span class="p">:[],</span> <span class="s1">&#39;PTCO_FREQ&#39;</span><span class="p">:</span> <span class="p">[]}</span>
         <span class="n">PRIMARY_DATA_PATH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRIMARY_DATA_PATH</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PRIMARY_DATA_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -888,8 +1025,6 @@
                                         <span class="p">,</span><span class="s1">&#39;OTHER_COVERAGE&#39;</span><span class="p">:</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;COVERAGE&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;SELF_COVERAGE&#39;</span><span class="p">]</span>\
                                         <span class="p">,</span><span class="s1">&#39;OTHER_CO_PER_A2&#39;</span><span class="p">:</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;CO_PER_A2&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;SELF_CO_PER_A2&#39;</span><span class="p">]})</span>
         
-        
-        
         <span class="k">def</span> <span class="nf">INT_func</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">X</span><span class="p">)</span>
         <span class="k">def</span> <span class="nf">reg_m</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
@@ -937,6 +1072,32 @@
 <div class="viewcode-block" id="COVERAGE_SCALING.save_coverage_figures"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.save_coverage_figures">[docs]</a>    <span class="k">def</span> <span class="nf">save_coverage_figures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure_directory</span><span class="p">,</span> <span class="n">adsorbate</span><span class="o">=</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span><span class="n">metal</span><span class="o">=</span><span class="s1">&#39;Pt&#39;</span>\
                               <span class="p">,</span><span class="n">frequency_scale_axis1</span><span class="o">=</span><span class="p">[</span><span class="mf">0.98</span><span class="p">,</span><span class="mf">1.10</span><span class="p">],</span> <span class="n">frequency_scale_axis2</span><span class="o">=</span><span class="p">[</span><span class="mf">0.995</span><span class="p">,</span><span class="mf">1.138</span><span class="p">]</span>\
                               <span class="p">,</span><span class="n">y_2_ticks</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mf">1.02</span><span class="p">,</span><span class="mf">1.04</span><span class="p">,</span><span class="mf">1.06</span><span class="p">,</span><span class="mf">1.08</span><span class="p">,</span><span class="mf">1.10</span><span class="p">,</span><span class="mf">1.12</span><span class="p">],</span><span class="n">presentation</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function generates and saves coverage scaling figures</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        figure_directory : str</span>
+<span class="sd">        	Directory where coverage scaling figures are to be saved</span>
+<span class="sd">        </span>
+<span class="sd">        adsorbate : str</span>
+<span class="sd">        	Name of adsorbate</span>
+<span class="sd">            </span>
+<span class="sd">        metal : str</span>
+<span class="sd">        	Name of metal</span>
+<span class="sd">            </span>
+<span class="sd">        frequency_scale_axis1 : list of flaot</span>
+<span class="sd">        	Scale of y axis for first and third subgraphs</span>
+<span class="sd">            </span>
+<span class="sd">        frequency_scale_axis2 : list of float</span>
+<span class="sd">        	Scale of y axis for second and fourth subgraphs</span>
+<span class="sd">            </span>
+<span class="sd">        y_2_ticks : list of float</span>
+<span class="sd">        	Tick points for y-axis of second and fourth subgraphs</span>
+<span class="sd">            </span>
+<span class="sd">        presentation : bool</span>
+<span class="sd">        	Indicates whether presentation style graphs are to be created.</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">PRIMARY_DATA_PATH</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PRIMARY_DATA_PATH</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PRIMARY_DATA_PATH</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
             <span class="n">ES_compressed</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
@@ -1002,8 +1163,6 @@
                                         <span class="p">,</span><span class="s1">&#39;FREQUENCY_SHIFT&#39;</span><span class="p">:</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;WEIGHTED_FREQUENCY&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;LOW_COV_FREQUENCY&#39;</span><span class="p">]</span>\
                                         <span class="p">,</span><span class="s1">&#39;OTHER_COVERAGE&#39;</span><span class="p">:</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;COVERAGE&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;SELF_COVERAGE&#39;</span><span class="p">]</span>\
                                         <span class="p">,</span><span class="s1">&#39;OTHER_CO_PER_A2&#39;</span><span class="p">:</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;CO_PER_A2&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">ES_joined</span><span class="p">[</span><span class="s1">&#39;SELF_CO_PER_A2&#39;</span><span class="p">]})</span>
-        
-        
         
         <span class="k">def</span> <span class="nf">INT_func</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">a</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">X</span><span class="p">)</span>

@@ -869,7 +869,7 @@ class CROSS_VALIDATION:
         	
         Attributes
         ----------
-        NN : MLPRegressor
+        NN : neural_network.MLPRegressor
         	Trained neural network. Only instantiated if IS_TEST == True
         		  
         Returns
@@ -1068,7 +1068,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         		  
         Returns
         -------
-        NN : MLPRegressor
+        NN : neural_network.MLPRegressor
         	Trained neural network.
                 
         """
@@ -1095,7 +1095,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         	
         Attributes
         ----------
-        NN : neural_network
+        NN : neural_network.MLPRegressor
         	Trained neural network.
             
         CV_DICT_LIST : list of dict

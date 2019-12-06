@@ -164,7 +164,31 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <div class="viewcode-block" id="VASP_PARSER"><a class="viewcode-back" href="../../../primary_data_creation/file_parser.html#jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER">[docs]</a><span class="k">class</span> <span class="nc">VASP_PARSER</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class for parsing vasp and chargemol files&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">create_files</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Summary goes on one line here</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        directory : str</span>
+<span class="sd">        	Location of vasp and chargemol files</span>
+<span class="sd">            </span>
+<span class="sd">        create_files : bool</span>
+<span class="sd">        	If True, charg2.extxyzstripped and vasprun2.xmlstripped files</span>
+<span class="sd">            are generated which compile concatenated DDEC6 charge and</span>
+<span class="sd">            vasprun.xml files into a format readable by PANDAS or ASE</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq_dirs : list of str</span>
+<span class="sd">            List of directories where concatenated vasprun.xml and chargemol</span>
+<span class="sd">            files are located.</span>
+<span class="sd">            </span>
+<span class="sd">        create_files : list of str</span>
+<span class="sd">            list of preprocessed concatenated DECC6 charge files</span>
+<span class="sd">        		  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="n">freq_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">subdirectory</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="k">for</span> <span class="n">subdirectory</span> <span class="ow">in</span> <span class="n">d</span>\
                       <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;charge2.extxyz&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">subdirectory</span><span class="p">))</span>\
                           <span class="ow">and</span> <span class="s1">&#39;vasprun2.xml&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">subdirectory</span><span class="p">)))]</span>
@@ -172,6 +196,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">create_files</span> <span class="o">=</span> <span class="n">create_files</span>
     
 <div class="viewcode-block" id="VASP_PARSER.get_freq_files"><a class="viewcode-back" href="../../../primary_data_creation/file_parser.html#jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER.get_freq_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_freq_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get list of porcessed concatenated vasprun.xml files</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        directory : str or None</span>
+<span class="sd">        	directory of concatenated unprocessed concated vasprun.xml files</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        freq_files_clean : list of str</span>
+<span class="sd">            List of processed concatenated vasprun.xml files</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">create_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_files</span>
         <span class="k">if</span> <span class="n">directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_dirs</span>
@@ -189,6 +226,19 @@
         <span class="k">return</span> <span class="n">freq_files_clean</span></div>
     
 <div class="viewcode-block" id="VASP_PARSER.get_charge_files"><a class="viewcode-back" href="../../../primary_data_creation/file_parser.html#jl_spectra_2_structure.primary_data_creation.file_parser.VASP_PARSER.get_charge_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_charge_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">directory</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get list of porcessed concatenated DDEC6 charge files</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        directory : str or None</span>
+<span class="sd">        	directory of concatenated unprocessed concated chargemol files</span>
+<span class="sd">        		  </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        charge_files_clean : list of str</span>
+<span class="sd">            List of processed concatenated chargemol files</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">create_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_files</span>
         <span class="k">if</span> <span class="n">directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_dirs</span>
@@ -214,6 +264,32 @@
         <span class="k">return</span> <span class="n">charge_files_clean</span></div></div>
     
 <div class="viewcode-block" id="explode"><a class="viewcode-back" href="../../../primary_data_creation/file_parser.html#jl_spectra_2_structure.primary_data_creation.file_parser.explode">[docs]</a><span class="k">def</span> <span class="nf">explode</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">lst_cols</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">preserve_index</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Take a pandas data frame with list components and explode</span>
+<span class="sd">    so there is a separate line for each value in the list</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pandas.dataframe</span>
+<span class="sd">    	Dataframe to expand</span>
+<span class="sd">        </span>
+<span class="sd">    lst_cols : list</span>
+<span class="sd">        list of columns names whose cells are lists that are to be expanded</span>
+<span class="sd">        into their own rows</span>
+<span class="sd">    fill_value : str</span>
+<span class="sd">        If a column does not does not have the same number of indices as </span>
+<span class="sd">        in a specific row as the other cells with lists replace NA with</span>
+<span class="sd">        fill_value</span>
+<span class="sd">        </span>
+<span class="sd">    preserve_index : bool</span>
+<span class="sd">        Indicates whether the indices of the dataframe should be preserved</span>
+<span class="sd">        after expanding</span>
+<span class="sd">    		  </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    res : pandas.dataframe</span>
+<span class="sd">        Expanded dataframe</span>
+<span class="sd">            </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># make sure `lst_cols` is list-alike</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">lst_cols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst_cols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>

@@ -167,6 +167,48 @@
     <span class="sd">&quot;&quot;&quot;Class for calculating coordination and generalized coordination number.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">[],</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span> <span class="n">cutoff_type</span> <span class="o">=</span> <span class="s1">&#39;percent&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : atoms</span>
+<span class="sd">        	ASE atoms type.</span>
+<span class="sd">            </span>
+<span class="sd">        exclude : list of int</span>
+<span class="sd">        	Indices of atoms to exclude in tabulating the coordination of</span>
+<span class="sd">            each atom</span>
+<span class="sd">            </span>
+<span class="sd">        cutoff : float</span>
+<span class="sd">            Fudge factor multiplied by Van der Waals radii used to determine</span>
+<span class="sd">            connectivity. If distance between atoms is less than the summ of</span>
+<span class="sd">            their radii times cutoff they are considered to be coordinated</span>
+<span class="sd">            </span>
+<span class="sd">        cutoff_type : str</span>
+<span class="sd">            Can be &#39;percent&#39; or &#39;absolute&#39;. If Absolute then the cutoff is</span>
+<span class="sd">            considered a distance and replaces the use of Van der Waals radii</span>
+<span class="sd">            entirely. If multiple atom types are to be used then &#39;perecent&#39;</span>
+<span class="sd">            is best.</span>
+<span class="sd">        	</span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        atoms : atoms</span>
+<span class="sd">        	ASE atoms type.</span>
+<span class="sd">            </span>
+<span class="sd">        exclude : list of int</span>
+<span class="sd">        	Indices of atoms to exclude in tabulating the coordination of</span>
+<span class="sd">            each atom</span>
+<span class="sd">            </span>
+<span class="sd">        cutoff : float</span>
+<span class="sd">            Fudge factor multiplied by Van der Waals radii used to determine</span>
+<span class="sd">            connectivity. If distance between atoms is less than the summ of</span>
+<span class="sd">            their radii times cutoff they are considered to be coordinated</span>
+<span class="sd">            </span>
+<span class="sd">        cutoff_type : str</span>
+<span class="sd">            Can be &#39;percent&#39; or &#39;absolute&#39;. If Absolute then the cutoff is</span>
+<span class="sd">            considered a distance and replaces the use of Van der Waals radii</span>
+<span class="sd">            entirely. If multiple atom types are to be used then &#39;perecent&#39;</span>
+<span class="sd">            is best.</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="n">exclude</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff</span>
@@ -181,6 +223,15 @@
 <span class="sd">        This only excludes them from being counted from other atoms,  the coordination</span>
 <span class="sd">        numbers for these atoms will still be calculated,  but will be unable to form</span>
 <span class="sd">        bonds to other excluded atomic numbers.</span>
+<span class="sd">        </span>
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cn : list of int</span>
+<span class="sd">        	list of coordination numbers for each atom.</span>
+<span class="sd">            </span>
+<span class="sd">        bonded : list of list</span>
+<span class="sd">        	List of indices of atoms bonded to each atom</span>
+<span class="sd">            </span>
 <span class="sd">        &quot;&quot;&quot;</span>
     
         <span class="c1"># Get all the distances</span>
@@ -217,18 +268,46 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bonded</span> <span class="o">=</span> <span class="n">bonded</span></div>
         
 <div class="viewcode-block" id="Coordination.get_coordination_numbers"><a class="viewcode-back" href="../../../primary_data_creation/coordination.html#jl_spectra_2_structure.primary_data_creation.coordination.Coordination.get_coordination_numbers">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordination_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implements the read function</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cn : list of int</span>
+<span class="sd">        	list of coordination numbers for each atom.</span>
+<span class="sd">            </span>
+<span class="sd">        bonded : list of list</span>
+<span class="sd">        	List of indices of atoms bonded to each atom</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded</span>    </div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bonded</span></div>
     
 <div class="viewcode-block" id="Coordination.get_gcn"><a class="viewcode-back" href="../../../primary_data_creation/coordination.html#jl_spectra_2_structure.primary_data_creation.coordination.Coordination.get_gcn">[docs]</a>    <span class="k">def</span> <span class="nf">get_gcn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">site</span><span class="o">=</span><span class="p">[],</span> <span class="n">surface_type</span><span class="o">=</span><span class="s2">&quot;fcc&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the generalized coordination number of the site given.  To define</span>
 <span class="sd">        A site,  just give a list containing the indices of the atoms forming the site.</span>
 <span class="sd">        The calculated coordination numbers and bonding needs to be supplied, and the</span>
 <span class="sd">        surface type also needs to be changed if the surface is not represented by bulk fcc.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        </span>
+<span class="sd">        site : list of int</span>
+<span class="sd">            indices for which to calculate the GCN values</span>
+<span class="sd">            </span>
+<span class="sd">        surface_type : str</span>
+<span class="sd">            Indicates natural bulk of the material which influences</span>
+<span class="sd">            the maximum coordination environment of a site</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        gcn : list of float</span>
+<span class="sd">        	Listof generalized coordination values for the desired atoms in</span>
+<span class="sd">            a system.</span>
+<span class="sd">            </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Define the types of bulk accepted</span>
         <span class="n">gcn_bulk</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fcc&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">12.</span><span class="p">,</span> <span class="mf">18.</span><span class="p">,</span> <span class="mf">22.</span><span class="p">,</span> <span class="mf">26.</span><span class="p">,</span> <span class="mf">26.</span><span class="p">],</span> <span class="s2">&quot;bcc&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">14.</span><span class="p">,</span> <span class="mf">22.</span><span class="p">,</span> <span class="mf">28.</span><span class="p">,</span> <span class="mf">32.</span><span class="p">]}</span>
-        <span class="n">gcn</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">sum_gcn</span> <span class="o">=</span> <span class="mf">0.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">site</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">0</span>
         <span class="n">counted</span> <span class="o">=</span> <span class="p">[]</span>
@@ -239,8 +318,9 @@
                 <span class="k">if</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">counted</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="n">counted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
-                <span class="n">gcn</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cn</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">gcn</span> <span class="o">/</span> <span class="n">gcn_bulk</span><span class="p">[</span><span class="n">surface_type</span><span class="p">][</span><span class="nb">len</span><span class="p">(</span><span class="n">site</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span></div></div>
+                <span class="n">sum_gcn</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cn</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="n">gcn</span> <span class="o">=</span> <span class="n">sum_gcn</span> <span class="o">/</span> <span class="n">gcn_bulk</span><span class="p">[</span><span class="n">surface_type</span><span class="p">][</span><span class="nb">len</span><span class="p">(</span><span class="n">site</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">gcn</span></div></div>
 </pre></div>
 
            </div>

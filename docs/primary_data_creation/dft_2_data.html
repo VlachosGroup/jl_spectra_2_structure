@@ -173,10 +173,64 @@
 <dl class="class">
 <dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA">
 <em class="property">class </em><code class="sig-name descname">Primary_DATA</code><span class="sig-paren">(</span><em class="sig-param">metal_atoms=['Pt'], adsorbate_atoms=['C', 'O'], create_new_vasp_files=False, delta=0.025</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Class that generates primary data (frequencies, intensities, GCN values)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metal_atoms</strong> (<em>list of str</em>) – List of atom types considered part of the surface, bulk
+nanoparticle</p></li>
+<li><p><strong>adsorbate_atoms</strong> (<em>list of str</em>) – List of atom types onsidered adsorbates. The first atom type
+listed is considered in contact with the surface.</p></li>
+<li><p><strong>create_new_vasp_files</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, charg2.extxyzstripped and vasprun2.xmlstripped files
+are generated which compile concatenated DDEC6 charge and
+vasprun.xml files into a format readable by PANDAS or ASE</p></li>
+<li><p><strong>delta</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Angstroms atoms were displaced in finite difference calculation
+for parameterizing the Hessian</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>METAL_ATOMS</strong> (<em>list of str</em>) – List of atom types considered part of the surface, bulk
+nanoparticle</p></li>
+<li><p><strong>ADSORBATE_ATOMS</strong> (<em>list of str</em>) – List of atom types onsidered adsorbates. The first atom type
+listed is considered in contact with the surface.</p></li>
+<li><p><strong>CREATE_NEW_VASP_FILES</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – If True, charg2.extxyzstripped and vasprun2.xmlstripped files
+are generated which compile concatenated DDEC6 charge and
+vasprun.xml files into a format readable by PANDAS or ASE</p></li>
+<li><p><strong>DELTA</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – Angstroms atoms were displaced in finite difference calculation
+for parameterizing the Hessian</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_isotope_data">
 <code class="sig-name descname">generate_isotope_data</code><span class="sig-paren">(</span><em class="sig-param">vasp_directory, output_file, masses1=[12, 16], masses2=[24, 32]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA.generate_isotope_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_isotope_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>FREQUENCIES: frequencies of normal modes
+<dd><p>Generate isotope data used in frequency scaling</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vasp_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Directory where vasp files are stored.</p></li>
+<li><p><strong>output_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Output file location of json that will stroe isotope studies</p></li>
+<li><p><strong>masses1</strong> (<em>list of int</em>) – List of masses for ‘adsorbate_atoms’ for one isotope set</p></li>
+<li><p><strong>masses2</strong> (<em>list of int</em>) – List of masses for ‘adsorbate_atoms’ for the other isotope set</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>OUTPUT_DICTIONARY</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of primary data</p></li>
+<li><p><strong>FREQ_FILES</strong> (<em>list of str</em>) – List of preprocessed concatenated vasprun.xml files</p></li>
+<li><p><strong>CHARGE_FILES</strong> (<em>list of str</em>) – list of preprocessed concatenated DECC6 charge files</p></li>
+<li><p><strong>INDICES_USED</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – indices of CHARGE_FILES and FREQ_FILES whose data is used to generate primary
+data written to the OUTPUT_DICTIONARY</p></li>
+<li><p><strong>MOLECULES</strong> (<em>list of Atoms</em>) – List of ASE atoms object that represent the local minima used as
+the initial configuration for each normal mode analysis</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The following data is written for the isotopic analysis used in
+determining coverage scaling.</p>
+<p>FREQUENCIES: frequencies of normal modes
 INTENSITIES: intensities of normal modes
 CO_CN_CO: number of CO to which each CO is coordinated
 MIN_SEPARATION: smallest distance (A) between each CO
@@ -204,7 +258,32 @@ MIXED_FACTOR: contribution to each normal from secondary contributing CO isotope
 <dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data">
 <code class="sig-name descname">generate_primary_data</code><span class="sig-paren">(</span><em class="sig-param">vasp_directory</em>, <em class="sig-param">output_path</em>, <em class="sig-param">data_type='nanoparticle'</em>, <em class="sig-param">num_adsorbates='single'</em>, <em class="sig-param">poc=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA.generate_primary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Generate primary data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vasp_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Directory where vasp files are stored.</p></li>
+<li><p><strong>output_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Output file location of json that will stroe primary data</p></li>
+<li><p><strong>data_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Indicates the kind of DFT data that is being used. Can be
+‘nanoparticle’ or ‘surface’.</p></li>
+<li><p><strong>num_adsorbates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Indicates the number of adsorbates that were considered in the
+simulation. Can be ‘single’ or ‘multiple’</p></li>
+<li><p><strong>poc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of points of contact each adsorbate has with the surface.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>OUTPUT_DICTIONARY</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Dictionary of primary data</p></li>
+<li><p><strong>FREQ_FILES</strong> (<em>list of str</em>) – List of processed concatenated vasprun.xml files</p></li>
+<li><p><strong>CHARGE_FILES</strong> (<em>list of str</em>) – list of processed concatenated DECC6 charge files</p></li>
+<li><p><strong>INDICES_USED</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – indices of CHARGE_FILES and FREQ_FILES whose data is used to generate primary
+data written to the OUTPUT_DICTIONARY</p></li>
+<li><p><strong>MOLECULES</strong> (<em>list of Atoms</em>) – List of ASE atoms object that represent the local minima used as
+the initial configuration for each normal mode analysis</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -214,15 +293,44 @@ MIXED_FACTOR: contribution to each normal from secondary contributing CO isotope
 <dl class="class">
 <dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING">
 <em class="property">class </em><code class="sig-name descname">COVERAGE_SCALING</code><span class="sig-paren">(</span><em class="sig-param">primary_data_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#COVERAGE_SCALING"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Class that generates coverage scaling parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>primary_data_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Primary isotopic data used in generate coverage scaling realtions</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>PRIMARY_DATA_PATH</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Primary isotopic data used in generate coverage scaling realtions</p>
+</dd>
+</dl>
+<dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.get_coverage_parameters">
 <code class="sig-name descname">get_coverage_parameters</code><span class="sig-paren">(</span><em class="sig-param">coverage_scaling_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#COVERAGE_SCALING.get_coverage_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.get_coverage_parameters" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function that generates coverage scaling relations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coverage_scaling_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Location to write coverage scaling parameter dictionary as a json.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.save_coverage_figures">
 <code class="sig-name descname">save_coverage_figures</code><span class="sig-paren">(</span><em class="sig-param">figure_directory, adsorbate='CO', metal='Pt', frequency_scale_axis1=[0.98, 1.1], frequency_scale_axis2=[0.995, 1.138], y_2_ticks=[1, 1.02, 1.04, 1.06, 1.08, 1.1, 1.12], presentation=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#COVERAGE_SCALING.save_coverage_figures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING.save_coverage_figures" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function generates and saves coverage scaling figures</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figure_directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Directory where coverage scaling figures are to be saved</p></li>
+<li><p><strong>adsorbate</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of adsorbate</p></li>
+<li><p><strong>metal</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of metal</p></li>
+<li><p><strong>frequency_scale_axis1</strong> (<em>list of flaot</em>) – Scale of y axis for first and third subgraphs</p></li>
+<li><p><strong>frequency_scale_axis2</strong> (<em>list of float</em>) – Scale of y axis for second and fourth subgraphs</p></li>
+<li><p><strong>y_2_ticks</strong> (<em>list of float</em>) – Tick points for y-axis of second and fourth subgraphs</p></li>
+<li><p><strong>presentation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether presentation style graphs are to be created.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
