@@ -37,7 +37,7 @@ Dependencies
 License
 -------
 
-This project is licensed under the MIT License - see the `LICENSE.md`_
+This project is licensed under the MIT License - see the `LICENSE.md`
 file for details.
 
 .. _`documentation page`: https://jlans.github.io/jl_spectra_2_structure/

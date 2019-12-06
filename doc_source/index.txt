@@ -3,11 +3,12 @@
 
 Welcome to jl_spectra_2_structure's documentation!
 ==================================================
-This is documentation for https://github.com/JLans/jl_spectra_2_structure.
- jl_spectra_2_structure trains neural network models to learn quantitative descriptions of surface coordination
- for either extended surfaces or nanoparticles. The model is trained on complex synthetic IR data (secondary data).
- A class is provided for generating complex (secondary) data from low coverage dft frequency and intensity data (primary data).
- Another class is provided for generating the primary data from forces on atoms and integrated charges computed by vasp and chargemol respectively.
+
+.. toctree::
+	:maxdepth: 2
+	:caption: Getting Started:
+	
+	includeme
 
 .. toctree::
    :maxdepth: 4
