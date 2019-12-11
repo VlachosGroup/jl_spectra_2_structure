@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 import os
 from jl_spectra_2_structure.cross_validation import  CROSS_VALIDATION
 import uuid
+#This should be run from terminal
 #x=1
 #print('running this script')
 #wasserstein_loss

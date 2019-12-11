@@ -887,6 +887,7 @@ class CROSS_VALIDATION:
             Score_compare = Dict['Score_Val']
             Wl2_compare = Dict['Wl2_Val']
         else:
+            WL2_score_best = 10**6
             Dict = {'NN_PROPERTIES':[]
             ,'Wl2_Train':[], 'Score_Train':[]
             ,'Wl2_Test':[], 'Score_Test': []
@@ -931,6 +932,9 @@ class CROSS_VALIDATION:
                     Dict['Wl2_Train'].append(error_metrics.get_wasserstein_loss(y,y_predict))
                     Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
                     Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
+                    if IS_TEST == True:
+                        if WL2_score_best > Wl2_compare[-1]:
+                            NN_BEST = deepcopy(NN)
             if IS_TEST == True and VERBOSE==True:
                 print('Wl2_val/test: ' + str(Wl2_compare[-1]))
                 print('Wl2_Train: ' + str(Dict['Wl2_Train'][-1]))
@@ -948,7 +952,7 @@ class CROSS_VALIDATION:
             Dict.update({'NN_PROPERTIES':NN_PROPERTIES, 'parameters':NN.get_params()
             ,'__getstate__': state})
         if IS_TEST == True:
-            self.NN = NN
+            self.NN = NN_BEST
         return Dict
 
     def get_test_secondary_data(self):
@@ -1002,7 +1006,7 @@ class CROSS_VALIDATION:
         get_test_secondary_data = self.get_test_secondary_data
         _run_NN = self._run_NN
         INDICES_CV_ALL = self.INDICES_CV_ALL
-        X_Test, y_Test = get_test_secondary_data(read_file=True)
+        X_Test, y_Test = get_test_secondary_data()
         Dict =_run_NN(NUM_TRAIN, INDICES_CV_ALL, X_Test, y_Test, IS_TEST=True)
         self.X_Test = X_Test
         self.Y_Test = y_Test
@@ -1052,6 +1056,14 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         CV_FILES = [os.path.join(cross_validation_path,file) for file \
         in os.listdir(cross_validation_path) \
         if os.path.isfile(os.path.join(cross_validation_path,file)) == True]
+        CV_FOLDERS = [os.path.join(cross_validation_path,folder) for folder \
+        in os.listdir(cross_validation_path) \
+        if os.path.isdir(os.path.join(cross_validation_path,folder)) == True]
+        for folder in CV_FOLDERS:
+            CV_FILE = [os.path.join(folder,file) for file \
+                        in os.listdir(folder) \
+                        if os.path.isfile(os.path.join(folder,file)) == True]
+            CV_FILES += CV_FILE
         self.CV_FILES = CV_FILES
         self.CV_PATH_OLD = cross_validation_path
         self.CV_INDICES_PATH_OLD = cv_indices_path
@@ -1145,6 +1157,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         KEYS = ['INCLUDED_BINDING_TYPES','NUM_GCN_LABELS','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
               ,'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','CV_FILES_INDEX']
         for count, file in enumerate(CV_FILES):
+            print('Loading data from model: '+str(count))
             with open(file, 'r') as infile:
                 CV_DICT_LIST = json_tricks.load(infile)
             ADSORBATE = CV_DICT_LIST[-1]['ADSORBATE']
@@ -1158,9 +1171,9 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 WL_VAL.append(CV_DICT_LIST[i]['Wl2_Val'])
                 WL_TRAIN.append(CV_DICT_LIST[i]['Wl2_Train'])
             WL_VAL_mean = np.mean(WL_VAL,axis=0)
-            WL_VAL_std  = np.std(WL_VAL,axis=0)
+            WL_VAL_std  = np.std(WL_VAL,axis=0,ddof=1)
             WL_TRAIN_mean = np.mean(WL_TRAIN,axis=0)
-            WL_TRAIN_std  = np.std(WL_TRAIN,axis=0)
+            WL_TRAIN_std  = np.std(WL_TRAIN,axis=0,ddof=1)
             WL_TEST_TEST = CV_DICT_LIST[-2]['Wl2_Test']
             WL_TEST_TRAIN = CV_DICT_LIST[-2]['Wl2_Train']
             VALUES = [INCLUDED_BINDING_TYPES,NUM_GCN_LABELS, WL_VAL_mean, WL_VAL_std, WL_TRAIN_mean\
