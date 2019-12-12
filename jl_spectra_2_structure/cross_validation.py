@@ -934,6 +934,7 @@ class CROSS_VALIDATION:
                     Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
                     if IS_TEST == True:
                         if WL2_score_best > Wl2_compare[-1]:
+                            WL2_score_best = Wl2_compare[-1]
                             NN_BEST = deepcopy(NN)
             if IS_TEST == True and VERBOSE==True:
                 print('Wl2_val/test: ' + str(Wl2_compare[-1]))

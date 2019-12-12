@@ -43,25 +43,26 @@ def fun(x):
                                     ,('NO','low','GCN'),('NO','high','binding_type')\
                                     ,('NO','high','combine_hollow_sites')\
                                     ,('NO',1,'binding_type'),('NO',1,'combine_hollow_sites'),('NO',1,'GCN')\
-                                    ,('C2H4','low','binding_type'),('C2H4','low','GCN')],10,axis=0)
+                                    ,('C2H4','low','binding_type'),('C2H4','low','GCN')],5,axis=0).tolist()
+    
     which_setup = setup_list[x]
     ADSORBATE = which_setup[0]
     COVERAGE = which_setup[1]
     TARGET = which_setup[2]
     epsilon = 10**-12
-    alpha = 5*10**-5
-    epochs=5
-    if COVERAGE == 'high' and TARGET in ['binding_type','combine_hollow']:
-        NUM_TRAIN = 1000
-        training_sets = 200
-        learning_rate = 0.0004
-        batch_size=10
+    alpha = 10**-3
+    learning_rate = 0.0004
+    if COVERAGE == 'high' and TARGET in ['binding_type','combine_hollow_sites']:
+        NUM_TRAIN = 500
+        training_sets = 50
+        batch_size=5
+        epochs = 20
         
     else:
-        NUM_TRAIN = 10000
-        training_sets = 500
-        learning_rate = 0.0004
-        batch_size=100
+        NUM_TRAIN = 5000
+        training_sets = 100
+        batch_size=50
+        epochs=10
         
     print('batch_size: '+str(batch_size))
     print('learning_rate: '+str(learning_rate))
@@ -112,9 +113,9 @@ def fun(x):
     print(cross_validation_path) 
     CV_class = CROSS_VALIDATION(ADSORBATE=ADSORBATE,INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
                                 ,cross_validation_path=cross_validation_path, VERBOSE=True)
-    CV_SPLITS = 5
+    CV_SPLITS = 7
     CV_class.generate_test_cv_indices(CV_SPLITS=CV_SPLITS, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN\
-        , test_fraction=0.167, random_state=None, read_file=False, write_file=False)
+        , test_fraction=0.125, random_state=x, read_file=False, write_file=False)
     properties_dictionary = {'batch_size':batch_size, 'learning_rate_init':learning_rate\
     , 'epsilon':epsilon,'hidden_layer_sizes':hidden_layers,'regularization':L1orL2\
     ,'alpha':alpha, 'epochs_per_training_set':epochs,'training_sets':training_sets,'loss': 'wasserstein_loss'}
@@ -129,6 +130,6 @@ def fun(x):
 
 if __name__ == "__main__":
     with MPICommExecutor(MPI.COMM_WORLD, root=0) as executor:
-        jobs = range(190)
+        jobs = range(95)
         if executor is not None:
             executor.map(fun, jobs)
