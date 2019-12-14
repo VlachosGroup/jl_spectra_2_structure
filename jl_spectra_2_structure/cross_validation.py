@@ -1589,7 +1589,6 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                     plt.savefig(figure_path, format='jpg')
                     plt.close()
             else:
-                for ii in range(NUM_TARGETS):
                 print('WL: ' + str(error_metrics.get_wasserstein_loss(Y_Test,y_test_predict)))
         rcParams.update({'lines.markersize': 5})
         
