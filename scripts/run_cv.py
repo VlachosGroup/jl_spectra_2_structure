@@ -12,64 +12,65 @@ import uuid
 #coverage is 'low', 'high' or a float <= 1
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 if __name__ == "__main__":
-    ADSORBATE='CO'
-    COVERAGE='low'
-    run_number = str(uuid.uuid4())
-    batch_size = 72
-    learning_rate = 0.0001 #0.001
-    epsilon = 10**-12
-    alpha = 3*10**-6
-    NUM_TRAIN = 1575 #50000 or 5000/500 for binding energy coverage
-    epochs=50
-    training_sets = 25 #200 or 2000 250 seconds for 500/5000 w/ binding energy
-    hidden_layers = (50,50)
-    TARGET='binding_type'
-    TRAINING_ERROR='gaussian'
-    REG = 'L1'
-    if ADSORBATE == 'CO':
-        INCLUDED_BINDING_TYPES=[1,2,3,4]
-        MAX_COVERAGES = [1, 0.7, 0.2, 0.2]
-        BINDING_TYPE_FOR_GCN=[1]
-        HIGH_FREQUENCY = 2200
-        ENERGY_POINTS=500
-        GCN_ALL = False
-    elif ADSORBATE == 'NO':
-        INCLUDED_BINDING_TYPES=[1,2,3,4]
-        MAX_COVERAGES = [1, 1, 1, 1]
-        BINDING_TYPE_FOR_GCN=[1]
-        HIGH_FREQUENCY = 2000
-        ENERGY_POINTS=450
-        GCN_ALL = False
-    elif ADSORBATE == 'C2H4':
-        INCLUDED_BINDING_TYPES=[1,2]
-        MAX_COVERAGES = [1, 1]
-        BINDING_TYPE_FOR_GCN=[2]
-        HIGH_FREQUENCY = 2000
-        ENERGY_POINTS=450
-        GCN_ALL = True
+    for iteration in range(3):
+        ADSORBATE='CO'
+        COVERAGE='high'
+        run_number = str(uuid.uuid4())
+        batch_size = 72
+        learning_rate = 0.0002 #0.001
+        epsilon = 10**-12
+        alpha = 5*10**-5
+        NUM_TRAIN = 5000 #50000 or 5000/500 for binding energy coverage
+        epochs=10
+        training_sets = 50 #200 or 2000 250 seconds for 500/5000 w/ binding energy
+        hidden_layers = (50,50)
+        TARGET='GCN'
+        TRAINING_ERROR='gaussian'
+        REG = 'L1'
+        if ADSORBATE == 'CO':
+            INCLUDED_BINDING_TYPES=[1,2,3,4]
+            MAX_COVERAGES = [1, 0.7, 0.2, 0.2]
+            BINDING_TYPE_FOR_GCN=[1]
+            HIGH_FREQUENCY = 2200
+            ENERGY_POINTS=500
+            GCN_ALL = False
+        elif ADSORBATE == 'NO':
+            INCLUDED_BINDING_TYPES=[1,2,3,4]
+            MAX_COVERAGES = [1, 1, 1, 1]
+            BINDING_TYPE_FOR_GCN=[1]
+            HIGH_FREQUENCY = 2000
+            ENERGY_POINTS=450
+            GCN_ALL = False
+        elif ADSORBATE == 'C2H4':
+            INCLUDED_BINDING_TYPES=[1,2]
+            MAX_COVERAGES = [1, 1]
+            BINDING_TYPE_FOR_GCN=[2]
+            HIGH_FREQUENCY = 2000
+            ENERGY_POINTS=450
+            GCN_ALL = True
+            
+        print('ADSORBATE: ' + ADSORBATE)
+        print('TARGET: ' + TARGET)
+        print('COVERAGE: ' + str(COVERAGE))
+        print('TRAINING_ERROR: ' + str(TRAINING_ERROR))
+        print('GCN_ALL: ' + str(GCN_ALL))
         
-    print('ADSORBATE: ' + ADSORBATE)
-    print('TARGET: ' + TARGET)
-    print('COVERAGE: ' + str(COVERAGE))
-    print('TRAINING_ERROR: ' + str(TRAINING_ERROR))
-    print('GCN_ALL: ' + str(GCN_ALL))
-    
-    work_dir = os.getcwd()
-    cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
-    print(cross_validation_path) 
-    CV_class = CROSS_VALIDATION(ADSORBATE,INCLUDED_BINDING_TYPES\
-                                ,cross_validation_path=cross_validation_path, VERBOSE=True)
-    CV_SPLITS = 5
-    CV_class.generate_test_cv_indices(CV_SPLITS, BINDING_TYPE_FOR_GCN\
-        , test_fraction=0.167, random_state=95, read_file=False, write_file=False)
-    properties_dictionary = {'batch_size':batch_size, 'learning_rate_init':learning_rate\
-    , 'epsilon':epsilon,'hidden_layer_sizes':hidden_layers,'regularization':REG\
-    ,'alpha':alpha, 'epochs_per_training_set':epochs,'training_sets':training_sets,'loss': 'wasserstein_loss'}
-    CV_class.set_model_parameters(TARGET=TARGET, COVERAGE=COVERAGE\
-    , MAX_COVERAGES = MAX_COVERAGES, NN_PROPERTIES=properties_dictionary\
-    , NUM_TRAIN=NUM_TRAIN, NUM_VAL=10000, NUM_TEST=10000\
-    , MIN_GCN_PER_LABEL=12, NUM_GCN_LABELS=10, GCN_ALL = GCN_ALL, TRAINING_ERROR = TRAINING_ERROR\
-    , LOW_FREQUENCY=200, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
-    CV_RESULTS_FILE = ADSORBATE+'_'+TARGET+'_'+str(COVERAGE)+'_'+ run_number
-    #CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=4)
-    CV_class.get_test_results()
+        work_dir = os.getcwd()
+        cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
+        print(cross_validation_path) 
+        CV_class = CROSS_VALIDATION(ADSORBATE,INCLUDED_BINDING_TYPES\
+                                    ,cross_validation_path=cross_validation_path, VERBOSE=True)
+        CV_SPLITS = 3
+        CV_class.generate_test_cv_indices(CV_SPLITS, BINDING_TYPE_FOR_GCN\
+            , test_fraction=0.25, random_state=iteration, read_file=False, write_file=False)
+        properties_dictionary = {'batch_size':batch_size, 'learning_rate_init':learning_rate\
+        , 'epsilon':epsilon,'hidden_layer_sizes':hidden_layers,'regularization':REG\
+        ,'alpha':alpha, 'epochs_per_training_set':epochs,'training_sets':training_sets,'loss': 'wasserstein_loss'}
+        CV_class.set_model_parameters(TARGET=TARGET, COVERAGE=COVERAGE\
+        , MAX_COVERAGES = MAX_COVERAGES, NN_PROPERTIES=properties_dictionary\
+        , NUM_TRAIN=NUM_TRAIN, NUM_VAL=10000, NUM_TEST=10000\
+        , MIN_GCN_PER_LABEL=12, NUM_GCN_LABELS=10, GCN_ALL = GCN_ALL, TRAINING_ERROR = TRAINING_ERROR\
+        , LOW_FREQUENCY=200, HIGH_FREQUENCY=HIGH_FREQUENCY, ENERGY_POINTS=ENERGY_POINTS)
+        CV_RESULTS_FILE = ADSORBATE+'_'+TARGET+'_'+str(COVERAGE)+'_'+ run_number
+        CV_class.run_CV_multiprocess(write_file=True, CV_RESULTS_FILE = CV_RESULTS_FILE, num_procs=4)
+        #CV_class.get_test_results()

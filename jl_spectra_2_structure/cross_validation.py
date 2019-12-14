@@ -25,8 +25,9 @@ class CROSS_VALIDATION:
        folds and generates sets of secondary data.    
     """
     def __init__(self, ADSORBATE='CO', INCLUDED_BINDING_TYPES=[1,2,3,4]\
-                 , cv_indices_path=None, cross_validation_path = None, nanoparticle_path=None\
-                 ,high_coverage_path=None, coverage_scaling_path=None,VERBOSE=False):
+                 , cv_indices_path=None, cross_validation_path = None\
+                 , nanoparticle_path=None,high_coverage_path=None\
+                 , coverage_scaling_path=None,VERBOSE=False, SAVE_ALL_NN=True):
         """ 
         Parameters
         ----------
@@ -76,6 +77,10 @@ class CROSS_VALIDATION:
         VERBOSE : bool
             Controls the printing of status statements.
             
+        SAVE_ALL_NN : bool
+            Controls whether a NN from each cross validation is saved or just
+            from the test set.
+            
         ADSORBATE : str
             Adsorbate for which the spectra is to be generated.
 
@@ -104,6 +109,7 @@ class CROSS_VALIDATION:
         self.HIGH_COV_PATH = high_coverage_path
         self.COV_SCALE_PATH = coverage_scaling_path
         self.VERBOSE = VERBOSE
+        self.SAVE_ALL_NN = SAVE_ALL_NN
         
         
     def _get_default_cross_validation_path(self):
@@ -881,11 +887,19 @@ class CROSS_VALIDATION:
         get_secondary_data = self.get_secondary_data
         NN_PROPERTIES = self.NN_PROPERTIES
         VERBOSE = self.VERBOSE
+        SAVE_ALL_NN = self.SAVE_ALL_NN
         if IS_TEST == False:
             Dict = {'Wl2_Train':[], 'Score_Train':[]\
                 ,'Wl2_Val':[], 'Score_Val':[]}
             Score_compare = Dict['Score_Val']
             Wl2_compare = Dict['Wl2_Val']
+            if SAVE_ALL_NN == True:
+                WL2_score_best = 10**6
+                Dict = {'NN_PROPERTIES':[], 'Wl2_Train':[], 'Score_Train':[]\
+                ,'Wl2_Val':[], 'Score_Val':[]
+                ,'parameters': [],'__getstate__':[]}
+                Score_compare = Dict['Score_Val']
+                Wl2_compare = Dict['Wl2_Val']
         else:
             WL2_score_best = 10**6
             Dict = {'NN_PROPERTIES':[]
@@ -930,9 +944,10 @@ class CROSS_VALIDATION:
                     ycompare_predict = NN.predict(X_compare)
                     Dict['Score_Train'].append(error_metrics.get_r2(y,y_predict))
                     Dict['Wl2_Train'].append(error_metrics.get_wasserstein_loss(y,y_predict))
+                    #This updates the value in the dictionary as well.
                     Score_compare.append(error_metrics.get_r2(y_compare,ycompare_predict))
                     Wl2_compare.append(error_metrics.get_wasserstein_loss(y_compare,ycompare_predict))
-                    if IS_TEST == True:
+                    if IS_TEST == True or SAVE_ALL_NN == True:
                         if WL2_score_best > Wl2_compare[-1]:
                             WL2_score_best = Wl2_compare[-1]
                             NN_BEST = deepcopy(NN)
@@ -941,7 +956,7 @@ class CROSS_VALIDATION:
                 print('Wl2_Train: ' + str(Dict['Wl2_Train'][-1]))
                 print('Score val/test: ' + str(Score_compare[-1]))
                 print('Score_Train: ' + str(Dict['Score_Train'][-1]))
-        if IS_TEST==True:
+        if IS_TEST == True or SAVE_ALL_NN == True:
             state = deepcopy(NN_BEST.__getstate__())
             #Below code is only necessary for removing class instances like the random and _optimizer
             for key in list(state.keys()):
@@ -952,7 +967,13 @@ class CROSS_VALIDATION:
                         del state[key]
             Dict.update({'NN_PROPERTIES':NN_PROPERTIES, 'parameters':NN_BEST.get_params()
             ,'__getstate__': state})
-        if IS_TEST == True:
+        if SAVE_ALL_NN == True:
+            try:
+                self.NN_LIST.append(NN_BEST)
+            except:
+                self.NN_LIST = []
+                self.NN_LIST.append(NN_BEST)
+        if IS_TEST == True or SAVE_ALL_NN == True:
             self.NN = NN_BEST
         return Dict
 
@@ -1092,7 +1113,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         NN.__setstate__(dictionary['__getstate__'])
         return NN
     
-    def get_NN_ensemble(self,indices):
+    def get_NN_ensemble(self,indices, use_all_cv_NN = False):
         """Loads a neural network from a dictionary containing properties
         such as number of nodes, acitavtion functions, their coefficients and
         their intercepts.
@@ -1102,6 +1123,10 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         indices : list
         	Indicates which cross validation results to use in generation of a NN
           ensemble
+          
+         use_all_cv_NN : bool
+          Indicates whether to use NN from all cross validation runs in
+          addition to the one trained on all the cross validation data.
         		  
         Returns
         -------
@@ -1116,8 +1141,11 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             file = CV_FILES[index]
             with open(file, 'r') as infile:
                 CV_DICT_LIST = json_tricks.load(infile)
-            NN = get_NN(CV_DICT_LIST[-2])
-            NN_List.append(NN)
+            if use_all_cv_NN == False:
+                NN = get_NN(CV_DICT_LIST[-2])
+                NN_List.append(NN)
+            else:
+                NN_List += [get_NN(i) for i in CV_DICT_LIST[0:-1]]
         return NN_ENSEMBLE(NN_List)
     
     def get_ensemble_cv(self):
@@ -1178,10 +1206,10 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         	Indicates which cross validation result to load
             
         new_cv_indices_path : str
-            Folder path where indices for new cross validation are to be saved. 
+         Folder path where indices for new cross validation are to be saved. 
             
         new_cross_validation_path : str
-            Folder path where new cross validation results are to be saved.
+         Folder path where new cross validation results are to be saved.
         	
         Attributes
         ----------
@@ -1211,6 +1239,10 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             CV_DICT_LIST = json_tricks.load(infile)
         __dict__.update(CV_DICT_LIST[-1])
         self.NN = get_NN(CV_DICT_LIST[-2])
+        try:
+            self.NN_ENSEMBLE = NN_ENSEMBLE([get_NN(i) for i in CV_DICT_LIST[0:-1]])
+        except:
+            pass
         self.CV_DICT_LIST = CV_DICT_LIST
         super().__init__(ADSORBATE=self.ADSORBATE, INCLUDED_BINDING_TYPES=self.INCLUDED_BINDING_TYPES\
              , cv_indices_path=new_cv_indices_path, cross_validation_path=new_cross_validation_path)
@@ -1487,7 +1519,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 plt.close()
         rcParams.update({'figure.autolayout': True})
         
-    def plot_parity_plots(self,figure_directory='show',model_list=None):
+    def plot_parity_plots(self,figure_directory='show',model_list=None, use_ensemble=False):
         """Plot parity plots for models whose index is in model_list
 
         Parameters
@@ -1498,11 +1530,17 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         model_list : None or list of int
         	Can be None only if load_CV_class(index) has already been run.
             
+        use_ensemble : bool
+         Dictates whether an ensemble of CV models is used.
+            
     """
         rcParams.update({'lines.markersize': 2.5})
         if model_list is None:
             try:
-                NN = self.NN
+                if use_ensemble == False:
+                    NN = self.NN
+                else:
+                    NN = self.NN_ENSEMBLE
                 num_runs = 1
             except:
                 print("LOAD_CROSS_VALIDATION.load_CV_class(index) must be run")
@@ -1516,7 +1554,10 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 model_list = ['no_index']
             else:
                 self.load_CV_class(model_list[i])
-                NN = self.NN
+                if use_ensemble == False:
+                    NN = self.NN
+                else:
+                    NN = self.NN_ENSEMBLE
             print('Model index: '+ str(model_list[i]))
             get_secondary_data = super().get_secondary_data
             INDICES_TEST = self.INDICES_TEST
@@ -1524,28 +1565,32 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             X_Test, Y_Test = get_secondary_data(200, INDICES_TEST,iterations=10)
             y_test_predict = NN.predict(X_Test)
             NUM_TARGETS = Y_Test.shape[1]
-            if figure_directory == 'show':
-                plt.figure()
+            if NUM_TARGETS < 5:
+                if figure_directory == 'show':
+                    plt.figure()
+                else:
+                    plt.figure(0,figsize=(3.5,2),dpi=400)
+                marker = ['o','s','^','D']
+                ax = plt.subplot()
+                for ii in range(NUM_TARGETS):
+                    ax.plot(Y_Test[:,ii],y_test_predict[:,ii],marker[ii],zorder=100-i)
+                    print('R2: ' + str(error_metrics.get_r2(Y_Test[:,ii],y_test_predict[:,ii])))
+                    print('RMSE: ' + str(error_metrics.get_rmse(Y_Test[:,ii],y_test_predict[:,ii])))
+                print('WL: ' + str(error_metrics.get_wasserstein_loss(Y_Test,y_test_predict)))
+                ax.plot([0,1],[0,1],'k')
+                ax.set_xlabel('Actual Percent')
+                ax.set_ylabel('Predicted Percent')
+                #plt.gcf().subplots_adjust(bottom=0.12,top=0.98,left=0.09,right=0.97)
+                ax.tick_params(axis='both', which='major')
+                if figure_directory == 'show':
+                    plt.show()
+                else:
+                    figure_path = os.path.join(figure_directory,'Parity_plot_'+str(model_list[i])+'.jpg')
+                    plt.savefig(figure_path, format='jpg')
+                    plt.close()
             else:
-                plt.figure(0,figsize=(3.5,2),dpi=400)
-            marker = ['o','s','^','D']
-            ax = plt.subplot()
-            for ii in range(NUM_TARGETS):
-                ax.plot(Y_Test[:,ii],y_test_predict[:,ii],marker[ii],zorder=10-i)
-                print('R2: ' + str(error_metrics.get_r2(Y_Test[:,ii],y_test_predict[:,ii])))
-                print('RMSE: ' + str(error_metrics.get_rmse(Y_Test[:,ii],y_test_predict[:,ii])))
-                print('WL: ' + str(error_metrics.get_wasserstein_loss(Y_Test[:,ii],y_test_predict[:,ii])))
-            ax.plot([0,1],[0,1],'k')
-            ax.set_xlabel('Actual Percent')
-            ax.set_ylabel('Predicted Percent')
-            #plt.gcf().subplots_adjust(bottom=0.12,top=0.98,left=0.09,right=0.97)
-            ax.tick_params(axis='both', which='major')
-            if figure_directory == 'show':
-                plt.show()
-            else:
-                figure_path = os.path.join(figure_directory,'Parity_plot_'+str(model_list[i])+'.jpg')
-                plt.savefig(figure_path, format='jpg')
-                plt.close()
+                for ii in range(NUM_TARGETS):
+                print('WL: ' + str(error_metrics.get_wasserstein_loss(Y_Test,y_test_predict)))
         rcParams.update({'lines.markersize': 5})
         
 class NESTED_DICT(dict):
