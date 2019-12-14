@@ -53,7 +53,7 @@ def fun(x):
     learning_rate = 0.0002
     if COVERAGE == 'high' and TARGET in ['binding_type','combine_hollow_sites']:
         NUM_TRAIN = 500
-        training_sets = 200
+        training_sets = 300
         batch_size=5
         epochs = 40
         
