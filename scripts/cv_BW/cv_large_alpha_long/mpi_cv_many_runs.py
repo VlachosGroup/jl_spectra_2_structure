@@ -35,33 +35,37 @@ def fun(x):
     hidden_layer_3 = 100
     hidden_layers = (hidden_layer1, hidden_layer2, hidden_layer_3)
     
-    setup_list = np.repeat([('CO','low','binding_type'),('CO','low','combine_hollow_sites')\
-                                    ,('CO','low','GCN'),('CO','high','binding_type')\
+    setup_list = np.repeat([('CO','low','GCN'),('CO','high','binding_type'),('CO',1,'GCN')\
                                     ,('CO','high','combine_hollow_sites'),('CO','high','GCN')\
-                                    ,('CO',1,'binding_type'),('CO',1,'combine_hollow_sites'),('CO',1,'GCN')\
-                                    ,('NO','low','binding_type'),('NO','low','combine_hollow_sites')\
                                     ,('NO','low','GCN'),('NO','high','binding_type')\
                                     ,('NO','high','combine_hollow_sites')\
                                     ,('NO',1,'binding_type'),('NO',1,'combine_hollow_sites'),('NO',1,'GCN')\
-                                    ,('C2H4','low','binding_type'),('C2H4','low','GCN')],5,axis=0).tolist()
+                                    ,('C2H4','low','binding_type'),('C2H4','low','GCN')\
+                                    ,('CO','low','binding_type'),('CO','low','combine_hollow_sites')\
+                                    ,('CO',1,'binding_type'),('CO',1,'combine_hollow_sites')\
+                                    ,('NO','low','binding_type'),('NO','low','combine_hollow_sites')],5,axis=0).tolist()
     
     which_setup = setup_list[x]
     ADSORBATE = which_setup[0]
     COVERAGE = which_setup[1]
+    try:
+        COVERAGE = float(COVERAGE)
+    except:
+        COVERAGE=COVERAGE
     TARGET = which_setup[2]
     epsilon = 10**-12
     alpha = 10**-3
-    learning_rate = 0.0004
+    learning_rate = 0.0002
     if COVERAGE == 'high' and TARGET in ['binding_type','combine_hollow_sites']:
         NUM_TRAIN = 500
-        training_sets = 50
+        training_sets = 200
         batch_size=5
-        epochs = 20
+        epochs = 40
         
     else:
         NUM_TRAIN = 5000
-        training_sets = 100
-        batch_size=50
+        training_sets = 200
+        batch_size=10
         epochs=10
         
     print('batch_size: '+str(batch_size))
@@ -112,10 +116,10 @@ def fun(x):
     cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
     print(cross_validation_path) 
     CV_class = CROSS_VALIDATION(ADSORBATE=ADSORBATE,INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
-                                ,cross_validation_path=cross_validation_path, VERBOSE=True)
-    CV_SPLITS = 7
+                                ,cross_validation_path=cross_validation_path, VERBOSE=False)
+    CV_SPLITS = 3
     CV_class.generate_test_cv_indices(CV_SPLITS=CV_SPLITS, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN\
-        , test_fraction=0.125, random_state=x, read_file=False, write_file=False)
+        , test_fraction=0.25, random_state=x, read_file=False, write_file=False)
     properties_dictionary = {'batch_size':batch_size, 'learning_rate_init':learning_rate\
     , 'epsilon':epsilon,'hidden_layer_sizes':hidden_layers,'regularization':L1orL2\
     ,'alpha':alpha, 'epochs_per_training_set':epochs,'training_sets':training_sets,'loss': 'wasserstein_loss'}

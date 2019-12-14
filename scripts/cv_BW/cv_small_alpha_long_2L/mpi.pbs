@@ -2,7 +2,7 @@
 #PBS -j oe
 #PBS -q low
 #PBS -l nodes=60:ppn=16:xk
-#PBS -l walltime=12:00:00
+#PBS -l walltime=22:00:00
 
 cd $PBS_O_WORKDIR
 

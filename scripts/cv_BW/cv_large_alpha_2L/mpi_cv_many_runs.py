@@ -30,10 +30,9 @@ def fun(x):
     
     L1orL2 = 'L1'
     TRAINING_ERROR = 'gaussian'
-    hidden_layer1 = 100
-    hidden_layer2 = 100
-    hidden_layer_3 = 100
-    hidden_layers = (hidden_layer1, hidden_layer2, hidden_layer_3)
+    hidden_layer1 = 50
+    hidden_layer2 = 50
+    hidden_layers = (hidden_layer1, hidden_layer2)
     
     setup_list = np.repeat([('CO','low','GCN'),('CO','high','binding_type'),('CO',1,'GCN')\
                                     ,('CO','high','combine_hollow_sites'),('CO','high','GCN')\

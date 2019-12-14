@@ -30,10 +30,9 @@ def fun(x):
     
     L1orL2 = 'L1'
     TRAINING_ERROR = 'gaussian'
-    hidden_layer1 = 100
-    hidden_layer2 = 100
-    hidden_layer_3 = 100
-    hidden_layers = (hidden_layer1, hidden_layer2, hidden_layer_3)
+    hidden_layer1 = 50
+    hidden_layer2 = 50
+    hidden_layers = (hidden_layer1, hidden_layer2)
     
     setup_list = np.repeat([('CO','low','GCN'),('CO','high','binding_type'),('CO',1,'GCN')\
                                     ,('CO','high','combine_hollow_sites'),('CO','high','GCN')\
@@ -54,7 +53,7 @@ def fun(x):
         COVERAGE=COVERAGE
     TARGET = which_setup[2]
     epsilon = 10**-12
-    alpha = 10**-3
+    alpha = 5*10**-5
     learning_rate = 0.0004
     if COVERAGE == 'high' and TARGET in ['binding_type','combine_hollow_sites']:
         NUM_TRAIN = 500
@@ -116,7 +115,7 @@ def fun(x):
     cross_validation_path = os.path.join(work_dir,'cross_validation_'+ADSORBATE+'_'+TARGET+'_'+str(COVERAGE))
     print(cross_validation_path) 
     CV_class = CROSS_VALIDATION(ADSORBATE=ADSORBATE,INCLUDED_BINDING_TYPES=INCLUDED_BINDING_TYPES\
-                                ,cross_validation_path=cross_validation_path, VERBOSE=False)
+                                ,cross_validation_path=cross_validation_path, VERBOSE=True)
     CV_SPLITS = 3
     CV_class.generate_test_cv_indices(CV_SPLITS=CV_SPLITS, BINDING_TYPE_FOR_GCN=BINDING_TYPE_FOR_GCN\
         , test_fraction=0.25, random_state=x, read_file=False, write_file=False)

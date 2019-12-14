@@ -22,11 +22,6 @@ def fun(x):
     seed = uuid.uuid4()
     run_number = str(seed) 
     print('run_number: ' + run_number)
-    #try:
-    #    run_number = sys.argv[1]
-    #except:
-    #    "requires an input argument"
-    #    raise
     
     L1orL2 = 'L1'
     TRAINING_ERROR = 'gaussian'
@@ -54,18 +49,18 @@ def fun(x):
         COVERAGE=COVERAGE
     TARGET = which_setup[2]
     epsilon = 10**-12
-    alpha = 10**-3
-    learning_rate = 0.0004
+    alpha = 5*10**-5
+    learning_rate = 0.0002
     if COVERAGE == 'high' and TARGET in ['binding_type','combine_hollow_sites']:
         NUM_TRAIN = 500
-        training_sets = 100
+        training_sets = 200
         batch_size=5
-        epochs = 20
+        epochs = 40
         
     else:
         NUM_TRAIN = 5000
         training_sets = 200
-        batch_size=50
+        batch_size=10
         epochs=10
         
     print('batch_size: '+str(batch_size))
@@ -76,13 +71,6 @@ def fun(x):
     print('training_sets: '+str(training_sets))
     print('epochs: '+str(epochs))
     print('hidden layers: '+str(hidden_layers))
-    #batch_size: 2297
-    #learning_rate = 0.06651629336077657
-    #epsilon = 0.02872678693613251
-    #alpha = 0.001931666535492889
-    #NUM_TRAIN = 100000
-    #epochs=2
-    #training_sets = 2
     if ADSORBATE == 'CO':
         INCLUDED_BINDING_TYPES=[1,2,3,4]
         MAX_COVERAGES = [1, 0.7, 0.2, 0.2]

@@ -35,32 +35,36 @@ def fun(x):
     hidden_layer_3 = 100
     hidden_layers = (hidden_layer1, hidden_layer2, hidden_layer_3)
     
-    setup_list = np.repeat([('CO','low','binding_type'),('CO','low','combine_hollow_sites')\
-                                    ,('CO','low','GCN'),('CO','high','binding_type')\
+    setup_list = np.repeat([('CO','low','GCN'),('CO','high','binding_type'),('CO',1,'GCN')\
                                     ,('CO','high','combine_hollow_sites'),('CO','high','GCN')\
-                                    ,('CO',1,'binding_type'),('CO',1,'combine_hollow_sites'),('CO',1,'GCN')\
-                                    ,('NO','low','binding_type'),('NO','low','combine_hollow_sites')\
                                     ,('NO','low','GCN'),('NO','high','binding_type')\
                                     ,('NO','high','combine_hollow_sites')\
                                     ,('NO',1,'binding_type'),('NO',1,'combine_hollow_sites'),('NO',1,'GCN')\
-                                    ,('C2H4','low','binding_type'),('C2H4','low','GCN')],5,axis=0).tolist()
+                                    ,('C2H4','low','binding_type'),('C2H4','low','GCN')\
+                                    ,('CO','low','binding_type'),('CO','low','combine_hollow_sites')\
+                                    ,('CO',1,'binding_type'),('CO',1,'combine_hollow_sites')\
+                                    ,('NO','low','binding_type'),('NO','low','combine_hollow_sites')],5,axis=0).tolist()
     
     which_setup = setup_list[x]
     ADSORBATE = which_setup[0]
     COVERAGE = which_setup[1]
+    try:
+        COVERAGE = float(COVERAGE)
+    except:
+        COVERAGE=COVERAGE
     TARGET = which_setup[2]
     epsilon = 10**-12
     alpha = 5*10**-5
     learning_rate = 0.0004
     if COVERAGE == 'high' and TARGET in ['binding_type','combine_hollow_sites']:
         NUM_TRAIN = 500
-        training_sets = 50
+        training_sets = 100
         batch_size=5
         epochs = 20
         
     else:
         NUM_TRAIN = 5000
-        training_sets = 100
+        training_sets = 200
         batch_size=50
         epochs=10
         

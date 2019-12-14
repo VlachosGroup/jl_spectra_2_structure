@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -j oe
 #PBS -q low
-#PBS -l nodes=399:ppn=32:xe
-#PBS -l walltime=24:00:00
+#PBS -l nodes=60:ppn=16:xk
+#PBS -l walltime=12:00:00
 
 cd $PBS_O_WORKDIR
 
@@ -12,4 +12,4 @@ module load bwpy-mpi
 NRANKS=$(wc -l <$PBS_NODEFILE)
 cpus=`expr $NRANKS / 4`
 echo $cpus
-aprun -n 396 -N 1 -b python ./mpi_cv_many_runs.py 
+aprun -n 60 -N 1 -b python ./mpi_cv_many_runs.py 

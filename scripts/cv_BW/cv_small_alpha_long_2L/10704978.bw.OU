@@ -1,0 +1,1121 @@
+----------------------------------------
+Begin Torque Prologue on nid25330
+at Sat Dec 14 06:36:26 CST 2019
+Job Id:			10704978.bw
+Username:		lansford
+Group:			EOT_baxw
+Job name:		mpi.pbs
+Requested resources:	nodes=60:ppn=16:xk,walltime=22:00:00,neednodes=60:ppn=16:xk
+Queue:			low
+Account:		baxw
+End Torque Prologue:  0.106 elapsed
+----------------------------------------
+
+
+
+
+240
+on 1 print 0
+run_number: eac88586-598b-45b1-96c4-0153c27a0c54
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_low
+on 5 print 4
+run_number: c7cf9c74-85ff-452c-89e7-0555df8cbb63
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_low
+on 38 print 37
+run_number: 7a415bd4-4706-4e13-816d-b1fc04238cec
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_1.0
+on 21 print 20
+run_number: 351c6507-9230-407e-baca-196d870e60f9
+on 18 print 17
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_high
+on 15 print 14
+run_number: 18b3415f-50d2-4b19-b09c-d3abc3454a58
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_low
+on 31 print 30
+run_number: f23c0daa-c997-4965-a8d4-2cff041de037
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_1.0
+on 32 print 31
+run_number: 4af52b61-42db-4595-a480-08237cb76aab
+on 10 print 9
+run_number: 4fed82cf-8acb-40d0-9e44-ae5387d073f0
+batch_size: 10
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_low
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_1.0
+on 37 print 36
+run_number: d9004c99-1317-4e47-9c11-ebb84c847875
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_1.0
+on 23 print 22
+run_number: 12f0af22-676f-4b9f-9ab9-e95a2868ba56
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_high
+on 42 print 41
+run_number: c8452f2e-1ccb-4969-a432-8899a5e12f35
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_1.0
+on 35 print 34
+run_number: 89db90e9-798c-46a5-8639-d410d7196cce
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_1.0
+on 14 print 13
+run_number: 0e6c9112-fa1f-4a75-8574-853eaa2b5d8a
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_low
+run_number: 165f3720-2363-49ce-a357-6a46504f8972
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_high
+on 3 print 2
+run_number: 7f9b3c1b-046d-4990-85b1-9ef1f96405a0
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_low
+on 6 print 5
+run_number: d7b44d15-2395-44c5-8c12-f8650d27b138
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_low
+on 8 print 7
+run_number: eef9f6e2-7b2d-403a-8d59-5870cc329121
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_low
+on 43 print 42
+run_number: b842fc76-7492-4778-84e8-5facaf43e4aa
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_1.0
+on 7 print 6
+run_number: af2d2b60-eda2-4e7f-8891-2d8bd97a4995
+on 34 print 33
+run_number: 29f40ec8-7287-497d-8f27-fe82ebd4b2c5
+batch_size: 10
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: low
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: 1.0
+GCN_ALL: False
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_low
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_1.0
+on 28 print 27
+run_number: bf7b09c1-a23c-4eb5-b603-475041d8492a
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_high
+on 11 print 10
+run_number: 7d786428-5150-4f0c-9d5d-bae5b1932d06
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_low
+on 25 print 24
+run_number: 468e0db5-d9c2-46b3-9e9f-bbfa720a0be6
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_high
+on 13 print 12
+run_number: 08984f79-47ad-421c-beec-98c28f7cd72f
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_low
+on 36 print 35
+on 44 print 43
+run_number: 5c3ec836-3c68-4e98-be25-ef1b116609fc
+run_number: 3b91e3a7-21d9-4e32-ad48-b53ee0ca2e33
+batch_size: 10
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: 1.0
+GCN_ALL: False
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_1.0
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_1.0
+on 26 print 25
+run_number: bdbc6dcd-fe6e-4676-a84f-bf2451faa8ff
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_high
+on 16 print 15
+run_number: 8348c0a2-273c-489e-a136-a54d73685f47
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_high
+on 2 print 1
+run_number: 70ab1163-c57a-412a-b924-28f2ee17c304
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_low
+on 19 print 18
+run_number: 3a90d831-aa98-4468-b808-fcccf11f838f
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_high
+on 27 print 26
+run_number: 058ec9a3-d148-4b1e-9273-30a331446bec
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_high
+on 9 print 8
+run_number: 7e566407-01ae-4358-95e7-d4b2adee347c
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_low
+on 24 print 23
+run_number: ef6e91ac-28c8-46ef-b6ff-e1ba61375a85
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_high
+on 20 print 19
+run_number: a2971fa8-d590-48fb-b398-4099aa82043a
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_high
+on 33 print 32
+run_number: 24d5eff6-6d0e-41e3-93b8-03debfaadf80
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_1.0
+on 4 print 3
+run_number: c60cc74b-7901-4e6c-a4ed-eaa3e61705bd
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_low
+on 41 print 40
+run_number: 2491b5c9-0ca0-4d3a-afd1-70f8f4a6ee78
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_1.0
+on 12 print 11
+run_number: 4449762f-d098-42ea-9c1b-7a8d7233ed83
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_low
+on 40 print 39
+run_number: f385ccdb-e371-4979-a6bb-7bee1be8b0fa
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_1.0
+on 30 print 29
+run_number: 961464d3-3edd-45a0-84bc-2d420cb6c145
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_high
+on 22 print 21
+run_number: 7338faef-17eb-435d-a925-f306a4ab570b
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_high
+on 39 print 38
+run_number: bec5392c-b542-4fd3-9e39-9ca768e3abb4
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: combine_hollow_sites
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_combine_hollow_sites_1.0
+on 17 print 16
+run_number: 9bb7d941-c0f7-47de-978f-bdea9ce56539
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_binding_type_high
+on 29 print 28
+run_number: 14cd58b5-c3a9-4026-9aac-59efd8fa69aa
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_high
+on 45 print 44
+run_number: e5cb4417-236c-4455-a2a8-c177c3a2d0d6
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: CO
+TARGET: GCN
+COVERAGE: 1.0
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_CO_GCN_1.0
+on 46 print 45
+run_number: 8329d64d-59b4-459a-a3ec-30e1043a11df
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_low
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+on 47 print 46
+run_number: 4bdb5f33-59bc-4142-b49d-5b0333d0f2fd
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_low
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+on 48 print 47
+run_number: 084c2a88-5606-44da-825a-e1a7bf6cd29c
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 49 print 48
+Setting number of processes to 4, which is the necessary number of model calls.
+run_number: 5eba3060-57b8-4c7b-838d-8b118b78c652
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_low
+on 50 print 49
+Setting number of processes to 4, which is the necessary number of model calls.
+run_number: 05e89574-d4ca-4f09-a8ea-4128758ca3e3
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_low
+on 51 print 50
+run_number: 2a6c70d3-deb8-4dd1-af04-12b969c6e248
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 52 print 51
+run_number: c0c8d1aa-df06-4af5-9d00-6eb36dbee202
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 53 print 52
+run_number: 2dcda91d-e29a-4217-baf3-cd766ea579b9
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 54 print 53
+run_number: 9552fdec-d2b0-49b7-aaab-a348a4fdb869
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 55 print 54
+run_number: 8b254bd5-5f87-4b79-9184-15038f03fc1f
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 56 print 55
+run_number: 9a6450df-656a-42cf-baf1-d7959882d7d5
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_GCN_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 57 print 56
+run_number: 4f69ca6a-7919-4278-994b-fca55410fe71
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_GCN_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 58 print 57
+run_number: 1340ed7f-bd95-4d3a-b6be-7a5064487b81
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_GCN_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 59 print 58
+run_number: 70c6b021-95ec-4473-be14-9afed3bb60f3
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_GCN_low
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+Setting number of processes to 4, which is the necessary number of model calls.
+on 25 print 59
+run_number: 07e93c0a-745c-4dcd-8ede-f8d528ce1729
+batch_size: 10
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 5000
+training_sets: 200
+epochs: 10
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: GCN
+COVERAGE: low
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_GCN_low
+Setting number of processes to 4, which is the necessary number of model calls.
+on 24 print 60
+run_number: a1274a14-e331-4456-a933-34e7b00349f0
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 22 print 61
+run_number: 90bbc4c5-1bb0-481e-a40d-b6272ea6c752
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 23 print 62
+run_number: e5e9892d-3432-43b0-8081-648b4bc43ce6
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 21 print 63
+run_number: f9a859d0-390d-492a-a703-464562af1c9f
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 20 print 64
+run_number: e1ba644a-8857-419f-a119-e6096bc39c92
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: binding_type
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_binding_type_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 19 print 65
+run_number: 802a3ffd-5a9c-458b-97c0-6a5263b1ec5c
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 16 print 66
+run_number: 360377ec-2e3e-4188-9250-22643227b29c
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 18 print 67
+run_number: b5dfeded-e80b-4e99-8fbd-49cb70ddc94f
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_high
+Setting number of processes to 4, which is the necessary number of model calls.
+on 17 print 68
+run_number: da043af7-ad14-4816-be47-a7db3e54b7d5
+batch_size: 5
+learning_rate: 0.0002
+epsilon: 1e-12
+alpha: 5e-05
+NUM_TRAIN: 500
+training_sets: 100
+epochs: 40
+hidden layers: (100, 100, 100)
+ADSORBATE: NO
+TARGET: combine_hollow_sites
+COVERAGE: high
+GCN_ALL: False
+/mnt/b/projects/eot/baxw/IR_Materials_Gap/cv_BW_round3/jl_spectra_2_structure/scripts/cv_BW/cv_small_alpha_long/cross_validation_NO_combine_hollow_sites_high
+Setting number of processes to 4, which is the necessary number of model calls.
