@@ -942,7 +942,7 @@ class CROSS_VALIDATION:
                 print('Score val/test: ' + str(Score_compare[-1]))
                 print('Score_Train: ' + str(Dict['Score_Train'][-1]))
         if IS_TEST==True:
-            state = deepcopy(NN.__getstate__())
+            state = deepcopy(NN_BEST.__getstate__())
             #Below code is only necessary for removing class instances like the random and _optimizer
             for key in list(state.keys()):
                 if type(state[key]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
@@ -950,7 +950,7 @@ class CROSS_VALIDATION:
                 elif type(state[key]) in [list, tuple, type(np.array(0))]:
                     if type(state[key][0]) not in [str, float, int, tuple, bool, complex, type(None), list, type(np.array(0))]:
                         del state[key]
-            Dict.update({'NN_PROPERTIES':NN_PROPERTIES, 'parameters':NN.get_params()
+            Dict.update({'NN_PROPERTIES':NN_PROPERTIES, 'parameters':NN_BEST.get_params()
             ,'__getstate__': state})
         if IS_TEST == True:
             self.NN = NN_BEST
@@ -1092,6 +1092,83 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         NN.__setstate__(dictionary['__getstate__'])
         return NN
     
+    def get_NN_ensemble(self,indices):
+        """Loads a neural network from a dictionary containing properties
+        such as number of nodes, acitavtion functions, their coefficients and
+        their intercepts.
+
+        Parameters
+        ----------
+        indices : list
+        	Indicates which cross validation results to use in generation of a NN
+          ensemble
+        		  
+        Returns
+        -------
+        NN_ensemble : neural_network.MLPRegressor ensemble
+        	Trained neural network ensemble.
+                
+        """
+        get_NN = self.get_NN
+        CV_FILES = self.CV_FILES
+        NN_List = []
+        for index in indices:
+            file = CV_FILES[index]
+            with open(file, 'r') as infile:
+                CV_DICT_LIST = json_tricks.load(infile)
+            NN = get_NN(CV_DICT_LIST[-2])
+            NN_List.append(NN)
+        return NN_ENSEMBLE(NN_List)
+    
+    def get_ensemble_cv(self):
+        """Get cross validation error for an ensemble of models
+
+        Parameters
+        ----------
+        	
+        Attributes
+        ----------
+        ENSEMBLE_MODELS : dict
+        	Dictionary of ensemble models
+        		  
+        Returns
+        -------
+        ENSEMBLE_MODELS_dict : dict
+        	Dictionary of ensemble models
+                
+        """
+        try:
+            CV_RESULTS = self.CV_RESULTS
+        except:
+            self.load_all_CV_data()
+            CV_RESULTS = self.CV_RESULTS
+        ENSEMBLE_MODELS = NESTED_DICT()
+        for ADSORBATE in CV_RESULTS.keys():
+            for TARGET in CV_RESULTS[ADSORBATE].keys():
+                for COVERAGE in CV_RESULTS[ADSORBATE][TARGET].keys():
+                    NUM_EPOCHS = CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN'][0].shape[1]
+                    ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'] =\
+                    np.reshape(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_VAL']\
+                               ,(-1,NUM_EPOCHS)).mean(axis=0)
+                    ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'] =\
+                    np.reshape(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_VAL']\
+                               ,(-1,NUM_EPOCHS)).std(axis=0, ddof=1)
+                    ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_mean'] =\
+                    np.reshape(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN']\
+                               ,(-1,NUM_EPOCHS)).mean(axis=0)
+                    ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_std'] =\
+                    np.reshape(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN']\
+                               ,(-1,NUM_EPOCHS)).std(axis=0, ddof=1)
+                    ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_TEST_mean'] =\
+                    np.mean(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'],\
+                                axis=0)
+                    ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_TEST_std'] =\
+                    np.std(CV_RESULTS[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'],\
+                                axis=0, ddof=1)
+        ENSEMBLE_MODELS_dict = NESTED_DICT_to_DICT(ENSEMBLE_MODELS)
+        self.ENSEMBLE_MODELS = ENSEMBLE_MODELS_dict
+        return ENSEMBLE_MODELS_dict
+    
     def load_CV_class(self,index, new_cv_indices_path = None, new_cross_validation_path=None):
         """Load all stored data from a single cross validation run.
 
@@ -1155,7 +1232,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 CV_RESULTS[ADSORBATE][TARGET][COVERAGE].update({KEY:[]})
             CV_RESULTS[ADSORBATE][TARGET][COVERAGE][KEY].append(VALUE)
         
-        KEYS = ['INCLUDED_BINDING_TYPES','NUM_GCN_LABELS','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
+        KEYS = ['INCLUDED_BINDING_TYPES','NUM_GCN_LABELS','WL_VAL','WL_TRAIN','WL_VAL_mean','WL_VAL_std','WL_TRAIN_mean'\
               ,'WL_TRAIN_std','WL_TEST_TEST','WL_TEST_TRAIN','CV_FILES_INDEX']
         for count, file in enumerate(CV_FILES):
             print('Loading data from model: '+str(count))
@@ -1177,7 +1254,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             WL_TRAIN_std  = np.std(WL_TRAIN,axis=0,ddof=1)
             WL_TEST_TEST = CV_DICT_LIST[-2]['Wl2_Test']
             WL_TEST_TRAIN = CV_DICT_LIST[-2]['Wl2_Train']
-            VALUES = [INCLUDED_BINDING_TYPES,NUM_GCN_LABELS, WL_VAL_mean, WL_VAL_std, WL_TRAIN_mean\
+            VALUES = [INCLUDED_BINDING_TYPES,NUM_GCN_LABELS, np.array(WL_VAL), np.array(WL_TRAIN), WL_VAL_mean, WL_VAL_std, WL_TRAIN_mean\
                       , WL_TRAIN_std, WL_TEST_TEST, WL_TEST_TRAIN,count]
             try:
                 for KEY, VALUE in zip(KEYS,VALUES):
@@ -1322,15 +1399,26 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                 for COVERAGE in dictionary[ADSORBATE][TARGET].keys():
                     WL_VAL = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_mean'])
                     #WL_VAL = WL_VAL.reshape(-1,WL_VAL.shape[-1])
-                    WL_STD = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
+                    WL_VAL_STD = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'])
                     #WL_STD = WL_STD.reshape(-1,WL_STD.shape[-1])
                     WL_TRAIN = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_mean'])
                     #WL_TRAIN = WL_TRAIN.reshape(-1,WL_TRAIN.shape[-1])
                     WL_TRAIN_STD = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TRAIN_std'])
                     #WL_TRAIN_STD = WL_TRAIN_STD.reshape(-1,WL_TRAIN_STD.shape[-1])
-                    WL_TEST = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'])
+                    try:
+                        WL_TEST = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_TEST'])
+                    except:
+                        WL_TEST = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_mean']).reshape(1,-1)
+                        WL_TEST_STD = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['WL_TEST_std']).reshape(1,-1)
+                        WL_VAL = WL_VAL.reshape(1,-1)
+                        WL_VAL_STD = WL_VAL_STD.reshape(1,-1)
+                        WL_TRAIN  = WL_TRAIN.reshape(1,-1)
+                        WL_TRAIN_STD = WL_TRAIN_STD.reshape(1,-1)
                     #WL_TEST = WL_TEST.reshape(-1,WL_TEST.shape[-1])
-                    CV_FILES_INDEX = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['CV_FILES_INDEX'])
+                    try:
+                        CV_FILES_INDEX = np.asarray(dictionary[ADSORBATE][TARGET][COVERAGE]['CV_FILES_INDEX'])
+                    except:
+                        CV_FILES_INDEX = [None]
                     for model_result in range(len(CV_FILES_INDEX)):
                         if model_list is None:
                             if figure_directory == 'show':
@@ -1341,11 +1429,16 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                             plt.plot(WL_VAL[model_result],'g')
                             plt.plot(WL_TRAIN[model_result],'b')
                             plt.plot(WL_TEST[model_result],'r')
-                            plt.plot(WL_VAL[model_result]+WL_STD[model_result],'g--')
-                            plt.plot(WL_VAL[model_result]-WL_STD[model_result],'g--')
-                            plt.plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b--')
-                            plt.plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b--')
-                            plt.legend(['Average validation loss','Average training loss','Test loss'])
+                            plt.plot(WL_VAL[model_result]+WL_VAL_STD[model_result],'g:')
+                            plt.plot(WL_VAL[model_result]-WL_VAL_STD[model_result],'g:')
+                            plt.plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b:')
+                            plt.plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b:')
+                            try:
+                                plt.plot(WL_TEST[model_result]+WL_TEST_STD[model_result],'r:')
+                                plt.plot(WL_TEST[model_result]-WL_TEST_STD[model_result],'r:')
+                            except:
+                                pass
+                            plt.legend(['Validation loss','Training loss','Test loss'])
                             if figure_directory == 'show':
                                 plt.show()
                             else:
@@ -1357,11 +1450,16 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                             axis_list[index_val].plot(WL_VAL[model_result],'g')
                             axis_list[index_val].plot(WL_TRAIN[model_result],'b')
                             axis_list[index_val].plot(WL_TEST[model_result],'r')
-                            axis_list[index_val].plot(WL_VAL[model_result]+WL_STD[model_result],'g--')
-                            axis_list[index_val].plot(WL_VAL[model_result]-WL_STD[model_result],'g--')
-                            axis_list[index_val].plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b--')
-                            axis_list[index_val].plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b--')
-                            axis_list[index_val].legend(['Average validation loss','Average training loss','Test loss'])
+                            axis_list[index_val].plot(WL_VAL[model_result]+WL_VAL_STD[model_result],'g:')
+                            axis_list[index_val].plot(WL_VAL[model_result]-WL_VAL_STD[model_result],'g:')
+                            axis_list[index_val].plot(WL_TRAIN[model_result]+WL_TRAIN_STD[model_result],'b:')
+                            axis_list[index_val].plot(WL_TRAIN[model_result]-WL_TRAIN_STD[model_result],'b:')
+                            try:
+                                axis_list[index_val].plot(WL_TEST[model_result]+WL_TEST_STD[model_result],'r:')
+                                axis_list[index_val].plot(WL_TEST[model_result]-WL_TEST_STD[model_result],'r:')
+                            except:
+                                pass
+                            axis_list[index_val].legend(['Validation loss','Training loss','Test loss'])
                             if len(model_list) == 4:
                                 if index_val < 2:
                                     axis_list[index_val].set_xticks([])
@@ -1489,3 +1587,56 @@ def NESTED_DICT_to_DICT(nested_dict):
                 recursive_items(value,value2) 
     recursive_items(nested_dict,dictionary)
     return dictionary
+
+class NN_ENSEMBLE:
+    """Class for generating an ensemble of neural networks.   
+    """
+    def __init__(self, NN_LIST):
+        """ 
+        Parameters
+        ----------
+        NN_LIST : list
+            A list of type NN
+        
+        Attributes
+        ----------
+        NN_LIST : list
+            A list of type NN
+            
+        """
+        self.NN_LIST = NN_LIST
+        
+    def predict(self, X, create_predictions_list=False):
+        """Predict value(s) using an ensemble
+        
+        Parameters
+        ----------
+        X : numpy.array
+            A numpy 2D array of input variables
+            
+        Attributes
+        ----------
+        PREDICTIONS_LIST : list
+            List of predictions if create_predictions_list=True
+            
+        STD : numpy.array
+            A numpy 2D array of standard deviation in the predictions.
+        		  
+        Returns
+        -------
+        PREDICTIONS : numpy.array
+            A numpy 2D array of average predictions
+                
+        """
+        NN_LIST = self.NN_LIST
+        predictions = []
+        for NN in NN_LIST:
+            predictions.append(NN.predict(X))
+        PREDICTIONS = np.mean(predictions,axis=0)
+        if create_predictions_list == True:
+            self.PREDICTIONS_LIST = predictions
+        self.PREDICTIONS = PREDICTIONS
+        self.STD = np.std(predictions,axis=0)
+        return PREDICTIONS
+    
+    
