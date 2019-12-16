@@ -94,6 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#the-load-cross-validation-class">The <code class="docutils literal notranslate"><span class="pre">LOAD_CROSS_VALIDATION</span></code> class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-nested-dict-class">The <code class="docutils literal notranslate"><span class="pre">NESTED_DICT</span></code> class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-nested-dict-to-dict-function">The <code class="docutils literal notranslate"><span class="pre">NESTED_DICT_to_DICT</span></code> function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-nn-ensemble-class">The <code class="docutils literal notranslate"><span class="pre">NN_ENSEMBLE</span></code> class</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="neural_network.html">neural_network</a></li>
@@ -774,6 +775,46 @@ don’t exist up to that level</p>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)">dict</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="the-nn-ensemble-class">
+<h2>The <code class="docutils literal notranslate"><span class="pre">NN_ENSEMBLE</span></code> class<a class="headerlink" href="#the-nn-ensemble-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="jl_spectra_2_structure.cross_validation.NN_ENSEMBLE">
+<em class="property">class </em><code class="sig-name descname">NN_ENSEMBLE</code><span class="sig-paren">(</span><em class="sig-param">NN_LIST</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#NN_ENSEMBLE"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.NN_ENSEMBLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for generating an ensemble of neural networks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>NN_LIST</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of type NN</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><p><strong>NN_LIST</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – A list of type NN</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="jl_spectra_2_structure.cross_validation.NN_ENSEMBLE.predict">
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param">X</em>, <em class="sig-param">create_predictions_list=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/cross_validation.html#NN_ENSEMBLE.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.cross_validation.NN_ENSEMBLE.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict value(s) using an ensemble</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>numpy.array</em>) – A numpy 2D array of input variables</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>PREDICTIONS_LIST</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – List of predictions if create_predictions_list=True</p></li>
+<li><p><strong>STD</strong> (<em>numpy.array</em>) – A numpy 2D array of standard deviation in the predictions.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>PREDICTIONS</strong> – A numpy 2D array of average predictions</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

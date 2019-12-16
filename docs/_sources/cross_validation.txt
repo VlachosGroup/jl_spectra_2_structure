@@ -28,4 +28,11 @@ The ``NESTED_DICT_to_DICT`` function
 ************************************
 .. autofunction:: jl_spectra_2_structure.cross_validation.NESTED_DICT_to_DICT
 
+The ``NN_ENSEMBLE`` class
+*************************
+.. autoclass:: jl_spectra_2_structure.cross_validation.NN_ENSEMBLE
+   :members:
+   :undoc-members:
+   :private-members:
+
 
