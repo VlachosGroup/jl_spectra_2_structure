@@ -17,95 +17,43 @@ from jl_spectra_2_structure import get_exp_data_path
 set_figure_settings('paper')
 #loading Spectrum files
 #Loading Neural Networks
-CV_DATA_PATH = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_large_alpha_long'
+BINDING_TYPE_PATH = 'C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/CO_BINDING_TYPE_HIGH'
+GCN_PATH = 'C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/CO_GCN_HIGH'
 Downloads = r'C:\Users\lansf\Downloads'
-CV_class = LOAD_CROSS_VALIDATION(cross_validation_path=CV_DATA_PATH)
-CV_class.load_all_CV_data()
-CV_class.load_CV_class(10)
-NN_CNCO = CV_class.get_NN_ensemble([10,11,12,13,14])
-NN_CNCO_LowCov = CV_class.get_NN_ensemble([15, 16, 17, 18, 19])
-NN_GCN = CV_class.get_NN_ensemble([30,31,32,33,34])
-X = np.linspace(CV_class.LOW_FREQUENCY,CV_class.HIGH_FREQUENCY,num=CV_class.ENERGY_POINTS,endpoint=True).reshape((-1,1))
-EXP_FILES = get_exp_data_path()
-COc4x2Pt111 = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[3], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
-COp1x2Pt110 = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[0], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
-COPt111LowCov = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[1], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
-COPtnano = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[2], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
-
-CNCO_COc4x2Pt111 = NN_CNCO.predict(COc4x2Pt111.reshape(1,-1))[0]
-CNCO_COPt111LowCov = NN_CNCO.predict(COPt111LowCov.reshape(1,-1))[0]
-CNCO_COp1x2Pt110 = NN_CNCO.predict(COp1x2Pt110.reshape(1,-1))[0]
-CNCO_COPtnano = NN_CNCO.predict(COPtnano.reshape(1,-1))[0]
-
-
-CNCO_LowCov_COc4x2Pt111 = NN_CNCO_LowCov.predict(COc4x2Pt111.reshape(1,-1))[0]
-CNCO_LowCov_COPt111LowCov = NN_CNCO_LowCov.predict(COPt111LowCov.reshape(1,-1))[0]
-CNCO_LowCov_COp1x2Pt110 = NN_CNCO_LowCov.predict(COp1x2Pt110.reshape(1,-1))[0]
-CNCO_LowCov_COPtnano = NN_CNCO_LowCov.predict(COPtnano.reshape(1,-1))[0]
-GCN_COc4x2Pt111 = NN_GCN.predict(COc4x2Pt111.reshape(1,-1))[0]
-GCN_COPt111LowCov = NN_GCN.predict(COPt111LowCov.reshape(1,-1))[0]
-GCN_COp1x2Pt110 = NN_GCN.predict(COp1x2Pt110.reshape(1,-1))[0]
-GCN_COPtnano = NN_GCN.predict(COPtnano.reshape(1,-1))[0]
-
-Bridge_Pt111 = np.all((CV_class.MAINconv.BINDING_TYPES==2,np.round(CV_class.MAINconv.GCNList,5)==7.33333),axis=0)
-Atop_Pt111 = np.all((CV_class.MAINconv.BINDING_TYPES==1,np.round(CV_class.MAINconv.GCNList,1)==7.5),axis=0)
-Xnew = CV_class.MAINconv.scaling_factor_shift(CV_class.MAINconv.X0cov)
-
-
-
-
-print(CNCO_COc4x2Pt111)
-print(CNCO_COPt111LowCov)
-print(CNCO_COp1x2Pt110)
-print(CNCO_COPtnano)
-#print(GCN_COc4x2Pt111)
-#print(GCN_COPt111LowCov)
-#print(GCN_COp1x2Pt110)
-#print(GCN_COPtnano)
-
-G = gridspec.GridSpec(2, 1)
-plt.figure(0,figsize=(3.5,4),dpi=300)
-ax1 = plt.subplot(G[0,0])
-x = np.arange(1,CNCO_COc4x2Pt111.size+1)
-ax1.bar(x-0.4, CNCO_COc4x2Pt111,width=0.2,color='g',align='edge', edgecolor='black', hatch='/')
-ax1.bar(x-0.2, CNCO_COPt111LowCov,width=0.2,color='b',align='edge', edgecolor='black', hatch='\\')
-ax1.bar(x, CNCO_COp1x2Pt110,width=0.2,color='orange',align='edge', edgecolor='black', hatch='-')
-ax1.bar(x+0.2, CNCO_COPtnano,width=0.2,color='darkorchid',align='edge', edgecolor='black')
-ax1.set_xlim([0.5,CNCO_COc4x2Pt111.size+0.5])
-#plt.legend(['Pt(111) c(4x2)','Pt(111) 0.17 ML CO', 'Pt(110)','55 nm Au@0.7 nm Pt/Pt'],loc=1)
-plt.xlabel('Site-type')
-plt.ylabel('CO site distribution')
-#plt.title('Predicted Site-type Histograms')
-ax1.set_xticks(range(1,len(x)+1))
-ax1.set_xticklabels(['Atop','Bridge','3-fold','4-fold'])
-ax1.text(0.01,0.92,'(a)', transform=ax1.transAxes)
-
-#x = np.arange(1,CNCO_LowCov_COc4x2Pt111.size+1)
-#ax2 = plt.subplot(G[1,0])
-#ax2.bar(x-0.4, CNCO_LowCov_COc4x2Pt111,width=0.2,color='g',align='edge', edgecolor='black', hatch="/")
-#ax2.bar(x-0.2, CNCO_LowCov_COPt111LowCov,width=0.2,color='b',align='edge', edgecolor='black', hatch="\\")
-#ax2.bar(x, CNCO_LowCov_COp1x2Pt110,width=0.2,color='orange',align='edge', edgecolor='black', hatch="-")
-#ax2.bar(x+0.2, CNCO_LowCov_COPtnano,width=0.2,color='darkorchid',align='edge', edgecolor='black')
-#ax2.set_xlim([0.5,CNCO_LowCov_COc4x2Pt111.size+0.5])
-#plt.legend(['Pt(111) c(4x2)','Pt(111) 0.17 ML CO', 'Pt(110)','55 nm Au@0.7 nm Pt/Pt'],loc=2)
-#plt.xlabel('Generalized Coordination Group')
-#plt.ylabel('CO site distribution')
-#plt.title('Predicted GCN Histogram')
-#ax2.set_xticklabels(['Atop','Bridge','3-fold','4-fold'])
-#ax2.set_xticks(range(1,len(x)+1))
-#ax2.text(0.01,0.92,'(b)', transform=ax2.transAxes)
-#plt.savefig('../Figures/High_vs_LowCov_Hist_paper.png', format='png')
-plt.close()
+CV_class = LOAD_CROSS_VALIDATION(cross_validation_path=BINDING_TYPE_PATH)
+CV_class.load_CV_class(0)
+NN_CNCO = CV_class.get_NN_ensemble(np.arange(len(CV_class.CV_FILES)).tolist(),use_all_cv_NN=True)
+CV_class_GCN = LOAD_CROSS_VALIDATION(cross_validation_path=GCN_PATH)
+NN_GCN = CV_class_GCN.get_NN_ensemble(np.arange(len(CV_class_GCN.CV_FILES)).tolist(), use_all_cv_NN=True)
+X = np.linspace(CV_class.LOW_FREQUENCY,CV_class.HIGH_FREQUENCY,num=CV_class.ENERGY_POINTS,endpoint=True)
+EXP_FILES = np.array(get_exp_data_path())[[3,1,0,2]]
+IR_DATA = np.zeros((len(EXP_FILES),X.shape[0]))
+for count, file in enumerate(EXP_FILES):
+    IR_DATA[count] = HREEL_2_scaledIR(np.loadtxt(file, delimiter=',', usecols=(0, 1)).T, frequency_range=X)
+#COc4x2Pt111 = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[3], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
+#COPt111LowCov = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[1], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
+#COp1x2Pt110 = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[0], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
+#COPtnano = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[2], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
+Surfaces = ['c4x2Pt111', 'LowCovPt111', 'p1x2Pt110','Ptnano']
+NUM_SURFACES = len(Surfaces)
+NUM_PREDICTIONS = len(NN_CNCO.NN_LIST)
+CNCO_prediction = NN_CNCO.predict(IR_DATA,create_predictions_list=True)
+GCN_prediction = NN_GCN.predict(IR_DATA,create_predictions_list=True)
+CNCO_sorted = [np.sort(np.array(NN_CNCO.PREDICTIONS_LIST)[:,i,:],axis=0) for i in range(NUM_SURFACES)]
+GCN_sorted = [np.sort(np.array(NN_GCN.PREDICTIONS_LIST)[:,i,:],axis=0) for i in range(NUM_SURFACES)]
+CNCO_95U = [CNCO_sorted[i][int(0.95*NUM_PREDICTIONS)] - CNCO_prediction[i] for i in range(NUM_SURFACES)]
+CNCO_95L = [CNCO_prediction[i]- CNCO_sorted[i][int(0.05*NUM_PREDICTIONS)] for i in range(NUM_SURFACES)]
+GCN_95U = [GCN_sorted[i][int(0.95*NUM_PREDICTIONS)] - GCN_prediction[i] for i in range(NUM_SURFACES)]
+GCN_95L = [GCN_prediction[i]- GCN_sorted[i][int(0.05*NUM_PREDICTIONS)] for i in range(NUM_SURFACES)]
 
 linestyle = ['-',':','-.','--']
+color = ['g','b', 'orange','darkorchid']
 G = gridspec.GridSpec(2, 2)
 plt.figure(1,figsize=(7.2,5.2),dpi=300)
 ax1 = plt.subplot(G[1,1])
 section = np.arange(350,X.size)
-plt.plot(X[section],COc4x2Pt111[section],'g',linestyle=linestyle[0])
-plt.plot(X[section],COPt111LowCov[section],'b',linestyle=linestyle[1])
-plt.plot(X[section],COp1x2Pt110[section],'orange',linestyle=linestyle[2])
-plt.plot(X[section],COPtnano[section],'darkorchid',linestyle=linestyle[3])
+for i in range(NUM_SURFACES):
+    plt.plot(X[section],IR_DATA[i][section],color[i],linestyle=linestyle[i])
 plt.xlabel('Frequency [cm$^{-1}$]')
 plt.ylabel('Relative Intensity')
 #plt.title('C-O Frequency Range')
@@ -115,10 +63,8 @@ ax1.text(0.01,0.92,'(c)', transform=ax1.transAxes)
 #plt.figure(2,figsize=(3.5,1.8),dpi=300)
 ax2 = plt.subplot(G[1,0])
 section = np.arange(0,120)
-plt.plot(X[section],COc4x2Pt111[section],'g',linestyle=linestyle[0])
-plt.plot(X[section],COPt111LowCov[section],'b',linestyle=linestyle[1])
-plt.plot(X[section],COp1x2Pt110[section],'orange',linestyle=linestyle[2])
-plt.plot(X[section],COPtnano[section],'darkorchid',linestyle=linestyle[3])
+for i in range(NUM_SURFACES):
+    plt.plot(X[section],IR_DATA[i][section],color[i],linestyle=linestyle[i])
 plt.xlabel('Frequency [cm$^{-1}$]')
 plt.ylabel('Relative Intensity')
 #plt.title('Pt-CO Frequency Range')
@@ -127,10 +73,8 @@ ax2.text(0.01,0.92,'(b)', transform=ax2.transAxes)
 
 #plt.figure(3,figsize=(7.2,2),dpi=300)
 ax3 = plt.subplot(G[0,:])
-plt.plot(X,COc4x2Pt111,'g',linestyle=linestyle[0])
-plt.plot(X,COPt111LowCov,'b',linestyle=linestyle[1])
-plt.plot(X,COp1x2Pt110,'orange',linestyle=linestyle[2])
-plt.plot(X,COPtnano,'darkorchid',linestyle=linestyle[3])
+for i in range(NUM_SURFACES):
+    plt.plot(X,IR_DATA[i],color[i],linestyle=linestyle[i])
 plt.xlabel('Frequency [cm$^{-1}$]')
 plt.ylabel('Relative Intensity')
 ax3.text(0.01,0.92, '(a)', transform=ax3.transAxes)
@@ -141,26 +85,27 @@ plt.close()
 
 
 G = gridspec.GridSpec(2, 2)
+x_offset = [-0.3,-0.1,0.1,0.3]
+hatch = ['/','\\','-',None]
 G.update(wspace=0.0,hspace=.6)
-
-linestyle = ['-',':','-.','--']
 plt.figure(2,figsize=(7.2,4),dpi=400)
 ax3 = plt.subplot(G[0,:])
-plt.plot(X,COc4x2Pt111,'g',linestyle=linestyle[0])
-plt.plot(X,COPt111LowCov,'b',linestyle=linestyle[1])
-plt.plot(X,COp1x2Pt110,'orange',linestyle=linestyle[2])
-plt.plot(X,COPtnano,'darkorchid',linestyle=linestyle[3])
+for i in range(NUM_SURFACES):
+    plt.plot(X,IR_DATA[i],color[i],linestyle=linestyle[i])
 plt.xlabel('Frequency [cm$^{-1}$]')
 plt.ylabel('Relative Intensity')
 ax3.text(0.002,0.93,'(a)', transform=ax3.transAxes)
 
 ax1 = plt.subplot(G[1,0])
-x = np.arange(1,CNCO_COc4x2Pt111.size+1)
-ax1.bar(x-0.4, CNCO_COc4x2Pt111,width=0.2,color='g',align='edge', edgecolor='black', hatch='/',linewidth=1)
-ax1.bar(x-0.2, CNCO_COPt111LowCov,width=0.2,color='b',align='edge', edgecolor='black', hatch='\\',linewidth=1)
-ax1.bar(x, CNCO_COp1x2Pt110,width=0.2,color='orange',align='edge', edgecolor='black', hatch='-',linewidth=1)
-ax1.bar(x+0.2, CNCO_COPtnano,width=0.2,color='darkorchid',align='edge', edgecolor='black',linewidth=1)
-ax1.set_xlim([0.5,CNCO_COc4x2Pt111.size+0.5])
+x = np.arange(1,CNCO_prediction[0].size+1)
+for i in range(NUM_SURFACES):
+    ax1.bar(x+x_offset[i], CNCO_prediction[i],width=0.2,color=color[i],align='center'\
+        , edgecolor='black', hatch=hatch[i],linewidth=1)
+    ax1.errorbar(x+x_offset[i], CNCO_prediction[i], yerr=np.stack((CNCO_95L[i],CNCO_95U[i]),axis=0), xerr=None\
+             , fmt='none', ecolor='k',elinewidth=2,capsize=4)
+    #ax1.errorbar(x+x_offset[i], CNCO_prediction[i], yerr=-1*CNCO_95U[i], xerr=None\
+    #         , fmt='none', ecolor='k', barsabove=False,elinewidth=2,capsize=4)
+ax1.set_xlim([0.5,CNCO_prediction[0].size+0.5])
 #plt.legend(['Pt(111) c(4x2)','Pt(111) 0.17 ML CO', 'Pt(110)','55 nm Au@0.7 nm Pt/Pt'],loc=1)
 plt.xlabel('Site-type')
 plt.ylabel('CO site distribution')
@@ -169,28 +114,20 @@ ax1.set_xticks(range(1,len(x)+1))
 ax1.set_xticklabels(['Atop','Bridge','3-fold','4-fold'])
 ax1.text(0.004,0.93,'(b)', transform=ax1.transAxes)
 
-#x = np.arange(1,GCN_COc4x2Pt111.size+1)
-#ax2 = plt.subplot(G[1,1])
-#ax2.bar(x-0.4, GCN_COc4x2Pt111,width=0.2,color='g',align='edge', edgecolor='black', hatch="/",linewidth=1)
-#ax2.bar(x-0.2, GCN_COPt111LowCov,width=0.2,color='b',align='edge', edgecolor='black', hatch="\\",linewidth=1)
-#ax2.bar(x, GCN_COp1x2Pt110,width=0.2,color='orange',align='edge', edgecolor='black', hatch="-",linewidth=1)
-#ax2.bar(x+0.2, GCN_COPtnano,width=0.2,color='darkorchid',align='edge', edgecolor='black',linewidth=1)
-#ax2.set_xlim([0.5,GCN_COc4x2Pt111.size+0.5])
+x = np.arange(1,GCN_prediction[0].size+1)
+ax2 = plt.subplot(G[1,1])
+for i in range(NUM_SURFACES):
+    ax2.bar(x+x_offset[i], GCN_prediction[i],width=0.2,color=color[i],align='center'\
+        , edgecolor='black', hatch=hatch[i],linewidth=1)
+    ax2.errorbar(x+x_offset[i], GCN_prediction[i], yerr=np.stack((GCN_95L[i],GCN_95U[i]),axis=0), xerr=None\
+             , fmt='none', ecolor='k',elinewidth=1,capsize=2)
+ax2.set_xlim([0.5,GCN_prediction[0].size+0.5])
 #plt.legend(['Pt(111) c(4x2)','Pt(111) 0.17 ML CO', 'Pt(110)','55 nm Au@0.7 nm Pt/Pt'],loc=2)
-#plt.xlabel('Generalized Coordination Group')
-#plt.yticks([])
+plt.xlabel('Generalized Coordination Group')
+plt.yticks([])
 #plt.title('Predicted GCN Histogram')
-#ax2.set_xticks(range(1,len(x)+1))
-#ax2.text(0.004,0.93,'(c)', transform=ax2.transAxes)
-#plt.gcf().subplots_adjust(bottom=0.09,top=0.98,right=0.98,left=0.06)
-#plt.savefig('../Figures/Experimental_Hist_with_data.png', format='png')
+ax2.set_xticks(range(1,len(x)+1))
+ax2.text(0.004,0.93,'(c)', transform=ax2.transAxes)
+plt.gcf().subplots_adjust(bottom=0.09,top=0.98,right=0.98,left=0.06)
+plt.savefig(os.path.join(Downloads,'Experimental_Hist_with_data.png'), format='png')
 plt.close()
-
-#FWHM = 20
-#fL = .5
-#Gaussian2 = CV_class.MAINconv._generate_spectra(Xnew[:,0],Xnew[:,1],CV_class.MAINconv.ENERGIES)
-#transform = CV_class.MAINconv._mixed_lineshape(FWHM, fL, CV_class.MAINconv.ENERGIES.shape[0], CV_class.MAINconv.ENERGIES[1]-CV_class.MAINconv.ENERGIES[0])
-#spectra = np.array([np.convolve(i, transform, mode='valid') for i in Gaussian2])
-#spectra_50 = spectra[Atop_Pt111] + spectra[Bridge_Pt111][0]
-#spectra_norm = spectra_50/np.max(spectra_50,axis=1).reshape(-1,1)
-#NN_CNCO.predict(spectra_norm)

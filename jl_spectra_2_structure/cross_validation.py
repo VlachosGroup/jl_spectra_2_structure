@@ -1535,6 +1535,7 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
             
     """
         rcParams.update({'lines.markersize': 2.5})
+        WL_LIST = []
         if model_list is None:
             try:
                 if use_ensemble == False:
@@ -1558,14 +1559,20 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                     NN = self.NN
                 else:
                     NN = self.NN_ENSEMBLE
+            print('ADSORBATE: ' + self.ADSORBATE)
+            print('TARGET: ' + self.TARGET)
+            print('COVERAGE: ' + str(self.COVERAGE))
             print('Model index: '+ str(model_list[i]))
             get_secondary_data = super().get_secondary_data
             INDICES_TEST = self.INDICES_TEST
             
             X_Test, Y_Test = get_secondary_data(200, INDICES_TEST,iterations=10)
             y_test_predict = NN.predict(X_Test)
+            WL = error_metrics.get_wasserstein_loss(Y_Test,y_test_predict)
+            WL_LIST.append(WL)
+            print('WL: ' + str(WL))
             NUM_TARGETS = Y_Test.shape[1]
-            if NUM_TARGETS < 5:
+            if NUM_TARGETS < 5 and figure_directory is not None:
                 if figure_directory == 'show':
                     plt.figure()
                 else:
@@ -1576,7 +1583,6 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                     ax.plot(Y_Test[:,ii],y_test_predict[:,ii],marker[ii],zorder=100-i)
                     print('R2: ' + str(error_metrics.get_r2(Y_Test[:,ii],y_test_predict[:,ii])))
                     print('RMSE: ' + str(error_metrics.get_rmse(Y_Test[:,ii],y_test_predict[:,ii])))
-                print('WL: ' + str(error_metrics.get_wasserstein_loss(Y_Test,y_test_predict)))
                 ax.plot([0,1],[0,1],'k')
                 ax.set_xlabel('Actual Percent')
                 ax.set_ylabel('Predicted Percent')
@@ -1588,9 +1594,8 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
                     figure_path = os.path.join(figure_directory,'Parity_plot_'+str(model_list[i])+'.jpg')
                     plt.savefig(figure_path, format='jpg')
                     plt.close()
-            else:
-                print('WL: ' + str(error_metrics.get_wasserstein_loss(Y_Test,y_test_predict)))
         rcParams.update({'lines.markersize': 5})
+        return WL_LIST
         
 class NESTED_DICT(dict):
     """Implementation of perl's autovivification feature.
