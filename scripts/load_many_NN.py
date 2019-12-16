@@ -17,20 +17,28 @@ from jl_spectra_2_structure.plotting_tools import set_figure_settings
 #coverage is 'low', 'high' or a float <= 1
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 Downloads_folder = os.path.join(os.path.expanduser("~"),'Downloads')
-cv_folder = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_BW_CV_NN\cv_small_alpha_2L'
+cv_folder = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_BW_CV_NN\cv_small_alpha_2L_smooth\cross_validation_CO_binding_type_high'
 set_figure_settings('paper')
 CV_class = LOAD_CROSS_VALIDATION(cross_validation_path=cv_folder)
 #CV_class.load_CV_class()
 #print(CV_class.NUM_TRAIN)
 #print(CV_class.TRAINING_ERROR)
 #print(CV_class.NN_PROPERTIES)
-#CV_class.load_all_CV_data()
-#CV_class.get_ensemble_cv()
+CV_class.load_all_CV_data()
+CV_class.get_ensemble_cv()
 #CV_class.plot_models(CV_class.CV_RESULTS)
-#CV_class.plot_models(CV_class.ENSEMBLE_MODELS)
-#CO_GCN_high_ensemble = CV_class.get_NN_ensemble([30,31,32,33,34])
-#CV_class.plot_models(BEST_MODELS,figure_directory=Downloads_folder)
-#CV_class.plot_models(CV_class.CV_RESULTS,figure_directory=Downloads_folder,model_list=[6,7,9,10])
+CV_class.plot_models(CV_class.ENSEMBLE_MODELS)
+BEST_MODELS = CV_class.get_best_models(1, 2)
+CV_class.plot_models(BEST_MODELS,figure_directory=Downloads_folder)
+CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
+                     ,model_list=[2,9],xlim=[0,600],ylim1= [0,0.07],ylim2=[0,0.25])
+CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
+                     ,model_list=[18,12,25,20],xlim=[0,600],ylim1= [0,0.13],ylim2=[0.09,0.25])
+CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
+                     ,model_list=[31,39,40,47],xlim=[0,600],ylim1= [0,0.13],ylim2=[0.05,0.25])
+    
+CV_class.plot_parity_plots(figure_directory=Downloads_folder,use_ensemble=True\
+                    ,model_list = [12])
 
 WL_LIST = CV_class.plot_parity_plots(figure_directory=None,use_ensemble=False\
                     ,model_list = np.arange(len(CV_class.CV_FILES)).tolist())

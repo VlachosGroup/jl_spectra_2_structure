@@ -19,6 +19,8 @@ set_figure_settings('paper')
 #Loading Neural Networks
 BINDING_TYPE_PATH = 'C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/CO_BINDING_TYPE_HIGH'
 GCN_PATH = 'C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/CO_GCN_HIGH'
+BINDING_TYPE_PATH = 'C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/cv_BW_CV_NN/cv_small_alpha_smooth/cross_validation_CO_binding_type_high'
+GCN_PATH = 'C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/cv_BW_CV_NN/cv_small_alpha_smooth/cross_validation_CO_GCN_high'
 Downloads = r'C:\Users\lansf\Downloads'
 CV_class = LOAD_CROSS_VALIDATION(cross_validation_path=BINDING_TYPE_PATH)
 CV_class.load_CV_class(0)

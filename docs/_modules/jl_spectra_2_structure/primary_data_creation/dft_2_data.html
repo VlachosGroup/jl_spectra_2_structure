@@ -163,31 +163,31 @@
 <span class="sd">@author: lansford</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="k">import</span> <span class="n">read_csv</span>
-<span class="kn">from</span> <span class="nn">ase.io</span> <span class="k">import</span> <span class="n">read</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">read_csv</span>
+<span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">read</span>
 <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">curve_fit</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">rcParams</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">..vibrations</span> <span class="k">import</span> <span class="n">Infrared</span>
-<span class="kn">from</span> <span class="nn">..error_metrics</span> <span class="k">import</span> <span class="n">get_r2</span>
-<span class="kn">from</span> <span class="nn">.coordination</span> <span class="k">import</span> <span class="n">Coordination</span>
-<span class="kn">from</span> <span class="nn">.file_parser</span> <span class="k">import</span> <span class="n">VASP_PARSER</span>
-<span class="kn">from</span> <span class="nn">.file_parser</span> <span class="k">import</span> <span class="n">explode</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">rcParams</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">..vibrations</span> <span class="kn">import</span> <span class="n">Infrared</span>
+<span class="kn">from</span> <span class="nn">..error_metrics</span> <span class="kn">import</span> <span class="n">get_r2</span>
+<span class="kn">from</span> <span class="nn">.coordination</span> <span class="kn">import</span> <span class="n">Coordination</span>
+<span class="kn">from</span> <span class="nn">.file_parser</span> <span class="kn">import</span> <span class="n">VASP_PARSER</span>
+<span class="kn">from</span> <span class="nn">.file_parser</span> <span class="kn">import</span> <span class="n">explode</span>
 
 
 <div class="viewcode-block" id="Primary_DATA"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA">[docs]</a><span class="k">class</span> <span class="nc">Primary_DATA</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class that generates primary data (frequencies, intensities, GCN values)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metal_atoms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pt&#39;</span><span class="p">],</span> <span class="n">adsorbate_atoms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">]</span>\
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">metal_atoms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pt&#39;</span><span class="p">],</span> <span class="n">adsorbate_atoms</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">]</span>\
                  <span class="p">,</span> <span class="n">create_new_vasp_files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
@@ -939,7 +939,7 @@
         
 <div class="viewcode-block" id="COVERAGE_SCALING"><a class="viewcode-back" href="../../../primary_data_creation/dft_2_data.html#jl_spectra_2_structure.primary_data_creation.dft_2_data.COVERAGE_SCALING">[docs]</a><span class="k">class</span> <span class="nc">COVERAGE_SCALING</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class that generates coverage scaling parameters&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">primary_data_path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">primary_data_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
