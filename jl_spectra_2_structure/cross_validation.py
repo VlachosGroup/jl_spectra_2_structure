@@ -1077,7 +1077,8 @@ class LOAD_CROSS_VALIDATION(CROSS_VALIDATION):
         , "input to LOAD_CROSS_VALIDATION path is not a directory"
         CV_FILES = [os.path.join(cross_validation_path,file) for file \
         in os.listdir(cross_validation_path) \
-        if os.path.isfile(os.path.join(cross_validation_path,file)) == True]
+        if os.path.isfile(os.path.join(cross_validation_path,file)) == True\
+            and 'mpi' not in file]
         CV_FOLDERS = [os.path.join(cross_validation_path,folder) for folder \
         in os.listdir(cross_validation_path) \
         if os.path.isdir(os.path.join(cross_validation_path,folder)) == True]

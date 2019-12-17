@@ -17,7 +17,7 @@ from jl_spectra_2_structure.plotting_tools import set_figure_settings
 #coverage is 'low', 'high' or a float <= 1
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 Downloads_folder = os.path.join(os.path.expanduser("~"),'Downloads')
-cv_folder = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_BW_CV_NN\cv_small_alpha_2L_smooth\cross_validation_CO_binding_type_high'
+cv_folder = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_BW_CV_NN\cv_small_alpha_2L_smooth_long'
 set_figure_settings('paper')
 CV_class = LOAD_CROSS_VALIDATION(cross_validation_path=cv_folder)
 #CV_class.load_CV_class()
@@ -27,18 +27,21 @@ CV_class = LOAD_CROSS_VALIDATION(cross_validation_path=cv_folder)
 CV_class.load_all_CV_data()
 CV_class.get_ensemble_cv()
 #CV_class.plot_models(CV_class.CV_RESULTS)
-CV_class.plot_models(CV_class.ENSEMBLE_MODELS)
+#CV_class.plot_models(CV_class.ENSEMBLE_MODELS)
 BEST_MODELS = CV_class.get_best_models(1, 2)
 CV_class.plot_models(BEST_MODELS,figure_directory=Downloads_folder)
+#plot C2H4 learning curves
 CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
-                     ,model_list=[2,9],xlim=[0,600],ylim1= [0,0.07],ylim2=[0,0.25])
+                     ,model_list=[0,7],xlim=[0,1200],ylim1= [0.01,0.07],ylim2=[0.03,0.23])
+#plot CO learning curves
 CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
-                     ,model_list=[18,12,25,20],xlim=[0,600],ylim1= [0,0.13],ylim2=[0.09,0.25])
+                     ,model_list=[24,19,51,45],xlim=[0,1200],ylim1= [0.015,0.13],ylim2=[0.075,0.23])
+#plot NO learning curves
 CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
-                     ,model_list=[31,39,40,47],xlim=[0,600],ylim1= [0,0.13],ylim2=[0.05,0.25])
+                     ,model_list=[69,71,76,83],xlim=[0,1200],ylim1= [0.015,0.13],ylim2=[0.055,0.23])
     
 CV_class.plot_parity_plots(figure_directory=Downloads_folder,use_ensemble=True\
-                    ,model_list = [12])
+                    ,model_list = [19])
 
 WL_LIST = CV_class.plot_parity_plots(figure_directory=None,use_ensemble=False\
                     ,model_list = np.arange(len(CV_class.CV_FILES)).tolist())
