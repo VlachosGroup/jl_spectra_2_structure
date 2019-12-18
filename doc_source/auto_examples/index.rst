@@ -15,6 +15,40 @@ This page includes examples for jl_spectra_2_structure.
 
 
 
+.. _sphx_glr_auto_examples_predict_experiment:
+
+Experimental Prediction Examples
+--------------------------------
+
+This contains an examples showing how to use an existing ensemble of neural networks to predict occupied adsorption sites.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to predict binding-type and GCN histograms from pdfs">
+
+.. only:: html
+
+    .. figure:: /auto_examples/predict_experiment/images/thumb/sphx_glr_plot_predict_experiment_thumb.png
+
+        :ref:`sphx_glr_auto_examples_predict_experiment_plot_predict_experiment.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/predict_experiment/plot_predict_experiment
+.. raw:: html
+
+    <div style='clear:both'></div>
+
+
+
 .. _sphx_glr_auto_examples_wasserstein_loss:
 
 Wasserstein loss examples

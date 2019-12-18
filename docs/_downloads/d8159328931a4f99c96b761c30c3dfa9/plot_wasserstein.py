@@ -11,7 +11,6 @@ from reacting systems are shown in figure 2 and 3 for different starting
 concentrations
 """
 
-import os
 import numpy as np
 from scipy.special import kl_div
 import matplotlib.pyplot as plt

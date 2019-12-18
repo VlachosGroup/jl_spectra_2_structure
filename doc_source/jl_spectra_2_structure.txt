@@ -5,6 +5,10 @@ The ``get_defaults`` function
 *****************************
 .. autofunction:: jl_spectra_2_structure.jl_spectra_2_structure.get_default_data_paths
 
+The ``get_exp_data_path`` function
+**********************************
+.. autofunction:: jl_spectra_2_structure.jl_spectra_2_structure.get_exp_data_path
+
 The ``IR_GEN`` class
 ********************
 .. autoclass:: jl_spectra_2_structure.jl_spectra_2_structure.IR_GEN

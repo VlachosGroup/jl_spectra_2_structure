@@ -90,6 +90,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">jl_spectra_2_structure</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-get-defaults-function">The <code class="docutils literal notranslate"><span class="pre">get_defaults</span></code> function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-get-exp-data-path-function">The <code class="docutils literal notranslate"><span class="pre">get_exp_data_path</span></code> function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-ir-gen-class">The <code class="docutils literal notranslate"><span class="pre">IR_GEN</span></code> class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-fold-function">The <code class="docutils literal notranslate"><span class="pre">fold</span></code> function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-hreel-2-scaledir-function">The <code class="docutils literal notranslate"><span class="pre">HREEL_2_scaledIR</span></code> function</a></li>
@@ -191,6 +192,23 @@ Data is already provided for ‘CO’, ‘NO’, and ‘C2H4’.</p>
 <p class="rubric">Notes</p>
 <p>Returns default frequencies to project intensities onto as well as default
 paths for locations of the pure and mixture spectroscopic data.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="the-get-exp-data-path-function">
+<h2>The <code class="docutils literal notranslate"><span class="pre">get_exp_data_path</span></code> function<a class="headerlink" href="#the-get-exp-data-path-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="jl_spectra_2_structure.jl_spectra_2_structure.get_exp_data_path">
+<code class="sig-name descname">get_exp_data_path</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#get_exp_data_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.get_exp_data_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default paths to experimental data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>experimental_data</strong> – list of paths to experimental data</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -770,7 +788,7 @@ from a Gaussian convoluting function.</p></li>
 <h2>The <code class="docutils literal notranslate"><span class="pre">HREEL_2_scaledIR</span></code> function<a class="headerlink" href="#the-hreel-2-scaledir-function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="jl_spectra_2_structure.jl_spectra_2_structure.HREEL_2_scaledIR">
-<code class="sig-name descname">HREEL_2_scaledIR</code><span class="sig-paren">(</span><em class="sig-param">HREEL</em>, <em class="sig-param">frequency_range=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#HREEL_2_scaledIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.HREEL_2_scaledIR" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">HREEL_2_scaledIR</code><span class="sig-paren">(</span><em class="sig-param">HREEL</em>, <em class="sig-param">frequency_range=None</em>, <em class="sig-param">PEAK_CONV=2.7</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/jl_spectra_2_structure/jl_spectra_2_structure.html#HREEL_2_scaledIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.jl_spectra_2_structure.HREEL_2_scaledIR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Summary goes on one line here</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -778,6 +796,7 @@ from a Gaussian convoluting function.</p></li>
 <li><p><strong>HREEL</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – HREEL spectra that is of size (2,n) where n is the number of points the
 into which the frequency and intensity are discretized.</p></li>
 <li><p><strong>frequency_range</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – Frequency range onto which HREEL will be interpolated after conversion to IR.</p></li>
+<li><p><strong>PEAK_CONV</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The intensity is scaled by the wavenumber raised to PEAK_CONV.</p></li>
 <li><p><strong>IR_scaled</strong> – </p></li>
 <li><p><strong>-------</strong> – </p></li>
 <li><p><strong>numpy.ndarray</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><em>numpy.ndarray</em></a>) – The IR spectra the HREELs is converted to.</p></li>

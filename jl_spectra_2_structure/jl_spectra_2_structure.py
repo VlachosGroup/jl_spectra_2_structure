@@ -1331,7 +1331,7 @@ def fold(frequencies, intensities, LOW_FREQUENCY, HIGH_FREQUENCY, ENERGY_POINTS,
     spectrum = np.sum(int_matrix, axis=1)
     return spectrum
 
-def HREEL_2_scaledIR(HREEL, frequency_range=None ):
+def HREEL_2_scaledIR(HREEL, frequency_range=None, PEAK_CONV = 2.7 ):
     """Summary goes on one line here
 
     Parameters
@@ -1342,6 +1342,9 @@ def HREEL_2_scaledIR(HREEL, frequency_range=None ):
         
     frequency_range : numpy.ndarray
         Frequency range onto which HREEL will be interpolated after conversion to IR.
+
+    PEAK_CONV : float
+        The intensity is scaled by the wavenumber raised to PEAK_CONV.
     		  
     IR_scaled
     -------
@@ -1351,7 +1354,6 @@ def HREEL_2_scaledIR(HREEL, frequency_range=None ):
     """
     if frequency_range is None:
         frequency_range = np.linspace(200,2200,num=501,endpoint=True)
-    PEAK_CONV = 2.7
     IR = np.interp(frequency_range, HREEL[0], HREEL[1]*HREEL[0]**PEAK_CONV, left=None, right=None, period=None)
     IR_scaled = IR/np.max(IR)
     return IR_scaled

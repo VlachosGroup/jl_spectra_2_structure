@@ -29,7 +29,7 @@ X = np.linspace(CV_class.LOW_FREQUENCY,CV_class.HIGH_FREQUENCY,num=CV_class.ENER
 EXP_FILES = np.array(get_exp_data_path())[[3,1,0,2]]
 IR_DATA = np.zeros((len(EXP_FILES),X.shape[0]))
 for count, file in enumerate(EXP_FILES):
-    IR_DATA[count] = HREEL_2_scaledIR(np.loadtxt(file, delimiter=',', usecols=(0, 1)).T, frequency_range=X)
+    IR_DATA[count] = HREEL_2_scaledIR(np.loadtxt(file, delimiter=',', usecols=(0, 1)).T, PEAK_CONV = 2.7, frequency_range=X)
 #COc4x2Pt111 = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[3], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
 #COPt111LowCov = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[1], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
 #COp1x2Pt110 = HREEL_2_scaledIR(np.loadtxt(EXP_FILES[0], delimiter=',', usecols=(0, 1)).T, frequency_range=X)
@@ -143,7 +143,7 @@ ax1.text(0.004,0.93,'(a)', transform=ax1.transAxes)
 plt.xlabel('CO binding-type distribution')
 plt.ylabel('Number of predictions')
 ax2 = plt.subplot(G[1])
-ax2.hist(GCN_p1x2[:,9],bins=np.,align='mid',rwidth=0.8,color='black')
+ax2.hist(GCN_p1x2[:,9],bins=10,align='mid',rwidth=0.8,color='black')
 ax2.hist(GCN_p1x2[:,7],bins=10,align='mid',rwidth=0.8,color='brown')
 ax2.text(0.004,0.93,'(b)', transform=ax2.transAxes)
 plt.xlabel('CO GCN group distribution')

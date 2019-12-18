@@ -22,7 +22,6 @@ concentrations
 .. code-block:: default
 
 
-    import os
     import numpy as np
     from scipy.special import kl_div
     import matplotlib.pyplot as plt
@@ -119,7 +118,7 @@ Second we'll set up the vectors to store the derivative of the loss with respect
 
  .. code-block:: none
 
-    C:\Users\lansf\Box Sync\Synced_Files\Coding\Python\Github\jl_spectra_2_structure\examples\wasserstein_loss\plot_wasserstein.py:87: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+    C:\Users\lansf\Box Sync\Synced_Files\Coding\Python\Github\jl_spectra_2_structure\examples\wasserstein_loss\plot_wasserstein.py:86: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
       plt.show()
 
 
@@ -127,7 +126,7 @@ Second we'll set up the vectors to store the derivative of the loss with respect
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.810 seconds)
+   **Total running time of the script:** ( 0 minutes  0.219 seconds)
 
 
 .. _sphx_glr_download_auto_examples_wasserstein_loss_plot_wasserstein.py:

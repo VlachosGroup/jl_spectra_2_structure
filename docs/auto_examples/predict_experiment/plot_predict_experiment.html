@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Experimental Prediction using a Binding-type and GCN NN Ensembles &mdash; jl_spectra_2_structure 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Wasserstein loss and its derivative used in jl_spectra_2_structure" href="../wasserstein_loss/plot_wasserstein.html" />
+    <link rel="prev" title="Examples" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> jl_spectra_2_structure
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../includeme.html">jl_spectra_2_structure</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../jl_spectra_2_structure.html">jl_spectra_2_structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cross_validation.html">cross_validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../neural_network.html">neural_network</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../primary_data_creation/index.html">primary_data_creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting_tools.html">plotting_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../error_metrics.html">error_metrics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#experimental-prediction-examples">Experimental Prediction Examples</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Experimental Prediction using a Binding-type and GCN NN Ensembles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#set-figure-settings">set figure settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#load-cross-validation-runs-and-generate-neural-network-ensembles">Load cross validation runs and generate neural network ensembles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#load-experimental-spectra-and-generate-predictions-with-95-prediction-range">Load experimental spectra and generate predictions with 95% prediction range</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plot-spectra-and-predictions-with-95-prediction-range">Plot spectra and predictions with 95% prediction range</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plot-all-predictions-for-binding-types-and-gcn-grups-with-large-error">PLot all predictions for binding-types and GCN grups with large error</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#wasserstein-loss-examples">Wasserstein loss examples</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">jl_spectra_2_structure</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+        
+      <li>Experimental Prediction using a Binding-type and GCN NN Ensembles</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/auto_examples/predict_experiment/plot_predict_experiment.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-predict-experiment-plot-predict-experiment-py"><span class="std std-ref">here</span></a> to download the full example code</p>
+</div>
+<div class="sphx-glr-example-title section" id="experimental-prediction-using-a-binding-type-and-gcn-nn-ensembles">
+<span id="sphx-glr-auto-examples-predict-experiment-plot-predict-experiment-py"></span><h1>Experimental Prediction using a Binding-type and GCN NN Ensembles<a class="headerlink" href="#experimental-prediction-using-a-binding-type-and-gcn-nn-ensembles" title="Permalink to this headline">¶</a></h1>
+<p>This example shows how to predict binding-type and GCN histograms from pdfs</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">jl_spectra_2_structure</span> <span class="kn">import</span> <span class="n">HREEL_2_scaledIR</span>
+<span class="kn">from</span> <span class="nn">jl_spectra_2_structure.plotting_tools</span> <span class="kn">import</span> <span class="n">set_figure_settings</span>
+<span class="kn">from</span> <span class="nn">jl_spectra_2_structure.cross_validation</span> <span class="kn">import</span> <span class="n">LOAD_CROSS_VALIDATION</span>
+<span class="kn">from</span> <span class="nn">jl_spectra_2_structure</span> <span class="kn">import</span> <span class="n">get_exp_data_path</span>
+</pre></div>
+</div>
+<div class="section" id="set-figure-settings">
+<h2>set figure settings<a class="headerlink" href="#set-figure-settings" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">set_figure_settings</span><span class="p">(</span><span class="s1">&#39;paper&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="load-cross-validation-runs-and-generate-neural-network-ensembles">
+<h2>Load cross validation runs and generate neural network ensembles<a class="headerlink" href="#load-cross-validation-runs-and-generate-neural-network-ensembles" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BINDING_TYPE_PATH</span> <span class="o">=</span> <span class="s1">&#39;C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/CO_BINDING_TYPE_HIGH&#39;</span>
+<span class="n">GCN_PATH</span> <span class="o">=</span> <span class="s1">&#39;C:/Users/lansf/Documents/Data/IR_Materials_Gap/cv_BW/CO_GCN_HIGH&#39;</span>
+<span class="n">Downloads</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Users\lansf\Downloads&#39;</span>
+<span class="n">CV_class</span> <span class="o">=</span> <span class="n">LOAD_CROSS_VALIDATION</span><span class="p">(</span><span class="n">cross_validation_path</span><span class="o">=</span><span class="n">BINDING_TYPE_PATH</span><span class="p">)</span>
+<span class="n">CV_class</span><span class="o">.</span><span class="n">load_CV_class</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">NN_CNCO</span> <span class="o">=</span> <span class="n">CV_class</span><span class="o">.</span><span class="n">get_NN_ensemble</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CV_class</span><span class="o">.</span><span class="n">CV_FILES</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span><span class="n">use_all_cv_NN</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">CV_class_GCN</span> <span class="o">=</span> <span class="n">LOAD_CROSS_VALIDATION</span><span class="p">(</span><span class="n">cross_validation_path</span><span class="o">=</span><span class="n">GCN_PATH</span><span class="p">)</span>
+<span class="n">NN_GCN</span> <span class="o">=</span> <span class="n">CV_class_GCN</span><span class="o">.</span><span class="n">get_NN_ensemble</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CV_class_GCN</span><span class="o">.</span><span class="n">CV_FILES</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">use_all_cv_NN</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="load-experimental-spectra-and-generate-predictions-with-95-prediction-range">
+<h2>Load experimental spectra and generate predictions with 95% prediction range<a class="headerlink" href="#load-experimental-spectra-and-generate-predictions-with-95-prediction-range" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">CV_class</span><span class="o">.</span><span class="n">LOW_FREQUENCY</span><span class="p">,</span><span class="n">CV_class</span><span class="o">.</span><span class="n">HIGH_FREQUENCY</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="n">CV_class</span><span class="o">.</span><span class="n">ENERGY_POINTS</span><span class="p">,</span><span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">EXP_FILES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">get_exp_data_path</span><span class="p">())[[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+<span class="n">IR_DATA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">EXP_FILES</span><span class="p">),</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">EXP_FILES</span><span class="p">):</span>
+    <span class="n">IR_DATA</span><span class="p">[</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="n">HREEL_2_scaledIR</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">PEAK_CONV</span> <span class="o">=</span> <span class="mf">2.7</span><span class="p">,</span> <span class="n">frequency_range</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+<span class="n">Surfaces</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;c4x2Pt111&#39;</span><span class="p">,</span> <span class="s1">&#39;LowCovPt111&#39;</span><span class="p">,</span> <span class="s1">&#39;p1x2Pt110&#39;</span><span class="p">,</span><span class="s1">&#39;Ptnano&#39;</span><span class="p">]</span>
+<span class="n">NUM_SURFACES</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Surfaces</span><span class="p">)</span>
+<span class="n">NUM_PREDICTIONS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">NN_CNCO</span><span class="o">.</span><span class="n">NN_LIST</span><span class="p">)</span>
+<span class="n">CNCO_prediction</span> <span class="o">=</span> <span class="n">NN_CNCO</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">IR_DATA</span><span class="p">,</span><span class="n">create_predictions_list</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">GCN_prediction</span> <span class="o">=</span> <span class="n">NN_GCN</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">IR_DATA</span><span class="p">,</span><span class="n">create_predictions_list</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">CNCO_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NN_CNCO</span><span class="o">.</span><span class="n">PREDICTIONS_LIST</span><span class="p">)[:,</span><span class="n">i</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">)]</span>
+<span class="n">GCN_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NN_GCN</span><span class="o">.</span><span class="n">PREDICTIONS_LIST</span><span class="p">)[:,</span><span class="n">i</span><span class="p">,:],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">)]</span>
+<span class="n">CNCO_95U</span> <span class="o">=</span> <span class="p">[</span><span class="n">CNCO_sorted</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.95</span><span class="o">*</span><span class="n">NUM_PREDICTIONS</span><span class="p">)]</span> <span class="o">-</span> <span class="n">CNCO_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">)]</span>
+<span class="n">CNCO_95L</span> <span class="o">=</span> <span class="p">[</span><span class="n">CNCO_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span> <span class="n">CNCO_sorted</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.05</span><span class="o">*</span><span class="n">NUM_PREDICTIONS</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">)]</span>
+<span class="n">GCN_95U</span> <span class="o">=</span> <span class="p">[</span><span class="n">GCN_sorted</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.95</span><span class="o">*</span><span class="n">NUM_PREDICTIONS</span><span class="p">)]</span> <span class="o">-</span> <span class="n">GCN_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">)]</span>
+<span class="n">GCN_95L</span> <span class="o">=</span> <span class="p">[</span><span class="n">GCN_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span> <span class="n">GCN_sorted</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.05</span><span class="o">*</span><span class="n">NUM_PREDICTIONS</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plot-spectra-and-predictions-with-95-prediction-range">
+<h2>Plot spectra and predictions with 95% prediction range<a class="headerlink" href="#plot-spectra-and-predictions-with-95-prediction-range" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">linestyle</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="s1">&#39;-.&#39;</span><span class="p">,</span><span class="s1">&#39;--&#39;</span><span class="p">]</span>
+<span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;g&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span><span class="s1">&#39;darkorchid&#39;</span><span class="p">]</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">x_offset</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mf">0.3</span><span class="p">]</span>
+<span class="n">hatch</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span>
+<span class="n">G</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span><span class="n">hspace</span><span class="o">=.</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.2</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">ax3</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">0</span><span class="p">,:])</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">IR_DATA</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Pt(111) c(4x2)&#39;</span><span class="p">,</span><span class="s1">&#39;Pt(111) 0.17 ML CO&#39;</span><span class="p">,</span> <span class="s1">&#39;Pt(110)&#39;</span><span class="p">,</span><span class="s1">&#39;55 nm Au@0.7 nm Pt/Pt&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Frequency [cm$^{-1}$]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Relative Intensity&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.002</span><span class="p">,</span><span class="mf">0.93</span><span class="p">,</span><span class="s1">&#39;(a)&#39;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax3</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">CNCO_prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">):</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">x_offset</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">CNCO_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span>\
+        <span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">x_offset</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">CNCO_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">CNCO_95L</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">CNCO_95U</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">xerr</span><span class="o">=</span><span class="kc">None</span>\
+             <span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">elinewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">capsize</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="n">CNCO_prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Site-type&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;CO site distribution&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s1">&#39;Atop&#39;</span><span class="p">,</span><span class="s1">&#39;Bridge&#39;</span><span class="p">,</span><span class="s1">&#39;3-fold&#39;</span><span class="p">,</span><span class="s1">&#39;4-fold&#39;</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.004</span><span class="p">,</span><span class="mf">0.93</span><span class="p">,</span><span class="s1">&#39;(b)&#39;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax1</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">GCN_prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_SURFACES</span><span class="p">):</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">x_offset</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">GCN_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span>\
+        <span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">hatch</span><span class="o">=</span><span class="n">hatch</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">x_offset</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">GCN_prediction</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">GCN_95L</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">GCN_95U</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">xerr</span><span class="o">=</span><span class="kc">None</span>\
+             <span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">elinewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">capsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="n">GCN_prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Generalized Coordination Group&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.004</span><span class="p">,</span><span class="mf">0.93</span><span class="p">,</span><span class="s1">&#39;(c)&#39;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax2</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mf">0.09</span><span class="p">,</span><span class="n">top</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span><span class="n">right</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span><span class="n">left</span><span class="o">=</span><span class="mf">0.06</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_predict_experiment_001.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_predict_experiment_001.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>C:\Users\lansf\Box Sync\Synced_Files\Coding\Python\Github\jl_spectra_2_structure\examples\predict_experiment\plot_predict_experiment.py:109: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
+</div>
+</div>
+<div class="section" id="plot-all-predictions-for-binding-types-and-gcn-grups-with-large-error">
+<h2>PLot all predictions for binding-types and GCN grups with large error<a class="headerlink" href="#plot-all-predictions-for-binding-types-and-gcn-grups-with-large-error" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">G</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpec</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">CNCO_c4x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NN_CNCO</span><span class="o">.</span><span class="n">PREDICTIONS_LIST</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">,:]</span>
+<span class="n">GCN_p1x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">NN_GCN</span><span class="o">.</span><span class="n">PREDICTIONS_LIST</span><span class="p">)[:,</span><span class="mi">2</span><span class="p">,:]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">CNCO_c4x2</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span><span class="n">rwidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;brown&#39;</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">CNCO_c4x2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span><span class="n">rwidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Pt(111) c(4x2) Atop&#39;</span><span class="p">,</span><span class="s1">&#39;Pt(111) c(4x2) Bridge&#39;</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.004</span><span class="p">,</span><span class="mf">0.93</span><span class="p">,</span><span class="s1">&#39;(a)&#39;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax1</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;CO binding-type distribution&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number of predictions&#39;</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">G</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">GCN_p1x2</span><span class="p">[:,</span><span class="mi">7</span><span class="p">],</span><span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span><span class="n">rwidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;brown&#39;</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">GCN_p1x2</span><span class="p">[:,</span><span class="mi">9</span><span class="p">],</span><span class="n">bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">align</span><span class="o">=</span><span class="s1">&#39;mid&#39;</span><span class="p">,</span><span class="n">rwidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Pt(110) Group 8&#39;</span><span class="p">,</span><span class="s1">&#39;Pt(110) Group 10&#39;</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.004</span><span class="p">,</span><span class="mf">0.93</span><span class="p">,</span><span class="s1">&#39;(b)&#39;</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax2</span><span class="o">.</span><span class="n">transAxes</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;CO GCN group distribution&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_predict_experiment_002.png" class="sphx-glr-single-img" src="../../_images/sphx_glr_plot_predict_experiment_002.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>C:\Users\lansf\Box Sync\Synced_Files\Coding\Python\Github\jl_spectra_2_structure\examples\predict_experiment\plot_predict_experiment.py:134: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 5 minutes  17.028 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-predict-experiment-plot-predict-experiment-py">
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/331ae3778e400d7907a71514ba370e40/plot_predict_experiment.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_predict_experiment.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/16426f7141c6333d6ca700a0c68bdcc6/plot_predict_experiment.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_predict_experiment.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../wasserstein_loss/plot_wasserstein.html" class="btn btn-neutral float-right" title="Wasserstein loss and its derivative used in jl_spectra_2_structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Joshua Lansford
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
