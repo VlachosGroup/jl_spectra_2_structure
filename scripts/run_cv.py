@@ -43,9 +43,9 @@ if __name__ == "__main__":
     elif ADSORBATE == 'C2H4':
         INCLUDED_BINDING_TYPES=[1,2]
         MAX_COVERAGES = [1, 1]
-        BINDING_TYPE_FOR_GCN=[2]
-        HIGH_FREQUENCY = 2000
-        ENERGY_POINTS=450
+        BINDING_TYPE_FOR_GCN=[1,2]
+        HIGH_FREQUENCY = 3350
+        ENERGY_POINTS=750
         GCN_ALL = True
         
     print('ADSORBATE: ' + ADSORBATE)

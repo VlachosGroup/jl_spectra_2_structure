@@ -17,7 +17,8 @@ from jl_spectra_2_structure.plotting_tools import set_figure_settings
 #coverage is 'low', 'high' or a float <= 1
 #assert TARGET in ['binding_type','GCN','combine_hollow_sites']
 Downloads_folder = os.path.join(os.path.expanduser("~"),'Downloads')
-cv_folder = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_BW_CV_NN\cv_small_alpha_2L_smooth_long'
+#cv_folder = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_BW_CV_NN\cv_small_alpha_2L_smooth_long'
+cv_folder = r'C:\Users\lansf\Documents\Data\IR_Materials_Gap\cv_BW\cv_BW_CV_NN\cv_exclude_low_frequencies\CO_learning_curve'
 set_figure_settings('paper')
 CV_class = LOAD_CROSS_VALIDATION(cross_validation_path=cv_folder)
 #CV_class.load_CV_class()
@@ -31,18 +32,30 @@ CV_class.get_ensemble_cv()
 BEST_MODELS = CV_class.get_best_models(1, 2)
 CV_class.plot_models(BEST_MODELS,figure_directory=Downloads_folder)
 #plot C2H4 learning curves
-CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
-                     ,model_list=[0,7],xlim=[0,1200],ylim1= [0.01,0.07],ylim2=[0.03,0.23])
+#CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
+#                     ,model_list=[0,7],xlim=[0,1200],ylim1= [0.01,0.07],ylim2=[0.03,0.23])
 #plot CO learning curves
+#CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
+#                     ,model_list=[24,19,51,45],xlim=[0,1200],ylim1= [0.015,0.13],ylim2=[0.075,0.23])
 CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
-                     ,model_list=[24,19,51,45],xlim=[0,1200],ylim1= [0.015,0.13],ylim2=[0.075,0.23])
+                     ,model_list=[10,2,20,15],xlim=[0,1200],ylim1= [0.015,0.13],ylim2=[0.075,0.23])
+
 #plot NO learning curves
-CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
-                     ,model_list=[69,71,76,83],xlim=[0,1200],ylim1= [0.015,0.13],ylim2=[0.055,0.23])
+#CV_class.plot_models(CV_class.BEST_MODELS,figure_directory=Downloads_folder\
+#                     ,model_list=[69,71,76,83],xlim=[0,1200],ylim1= [0.015,0.13],ylim2=[0.055,0.23])
     
 CV_class.plot_parity_plots(figure_directory=Downloads_folder,use_ensemble=True\
-                    ,model_list = [19])
+                    ,model_list = [2])
 
+#CV_class.plot_parity_plots(figure_directory=Downloads_folder,use_ensemble=True\
+#                    ,model_list = [71])
+    
+#CV_class.plot_parity_plots(figure_directory=Downloads_folder,use_ensemble=True\
+#                    ,model_list = [0])
+
+#Text below is used to see if hyperparameters perform well enough for all model
+#types to include this data in the neural network ensembles.
+"""
 WL_LIST = CV_class.plot_parity_plots(figure_directory=None,use_ensemble=False\
                     ,model_list = np.arange(len(CV_class.CV_FILES)).tolist())
 
@@ -69,4 +82,4 @@ for ADSORBATE in CV_class.ENSEMBLE_MODELS.keys():
             WL_VAL_std.append(CV_class.ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_VAL_std'][argval])
             WL_TEST_min.append(CV_class.ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_TEST_mean'][argval])
             WL_TEST_std.append(CV_class.ENSEMBLE_MODELS[ADSORBATE][TARGET][COVERAGE]['WL_TEST_std'][argval])
-            
+ """           
