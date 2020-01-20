@@ -261,7 +261,7 @@ MIXED_FACTOR: contribution to each normal from secondary contributing CO isotope
 
 <dl class="method">
 <dt id="jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data">
-<code class="sig-name descname">generate_primary_data</code><span class="sig-paren">(</span><em class="sig-param">vasp_directory</em>, <em class="sig-param">output_path</em>, <em class="sig-param">data_type='nanoparticle'</em>, <em class="sig-param">num_adsorbates='single'</em>, <em class="sig-param">poc=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA.generate_primary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">generate_primary_data</code><span class="sig-paren">(</span><em class="sig-param">vasp_directory</em>, <em class="sig-param">output_path</em>, <em class="sig-param">data_type='nanoparticle'</em>, <em class="sig-param">num_adsorbates='single'</em>, <em class="sig-param">poc=1</em>, <em class="sig-param">key_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jl_spectra_2_structure/primary_data_creation/dft_2_data.html#Primary_DATA.generate_primary_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#jl_spectra_2_structure.primary_data_creation.dft_2_data.Primary_DATA.generate_primary_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate primary data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -273,6 +273,10 @@ MIXED_FACTOR: contribution to each normal from secondary contributing CO isotope
 <li><p><strong>num_adsorbates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Indicates the number of adsorbates that were considered in the
 simulation. Can be ‘single’ or ‘multiple’</p></li>
 <li><p><strong>poc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of points of contact each adsorbate has with the surface.</p></li>
+<li><p><strong>key_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – List of keys for a personalized dictionary of structural features
+Can include the following: ‘FREQUENCIES’, ‘IMAGINARY’, ‘INTENSITIES’
+, ‘MAX_FORCE’, ‘CN_ADSORBATE’, ‘GCN’, ‘CN_METAL’, ‘SYMBOLS’
+, ‘NUM_METAL’, ‘COVERAGE’, ‘ENERGY’, ‘POSITIONS’, and/or ‘SHELL_LIST’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Variables</dt>

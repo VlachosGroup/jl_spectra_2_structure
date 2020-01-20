@@ -76,7 +76,8 @@ class Primary_DATA:
         self.CREATE_NEW_VASP_FILES = create_new_vasp_files
     def generate_primary_data(self, vasp_directory, output_path\
                                 ,data_type='nanoparticle'\
-                                , num_adsorbates='single', poc=1):
+                                , num_adsorbates='single', poc=1
+                                ,key_list = None):
         """Generate primary data
 
         Parameters
@@ -97,6 +98,12 @@ class Primary_DATA:
             
         poc : int
         	The number of points of contact each adsorbate has with the surface.
+            
+        key_list: list
+          List of keys for a personalized dictionary of structural features
+          Can include the following: 'FREQUENCIES', 'IMAGINARY', 'INTENSITIES'
+          , 'MAX_FORCE', 'CN_ADSORBATE', 'GCN', 'CN_METAL', 'SYMBOLS'
+          , 'NUM_METAL', 'COVERAGE', 'ENERGY', 'POSITIONS', and/or 'SHELL_LIST'
         	
         Attributes
         ----------
@@ -130,10 +137,18 @@ class Primary_DATA:
         charge_files = VASP_FILES.get_charge_files()
         
         #Initialize dictionary that will be saved as json
-        VIB_DICT = {'FREQUENCIES' : [], 'IMAGINARY' : [], 'INTENSITIES' : []\
-                    ,'MAX_FORCE' : [], 'CN_ADSORBATE' : [], 'GCN' : []\
-                    ,'CN_METAL' : [], 'NUM_METAL' : [], 'COVERAGE':[]\
-                    , 'ENERGY' : []}
+        if key_list is None:
+            VIB_DICT = {'FREQUENCIES' : [], 'IMAGINARY' : [], 'INTENSITIES' : []\
+                        ,'MAX_FORCE' : [], 'CN_ADSORBATE' : [], 'GCN' : []\
+                        ,'CN_METAL' : [], 'NUM_METAL' : [], 'COVERAGE':[]\
+                        , 'ENERGY' : []}
+        else:
+            for key in key_list:
+                assert key in ['FREQUENCIES', 'IMAGINARY', 'INTENSITIES'\
+                              , 'MAX_FORCE', 'CN_ADSORBATE', 'GCN', 'CN_METAL'\
+                              , 'NUM_METAL', 'COVERAGE', 'ENERGY', 'POSITIONS'\
+                              , 'SYMBOLS', 'SHELL_LIST'], key + "not in keylist"
+            VIB_DICT = {key : [] for key in key_list}
         #countlist is used only for testing purposes
         count_list = []
         molecule_list = []
@@ -276,37 +291,67 @@ class Primary_DATA:
                             surface_atoms = len([i for i in CN.cn if i <12]) - num_adsorbate_atoms
                         NUM_CO = len(Catoms)
                         #set values of dictionary
-                        #Generate an infrared object
-                        if data_type == 'surface':
-                            infrared = Infrared(molecule_images,delta=delta, nfree=2, directions=2)
-                        else:
-                            infrared = Infrared(molecule_images,delta=delta, nfree=2)
-                        #Get frequencies and remove imaginary parts
-                        FREQUENCIES = infrared.get_frequencies().real
-                        #Get intensities of corresponding to frequenices
-                        VIB_DICT['INTENSITIES'].append(infrared.intensities)
-                        #Set intensities of imaginary frequencies to 0
-                        VIB_DICT['INTENSITIES'][-1][FREQUENCIES == 0] = 0
-                        #convert arrays to lists to store in json
-                        VIB_DICT['INTENSITIES'][-1] = VIB_DICT['INTENSITIES'][-1].tolist()
-                        VIB_DICT['FREQUENCIES'].append(FREQUENCIES.real.tolist())
-                        VIB_DICT['IMAGINARY'].append(FREQUENCIES.imag.tolist())
-                        VIB_DICT['NUM_METAL'].append(NumPt)
-                        VIB_DICT['ENERGY'].append(molecule_images[0].get_potential_energy())
-                        VIB_DICT['COVERAGE'].append(NUM_CO/surface_atoms)
-                        VIB_DICT['MAX_FORCE'].append(max_force)
-                        if num_adsorbates == 'single' and poc==1:
-                            VIB_DICT['GCN'].append(GCN[0])
-                            VIB_DICT['CN_ADSORBATE'].append(CN_CO[0])
-                            VIB_DICT['CN_METAL'].append(TotalNN[0])
-                        else:
-                            VIB_DICT['GCN'].append(GCN)
-                            VIB_DICT['CN_ADSORBATE'].append(CN_CO)
-                            VIB_DICT['CN_METAL'].append(TotalNN)
-                        if poc > 1:
-                            VIB_DICT['CN_ADSORBATE'][-1] = np.unique([CN.bonded[C] for C in Catoms]).size
-                            VIB_DICT['GCN'][-1] = np.mean(GCN)
-                            VIB_DICT['CN_METAL'][-1] = np.mean(TotalNN)
+                        if any(key in  VIB_DICT.keys() for key in ['FREQUENCIES','INTENSITIES','IMAGINARY']):
+                            #Generate an infrared object
+                            if data_type == 'surface':
+                                infrared = Infrared(molecule_images,delta=delta, nfree=2, directions=2)
+                            else:
+                                infrared = Infrared(molecule_images,delta=delta, nfree=2)
+                            #Get frequencies and remove imaginary parts
+                            FREQUENCIES = infrared.get_frequencies().real
+                            #Get intensities of corresponding to frequenices
+                            VIB_DICT['INTENSITIES'].append(infrared.intensities)
+                            #Set intensities of imaginary frequencies to 0
+                            VIB_DICT['INTENSITIES'][-1][FREQUENCIES == 0] = 0
+                            #convert arrays to lists to store in json
+                            VIB_DICT['INTENSITIES'][-1] = VIB_DICT['INTENSITIES'][-1].tolist()
+                            VIB_DICT['FREQUENCIES'].append(FREQUENCIES.real.tolist())
+                            VIB_DICT['IMAGINARY'].append(FREQUENCIES.imag.tolist())
+                        if 'NUM_METAL' in VIB_DICT.keys():
+                            VIB_DICT['NUM_METAL'].append(NumPt)
+                        if 'ENERGY' in VIB_DICT.keys():
+                            VIB_DICT['ENERGY'].append(molecule_images[0].get_potential_energy())
+                        if 'COVERAGE' in VIB_DICT.keys():
+                            VIB_DICT['COVERAGE'].append(NUM_CO/surface_atoms)
+                        if 'MAX_FORCE' in VIB_DICT.keys():
+                            VIB_DICT['MAX_FORCE'].append(max_force)
+                        if 'SYMBOLS' in VIB_DICT.keys():
+                            VIB_DICT['SYMBOLS'].append(molecule_images[0].get_chemical_symbols())
+                        if 'POSITIONS' in VIB_DICT.keys():
+                            VIB_DICT['POSITIONS'].append(molecule_images[0].get_positions().tolist())
+                        
+                        if any(key in  VIB_DICT.keys() for key in ['GCN','CN_ADSORBATE','CN_METAL','COORDINATION_LIST']):
+                            if num_adsorbates == 'single' and poc==1:
+                                VIB_DICT['GCN'].append(GCN[0])
+                                VIB_DICT['CN_ADSORBATE'].append(CN_CO[0])
+                                VIB_DICT['CN_METAL'].append(TotalNN[0])
+                            else:
+                                VIB_DICT['GCN'].append(GCN)
+                                VIB_DICT['CN_ADSORBATE'].append(CN_CO)
+                                VIB_DICT['CN_METAL'].append(TotalNN)
+                            if poc > 1:
+                                VIB_DICT['CN_ADSORBATE'][-1] = np.unique([CN.bonded[C] for C in Catoms]).size
+                                VIB_DICT['GCN'][-1] = np.mean(GCN)
+                                VIB_DICT['CN_METAL'][-1] = np.mean(TotalNN)
+                                
+                        if 'SHELL_LIST' in VIB_DICT.keys():
+                            def get_shells(bonded_list,indices):
+                                shell_list = []
+                                #recursively updae shell_list
+                                def get_single_shell(bonded_list,indices,shell_list):
+                                    this_shell = [bonded_list[index] for index in indices]
+                                    this_shell = list(set([item for sublist in this_shell for item in sublist]))
+                                    shell_list_flattened = [item for sublist in shell_list for item in sublist]
+                                    extension = [i for i in this_shell if\
+                                                 i not in shell_list_flattened]
+                                    if len(extension) > 0:
+                                        shell_list.append(extension)
+                                        get_single_shell(bonded_list,this_shell,shell_list)
+                                    pass
+                                get_single_shell(bonded_list,indices,shell_list)
+                                return shell_list
+                            VIB_DICT['SHELL_LIST'].append(get_shells(CN.bonded,Catoms))
+                        
                         count_list.append(count)
                         molecule_list.append(molecule_images[0])
         
