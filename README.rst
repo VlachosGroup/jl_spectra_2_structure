@@ -2,7 +2,7 @@ jl_spectra_2_structure
 ======================
 Methods for converting spectra to structure and solving the materials gap
 
-This is documentation for https://github.com/JLans/jl_spectra_2_structure.
+This is documentation for https://github.com/VlachosGroup/jl_spectra_2_structure.
 jl_spectra_2_structure trains neural network models to learn quantitative descriptions of surface coordination
 for either extended surfaces or nanoparticles. The model is trained on complex synthetic IR data (secondary data).
 A class is provided for generating complex (secondary) data from low coverage dft frequency and intensity data (primary data).
@@ -40,7 +40,7 @@ License
 This project is licensed under the MIT License - see the `LICENSE.md`
 file for details.
 
-.. _`documentation page`: https://jlans.github.io/jl_spectra_2_structure/
+.. _`documentation page`: https://VlachosGroup.github.io/jl_spectra_2_structure/
 .. _Atomic Simulation Environment: https://wiki.fysik.dtu.dk/ase/
 .. _Numpy: http://www.numpy.org/
 .. _Pandas: https://pandas.pydata.org/
