@@ -22,7 +22,8 @@ Developer
 DOI
 ----
 
-<a href="https://doi.org/10.5281/zenodo.3653351"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.3653351.svg" alt="DOI"></a>
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3653351.svg
+   :target: https://doi.org/10.5281/zenodo.3653351
 
 Dependencies
 ------------
