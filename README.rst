@@ -13,10 +13,16 @@ Documentation
 
 See our `documentation page`_ for examples, equations used, and docstrings.
 
+
 Developer
 ---------
 
 -  Joshua Lansford (lansford@udel.edu)
+
+DOI
+----
+
+<a href="https://doi.org/10.5281/zenodo.3653351"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.3653351.svg" alt="DOI"></a>
 
 Dependencies
 ------------
